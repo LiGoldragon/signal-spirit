@@ -1,0 +1,91 @@
+;; signal-spirit.schema — the ordinary wire layer's contract.
+;;
+;; Declares the typed surface for psyche statements, intent records,
+;; observation queries, and subscriptions. Privileged/control
+;; operations live in core-signal-spirit, not here.
+;;
+;; Three-part schema structure per records 746-753 / /353:
+;;   block 1 ({}) — Specifying: imports / exports
+;;   block 2 ([]) — Input header: operations accepted (in variant order)
+;;   block 3 ([]) — Input extras
+;;   block 4 ({}) — Namespace: user-defined type definitions
+;;   block 5 ([]) — Output: replies / events (in variant order)
+;;
+;; No Features section. Schema declares data types only
+;; (records 730-732).
+
+{
+  Magnitude (ImportAll schemas/signal-sema/magnitude.schema)
+}
+
+[
+  (State (Statement))
+  (Record (Entry))
+  (Observe (Observation))
+  (Watch (Subscription))
+  (Unwatch (SubscriptionToken))
+]
+
+[]
+
+{
+  State ((Statement))
+  Record ((Entry))
+  Observe ((Observation))
+  Watch ((Subscription))
+  Unwatch ((SubscriptionToken))
+
+  Kind (Decision Principle Correction Clarification Constraint)
+  ObservationMode (DescriptionOnly WithProvenance)
+  Certainty Magnitude
+  Mode ObservationMode
+
+  Topic [String]
+  Topics [(Vec Topic)]
+  Description [String]
+  StatementText [String]
+  RecordIdentifier [u64]
+  StateSubscriptionToken [u64]
+  RecordSubscriptionToken [u64]
+
+  Entry [Topics Kind Description Certainty]
+  Statement [StatementText]
+  RecordQuery [(Option Topic) (Option Kind) Mode]
+  RecordSubscription [(Option Topic) Mode]
+  RecordDescription [RecordIdentifier Topics Kind Description Certainty]
+  RecordProvenance [RecordDescription Date Time]
+  TopicCount [Topic u64]
+
+  RecordAccepted [RecordIdentifier]
+  RecordsObserved [(Vec RecordDescription)]
+  RecordProvenancesObserved [(Vec RecordProvenance)]
+  TopicsObserved [(Vec TopicCount)]
+  RecordCaptured [RecordDescription]
+
+  Date [u16 u8 u8]
+  Time [u8 u8 u8]
+  UnimplementedReason (NotBuiltYet IntegrationNotLanded)
+
+  Observation (State (Records RecordQuery) Topics)
+  Subscription (State (Records RecordSubscription))
+  SubscriptionToken ((State StateSubscriptionToken) (Records RecordSubscriptionToken))
+
+  SubscriptionSnapshot ((Records (Vec RecordDescription)))
+  SubscriptionOpened [SubscriptionToken SubscriptionSnapshot]
+  SubscriptionRetracted [SubscriptionToken]
+  RequestUnimplemented [UnimplementedReason]
+}
+
+[
+  (Reply
+    RecordAccepted
+    RecordsObserved
+    RecordProvenancesObserved
+    TopicsObserved
+    SubscriptionOpened
+    SubscriptionRetracted
+    RequestUnimplemented)
+
+  (Event
+    RecordCaptured)
+]
