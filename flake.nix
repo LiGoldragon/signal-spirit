@@ -1,5 +1,5 @@
 {
-  description = "signal-spirit — ordinary signal contract for the spirit component";
+  description = "signal-spirit - Signal contract for the ordinary spirit surface";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
@@ -23,11 +23,14 @@
           "rust-src"
         ];
         craneLib = (crane.mkLib pkgs).overrideToolchain toolchain;
+        examplesFilter = path: _type: builtins.match ".*/examples(/.*)?$" path != null;
         schemaFilter = path: type:
           type == "regular" &&
           (pkgs.lib.hasSuffix ".nota" path || pkgs.lib.hasSuffix ".schema" path);
         sourceFilter = path: type:
-          (craneLib.filterCargoSources path type) || (schemaFilter path type);
+          (craneLib.filterCargoSources path type)
+          || (examplesFilter path type)
+          || (schemaFilter path type);
         src = pkgs.lib.cleanSourceWith {
           src = ./.;
           filter = sourceFilter;
@@ -45,6 +48,22 @@
         checks = {
           build = craneLib.cargoBuild (commonArguments // { inherit cargoArtifacts; });
           test = craneLib.cargoTest (commonArguments // { inherit cargoArtifacts; });
+          test-round-trip = craneLib.cargoTest (commonArguments // {
+            inherit cargoArtifacts;
+            cargoTestExtraArgs = "--test round_trip";
+          });
+          test-short-header-dispatch = craneLib.cargoTest (commonArguments // {
+            inherit cargoArtifacts;
+            cargoTestExtraArgs = "--test short_header";
+          });
+          test-box-form = craneLib.cargoTest (commonArguments // {
+            inherit cargoArtifacts;
+            cargoTestExtraArgs = "--test box_form";
+          });
+          test-version-projection = craneLib.cargoTest (commonArguments // {
+            inherit cargoArtifacts;
+            cargoTestExtraArgs = "--test migration";
+          });
           doc = craneLib.cargoDoc (commonArguments // {
             inherit cargoArtifacts;
             RUSTDOCFLAGS = "-D warnings";

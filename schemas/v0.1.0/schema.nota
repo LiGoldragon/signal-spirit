@@ -1,0 +1,20 @@
+[
+  (Operation
+    (State Statement)
+    (Record Entry)
+    (Observe Observation)
+    (Watch Subscription)
+    (Unwatch SubscriptionToken))
+
+  (Kind Decision Principle Correction Clarification Constraint)
+  (Certainty Maximum Medium Minimum)
+
+  (Topic (Topic String))
+  (Summary (Summary String))
+  (Context (Context String))
+  (Quote (Quote String))
+  (StatementText (StatementText String))
+
+  (Entry (Entry Topic Kind Summary Context Certainty Quote))
+  (Statement (Statement StatementText))
+]

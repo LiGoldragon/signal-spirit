@@ -123,14 +123,34 @@ dependencies = [
 
 [[package]]
 name = "nota-next"
-version = "0.1.0"
-source = "git+https://github.com/LiGoldragon/nota-next.git?branch=main#6b4364d94206a321db3489b8da59a88750a7c594"
+version = "0.3.0"
+source = "git+https://github.com/LiGoldragon/nota-next.git?branch=main#ae5c25cd42b65512be941b274922c9e17bf67176"
+dependencies = [
+ "nota-next-derive",
+ "rkyv",
+]
+
+[[package]]
+name = "nota-next-derive"
+version = "0.2.0"
+source = "git+https://github.com/LiGoldragon/nota-next.git?branch=main#ae5c25cd42b65512be941b274922c9e17bf67176"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
 
 [[package]]
 name = "once_cell"
 version = "1.21.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50"
+
+[[package]]
+name = "paste"
+version = "1.0.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
 
 [[package]]
 name = "pin-project-lite"
@@ -231,29 +251,36 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
 
 [[package]]
-name = "schema-next"
-version = "0.1.0"
-source = "git+https://github.com/LiGoldragon/schema-next.git?branch=main#19591a7a7f5366a3afe7c807c42074b22400e4b5"
+name = "signal-frame"
+version = "0.2.1"
+source = "git+https://github.com/LiGoldragon/signal-frame.git?branch=main#8b128d3648935d9d322d5c4985d5b347aaeecddd"
 dependencies = [
  "nota-next",
+ "paste",
+ "rkyv",
+ "signal-frame-macros",
+ "thiserror",
 ]
 
 [[package]]
-name = "schema-rust-next"
-version = "0.1.0"
-source = "git+https://github.com/LiGoldragon/schema-rust-next.git?branch=main#f76d6483b477e19e4d56de42e571e970115e31c0"
+name = "signal-frame-macros"
+version = "0.1.1"
+source = "git+https://github.com/LiGoldragon/signal-frame.git?branch=main#8b128d3648935d9d322d5c4985d5b347aaeecddd"
 dependencies = [
- "schema-next",
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
 name = "signal-spirit"
-version = "0.4.0-pre"
+version = "0.5.0"
 dependencies = [
  "nota-next",
  "rkyv",
- "schema-next",
- "schema-rust-next",
+ "signal-frame",
+ "thiserror",
+ "version-projection",
 ]
 
 [[package]]
@@ -280,6 +307,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "thiserror"
+version = "2.0.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4288b5bcbc7920c07a1149a35cf9590a2aa808e0bc1eafaade0b80947865fbc4"
+dependencies = [
+ "thiserror-impl",
+]
+
+[[package]]
+name = "thiserror-impl"
+version = "2.0.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ebc4ee7f67670e9b64d05fa4253e753e016c6c95ff35b89b7941d6b856dec1d5"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "tinyvec"
 version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -302,12 +349,22 @@ checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
 
 [[package]]
 name = "uuid"
-version = "1.23.1"
+version = "1.23.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ddd74a9687298c6858e9b88ec8935ec45d22e8fd5e6394fa1bd4e99a87789c76"
+checksum = "d258b83ceec21034727ecee8c382cfa6c3e133699b0742c64571814fb420c9f7"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "version-projection"
+version = "0.1.0"
+source = "git+https://github.com/LiGoldragon/version-projection.git?branch=main#e40fd1493236b4506260a9e53a15e7bbda96951d"
+dependencies = [
+ "nota-next",
+ "rkyv",
+ "thiserror",
 ]
 
 [[package]]
