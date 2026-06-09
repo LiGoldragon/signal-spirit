@@ -581,6 +581,99 @@ impl ArchivePath {
     feature = "nota-text",
     derive(::nota_next::NotaEncode, ::nota_next::NotaDecode)
 )]
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, Debug, Clone, PartialEq, Eq, Hash)]
+pub struct ConfigurationPath(String);
+
+impl ConfigurationPath {
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(value.into())
+    }
+
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+/// The ordinary-contract daemon configuration the `spirit` daemon decodes from
+/// its single binary startup argument. Per the component-triad pipeline the
+/// configuration *type* lives in this contract crate and the daemon imports it;
+/// `spirit` wraps this value in its runtime configuration and implements the
+/// runtime binding surface on that wrapper.
+#[cfg_attr(
+    feature = "nota-text",
+    derive(::nota_next::NotaEncode, ::nota_next::NotaDecode)
+)]
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, Debug, Clone, PartialEq, Eq)]
+pub struct SpiritDaemonConfiguration {
+    socket_path: ConfigurationPath,
+    meta_socket_path: Option<ConfigurationPath>,
+    database_path: ConfigurationPath,
+    trace_socket_path: Option<ConfigurationPath>,
+}
+
+impl SpiritDaemonConfiguration {
+    pub fn new(socket_path: ConfigurationPath, database_path: ConfigurationPath) -> Self {
+        Self {
+            socket_path,
+            meta_socket_path: None,
+            database_path,
+            trace_socket_path: None,
+        }
+    }
+
+    pub fn with_meta_socket_path(mut self, meta_socket_path: ConfigurationPath) -> Self {
+        self.meta_socket_path = Some(meta_socket_path);
+        self
+    }
+
+    pub fn with_trace_socket_path(mut self, trace_socket_path: ConfigurationPath) -> Self {
+        self.trace_socket_path = Some(trace_socket_path);
+        self
+    }
+
+    pub fn socket_path(&self) -> &str {
+        self.socket_path.as_str()
+    }
+
+    pub fn meta_socket_path(&self) -> Option<&str> {
+        self.meta_socket_path.as_ref().map(ConfigurationPath::as_str)
+    }
+
+    pub fn database_path(&self) -> &str {
+        self.database_path.as_str()
+    }
+
+    pub fn trace_socket_path(&self) -> Option<&str> {
+        self.trace_socket_path
+            .as_ref()
+            .map(ConfigurationPath::as_str)
+    }
+
+    pub fn from_rkyv_bytes(bytes: &[u8]) -> Result<Self, SpiritDaemonConfigurationArchiveError> {
+        rkyv::from_bytes::<Self, rkyv::rancor::Error>(bytes)
+            .map_err(|_| SpiritDaemonConfigurationArchiveError::Decode)
+    }
+
+    pub fn to_rkyv_bytes(&self) -> Result<Vec<u8>, SpiritDaemonConfigurationArchiveError> {
+        rkyv::to_bytes::<rkyv::rancor::Error>(self)
+            .map(|bytes| bytes.to_vec())
+            .map_err(|_| SpiritDaemonConfigurationArchiveError::Encode)
+    }
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum SpiritDaemonConfigurationArchiveError {
+    #[error("failed to encode spirit daemon configuration archive")]
+    Encode,
+
+    #[error("failed to decode spirit daemon configuration archive")]
+    Decode,
+}
+
+#[cfg_attr(
+    feature = "nota-text",
+    derive(::nota_next::NotaEncode, ::nota_next::NotaDecode)
+)]
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, Debug, Clone, PartialEq, Eq)]
 pub struct StateSubscriptionToken {
     pub identifier: u64,
