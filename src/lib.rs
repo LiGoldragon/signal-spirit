@@ -594,6 +594,127 @@ impl ConfigurationPath {
     }
 }
 
+#[cfg_attr(
+    feature = "nota-text",
+    derive(::nota_next::NotaEncode, ::nota_next::NotaDecode)
+)]
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, Debug, Clone, PartialEq, Eq, Hash)]
+pub struct SpiritGuardianProviderName(String);
+
+impl SpiritGuardianProviderName {
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(value.into())
+    }
+
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+#[cfg_attr(
+    feature = "nota-text",
+    derive(::nota_next::NotaEncode, ::nota_next::NotaDecode)
+)]
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, Debug, Clone, PartialEq, Eq, Hash)]
+pub struct SpiritGuardianModelName(String);
+
+impl SpiritGuardianModelName {
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(value.into())
+    }
+
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+#[cfg_attr(
+    feature = "nota-text",
+    derive(::nota_next::NotaEncode, ::nota_next::NotaDecode)
+)]
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct SpiritGuardianTimeoutMilliseconds(u64);
+
+impl SpiritGuardianTimeoutMilliseconds {
+    pub const fn new(value: u64) -> Self {
+        Self(value)
+    }
+
+    pub const fn into_u64(self) -> u64 {
+        self.0
+    }
+}
+
+#[cfg_attr(
+    feature = "nota-text",
+    derive(::nota_next::NotaEncode, ::nota_next::NotaDecode)
+)]
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct SpiritGuardianMaximumOutputTokens(u64);
+
+impl SpiritGuardianMaximumOutputTokens {
+    pub const fn new(value: u64) -> Self {
+        Self(value)
+    }
+
+    pub const fn into_u64(self) -> u64 {
+        self.0
+    }
+}
+
+#[cfg_attr(
+    feature = "nota-text",
+    derive(::nota_next::NotaEncode, ::nota_next::NotaDecode)
+)]
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, Debug, Clone, PartialEq, Eq)]
+pub struct SpiritGuardianAgentConfiguration {
+    agent_socket_path: ConfigurationPath,
+    provider_name: Option<SpiritGuardianProviderName>,
+    model_name: Option<SpiritGuardianModelName>,
+    timeout_milliseconds: SpiritGuardianTimeoutMilliseconds,
+    maximum_output_tokens: SpiritGuardianMaximumOutputTokens,
+}
+
+impl SpiritGuardianAgentConfiguration {
+    pub fn new(
+        agent_socket_path: ConfigurationPath,
+        provider_name: Option<SpiritGuardianProviderName>,
+        model_name: Option<SpiritGuardianModelName>,
+        timeout_milliseconds: SpiritGuardianTimeoutMilliseconds,
+        maximum_output_tokens: SpiritGuardianMaximumOutputTokens,
+    ) -> Self {
+        Self {
+            agent_socket_path,
+            provider_name,
+            model_name,
+            timeout_milliseconds,
+            maximum_output_tokens,
+        }
+    }
+
+    pub fn agent_socket_path(&self) -> &str {
+        self.agent_socket_path.as_str()
+    }
+
+    pub fn provider_name(&self) -> Option<&str> {
+        self.provider_name
+            .as_ref()
+            .map(SpiritGuardianProviderName::as_str)
+    }
+
+    pub fn model_name(&self) -> Option<&str> {
+        self.model_name.as_ref().map(SpiritGuardianModelName::as_str)
+    }
+
+    pub fn timeout_milliseconds(&self) -> u64 {
+        self.timeout_milliseconds.into_u64()
+    }
+
+    pub fn maximum_output_tokens(&self) -> u64 {
+        self.maximum_output_tokens.into_u64()
+    }
+}
+
 /// The ordinary-contract daemon configuration the `spirit` daemon decodes from
 /// its single binary startup argument. Per the component-triad pipeline the
 /// configuration *type* lives in this contract crate and the daemon imports it;
@@ -609,6 +730,7 @@ pub struct SpiritDaemonConfiguration {
     meta_socket_path: Option<ConfigurationPath>,
     database_path: ConfigurationPath,
     trace_socket_path: Option<ConfigurationPath>,
+    guardian_agent_configuration: Option<SpiritGuardianAgentConfiguration>,
 }
 
 impl SpiritDaemonConfiguration {
@@ -618,11 +740,20 @@ impl SpiritDaemonConfiguration {
             meta_socket_path: None,
             database_path,
             trace_socket_path: None,
+            guardian_agent_configuration: None,
         }
     }
 
     pub fn with_meta_socket_path(mut self, meta_socket_path: ConfigurationPath) -> Self {
         self.meta_socket_path = Some(meta_socket_path);
+        self
+    }
+
+    pub fn with_guardian_agent_configuration(
+        mut self,
+        guardian_agent_configuration: SpiritGuardianAgentConfiguration,
+    ) -> Self {
+        self.guardian_agent_configuration = Some(guardian_agent_configuration);
         self
     }
 
@@ -647,6 +778,10 @@ impl SpiritDaemonConfiguration {
         self.trace_socket_path
             .as_ref()
             .map(ConfigurationPath::as_str)
+    }
+
+    pub fn guardian_agent_configuration(&self) -> Option<&SpiritGuardianAgentConfiguration> {
+        self.guardian_agent_configuration.as_ref()
     }
 
     pub fn from_rkyv_bytes(bytes: &[u8]) -> Result<Self, SpiritDaemonConfigurationArchiveError> {
