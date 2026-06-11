@@ -672,7 +672,7 @@ pub struct SpiritGuardianAgentConfiguration {
     provider_name: Option<SpiritGuardianProviderName>,
     model_name: Option<SpiritGuardianModelName>,
     timeout_milliseconds: SpiritGuardianTimeoutMilliseconds,
-    maximum_output_tokens: SpiritGuardianMaximumOutputTokens,
+    maximum_output_tokens: Option<SpiritGuardianMaximumOutputTokens>,
 }
 
 impl SpiritGuardianAgentConfiguration {
@@ -681,7 +681,7 @@ impl SpiritGuardianAgentConfiguration {
         provider_name: Option<SpiritGuardianProviderName>,
         model_name: Option<SpiritGuardianModelName>,
         timeout_milliseconds: SpiritGuardianTimeoutMilliseconds,
-        maximum_output_tokens: SpiritGuardianMaximumOutputTokens,
+        maximum_output_tokens: Option<SpiritGuardianMaximumOutputTokens>,
     ) -> Self {
         Self {
             agent_socket_path,
@@ -703,15 +703,18 @@ impl SpiritGuardianAgentConfiguration {
     }
 
     pub fn model_name(&self) -> Option<&str> {
-        self.model_name.as_ref().map(SpiritGuardianModelName::as_str)
+        self.model_name
+            .as_ref()
+            .map(SpiritGuardianModelName::as_str)
     }
 
     pub fn timeout_milliseconds(&self) -> u64 {
         self.timeout_milliseconds.into_u64()
     }
 
-    pub fn maximum_output_tokens(&self) -> u64 {
-        self.maximum_output_tokens.into_u64()
+    pub fn maximum_output_tokens(&self) -> Option<u64> {
+        self.maximum_output_tokens
+            .map(SpiritGuardianMaximumOutputTokens::into_u64)
     }
 }
 
@@ -767,7 +770,9 @@ impl SpiritDaemonConfiguration {
     }
 
     pub fn meta_socket_path(&self) -> Option<&str> {
-        self.meta_socket_path.as_ref().map(ConfigurationPath::as_str)
+        self.meta_socket_path
+            .as_ref()
+            .map(ConfigurationPath::as_str)
     }
 
     pub fn database_path(&self) -> &str {
