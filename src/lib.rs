@@ -8,6 +8,8 @@
 #[rustfmt::skip]
 pub mod schema;
 
+use std::collections::BTreeSet;
+
 pub use schema::signal::*;
 
 pub type SpiritRequest = Input;
@@ -155,4 +157,984 @@ pub enum SpiritDaemonConfigurationArchiveError {
 
     #[error("failed to decode spirit daemon configuration archive")]
     Decode,
+}
+
+impl Input {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        match self {
+            Self::State(statement) => statement.payload().validate(),
+            Self::Record(record) => record.payload().validate(),
+            Self::Propose(propose) => propose.payload().validate(),
+            Self::Clarify(clarify) => clarify.payload().validate(),
+            Self::Supersede(supersede) => supersede.payload().validate(),
+            Self::Observe(observe) => observe.payload().validate(),
+            Self::PublicRecords(selection) => selection.payload().validate(),
+            Self::PrivateRecords(selection) => selection.payload().validate(),
+            Self::Lookup(_)
+            | Self::ChangeCertainty(_)
+            | Self::BumpImportance(_)
+            | Self::LookupStash(_)
+            | Self::Tap(_)
+            | Self::Untap(_)
+            | Self::Version
+            | Self::Marker => Ok(()),
+            Self::ChangeRecord(change) => change.payload().validate(),
+            Self::Remove(remove) => remove.payload().validate(),
+            Self::RegisterReferent(register) => register.payload().validate(),
+            Self::Retire(retire) => retire.payload().validate(),
+            Self::CollectRemovalCandidates(collection) => collection.payload().validate(),
+            Self::SubscribeIntent(query) => query.payload().validate(),
+            Self::Count(count) => count.payload().validate(),
+        }
+    }
+}
+
+impl Statement {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        if self.payload().trim().is_empty() {
+            return Err(ValidationError::EmptyDescription);
+        }
+        Ok(())
+    }
+}
+
+impl Entry {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        if self.domains.is_empty() {
+            return Err(ValidationError::EmptyDomain);
+        }
+        if self.description.trim().is_empty() {
+            return Err(ValidationError::EmptyDescription);
+        }
+        Ok(())
+    }
+
+    pub fn matches(&self, query: &Query) -> bool {
+        query.matches(self)
+    }
+
+    pub fn certainty_rank(&self) -> u64 {
+        self.certainty.payload().rank()
+    }
+
+    pub fn importance_rank(&self) -> u64 {
+        self.importance.payload().rank()
+    }
+}
+
+impl Justification {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        if self.reasoning.payload().trim().is_empty() {
+            return Err(ValidationError::EmptyDescription);
+        }
+        for quote in self.testimony.payload() {
+            if quote.quote_text.payload().trim().is_empty() {
+                return Err(ValidationError::EmptyDescription);
+            }
+            if quote
+                .antecedent
+                .as_ref()
+                .is_some_and(|antecedent| antecedent.payload().trim().is_empty())
+            {
+                return Err(ValidationError::EmptyDescription);
+            }
+        }
+        Ok(())
+    }
+}
+
+impl RecordRequest {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        self.entry.validate()?;
+        self.justification.validate()
+    }
+}
+
+impl Proposal {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        self.entry.validate()?;
+        self.justification.validate()
+    }
+}
+
+impl Referent {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        if self.payload().trim().is_empty() {
+            return Err(ValidationError::EmptyQueryReferent);
+        }
+        Ok(())
+    }
+}
+
+impl Referents {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        if self
+            .payload()
+            .iter()
+            .any(|referent| referent.payload().trim().is_empty())
+        {
+            return Err(ValidationError::EmptyQueryReferent);
+        }
+        Ok(())
+    }
+}
+
+impl ReferentRegistration {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        self.referent.validate()?;
+        self.aliases.validate()?;
+        self.justification.validate()
+    }
+}
+
+impl Removal {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        self.justification.validate()
+    }
+}
+
+impl RecordChange {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        self.entry.validate()?;
+        self.justification.validate()
+    }
+}
+
+impl Clarification {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        if self.description.trim().is_empty() {
+            return Err(ValidationError::EmptyDescription);
+        }
+        self.justification.validate()
+    }
+}
+
+impl Supersession {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        if self.retired_identifiers.payload().is_empty() {
+            return Err(ValidationError::EmptyDescription);
+        }
+        if self.replacements.payload().is_empty() {
+            return Err(ValidationError::EmptyDescription);
+        }
+        for replacement in self.replacements.payload() {
+            replacement.validate()?;
+        }
+        self.justification.validate()
+    }
+}
+
+impl Retirement {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        self.justification.validate()
+    }
+}
+
+impl RemovalCandidateCollection {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        self.record_query.validate()?;
+        self.justification.validate()
+    }
+}
+
+impl RecordQuery {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        self.payload().validate()
+    }
+}
+
+impl RecordSelection {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        self.domain_match.validate()
+    }
+
+    pub fn into_public_query(self) -> Query {
+        Query {
+            domain_match: self.domain_match,
+            keyword_match: KeywordMatch::Any,
+            text_match: TextMatch::Any,
+            referent_selection: ReferentSelection::Any,
+            kind: self.kind,
+            privacy_selection: PrivacySelection::default_observation_privacy(),
+            certainty_selection: CertaintySelection::default_observation_certainty(),
+            importance_selection: ImportanceSelection::default_observation_importance(),
+        }
+    }
+
+    pub fn into_private_query(self) -> Query {
+        Query {
+            domain_match: self.domain_match,
+            keyword_match: KeywordMatch::Any,
+            text_match: TextMatch::Any,
+            referent_selection: ReferentSelection::Any,
+            kind: self.kind,
+            privacy_selection: PrivacySelection::at_least(Privacy::new(
+                PrivacySelection::private_floor(),
+            )),
+            certainty_selection: CertaintySelection::default_observation_certainty(),
+            importance_selection: ImportanceSelection::default_observation_importance(),
+        }
+    }
+}
+
+impl Query {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        self.domain_match.validate()?;
+        self.keyword_match.validate()?;
+        self.text_match.validate()?;
+        self.referent_selection.validate()
+    }
+
+    pub fn matches(&self, entry: &Entry) -> bool {
+        self.domain_match.matches(&entry.domains)
+            && self.keyword_match.matches(&entry.description)
+            && self.text_match.matches(&entry.description)
+            && self.referent_selection.matches(&entry.referents)
+            && self.kind.as_ref().is_none_or(|kind| &entry.kind == kind)
+            && self.privacy_selection.matches(&entry.privacy)
+            && self.certainty_selection.matches(&entry.certainty)
+            && self.importance_selection.matches(&entry.importance)
+    }
+}
+
+impl DomainMatch {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        match self {
+            Self::Any => Ok(()),
+            Self::Partial(scopes) => {
+                if scopes.payload().is_empty() {
+                    return Err(ValidationError::EmptyQueryDomain);
+                }
+                Ok(())
+            }
+            Self::Full(scopes) => {
+                if scopes.payload().is_empty() {
+                    return Err(ValidationError::EmptyQueryDomain);
+                }
+                Ok(())
+            }
+        }
+    }
+
+    pub fn matches(&self, entry_domains: &Domains) -> bool {
+        match self {
+            Self::Any => true,
+            Self::Partial(partial) => partial.payload().matches_any_domain(entry_domains),
+            Self::Full(full) => full
+                .payload()
+                .iter()
+                .all(|scope| scope.expand().matches_any_domain(entry_domains)),
+        }
+    }
+}
+
+impl KeywordMatch {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        match self {
+            Self::Any => Ok(()),
+            Self::AnyKeyword(keywords) => keywords.payload().validate(),
+            Self::AllKeywords(keywords) => keywords.payload().validate(),
+        }
+    }
+
+    pub fn matches(&self, description: &Description) -> bool {
+        match self {
+            Self::Any => true,
+            Self::AnyKeyword(expected) => description.keywords().contains_any(expected.payload()),
+            Self::AllKeywords(expected) => description.keywords().contains_all(expected.payload()),
+        }
+    }
+}
+
+impl TextMatch {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        match self {
+            Self::Any => Ok(()),
+            Self::ContainsText(search_text) => {
+                if search_text.payload().payload().trim().is_empty() {
+                    return Err(ValidationError::EmptySearchText);
+                }
+                Ok(())
+            }
+        }
+    }
+
+    pub fn matches(&self, description: &Description) -> bool {
+        match self {
+            Self::Any => true,
+            Self::ContainsText(search_text) => description.contains_search_text(search_text.payload()),
+        }
+    }
+}
+
+impl ReferentSelection {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        match self {
+            Self::Any => Ok(()),
+            Self::AnyReferent(referents) => {
+                if referents.payload().payload().is_empty() {
+                    return Err(ValidationError::EmptyQueryReferent);
+                }
+                Ok(())
+            }
+            Self::AllReferents(referents) => {
+                if referents.payload().payload().is_empty() {
+                    return Err(ValidationError::EmptyQueryReferent);
+                }
+                Ok(())
+            }
+        }
+    }
+
+    pub fn matches(&self, entry_referents: &Referents) -> bool {
+        match self {
+            Self::Any => true,
+            Self::AnyReferent(expected) => expected
+                .payload()
+                .payload()
+                .iter()
+                .any(|referent| entry_referents.payload().contains(referent)),
+            Self::AllReferents(expected) => expected
+                .payload()
+                .payload()
+                .iter()
+                .all(|referent| entry_referents.payload().contains(referent)),
+        }
+    }
+}
+
+impl Keywords {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        if self.payload().is_empty()
+            || self
+                .payload()
+                .iter()
+                .any(|keyword| keyword.payload().trim().is_empty())
+        {
+            return Err(ValidationError::EmptyKeyword);
+        }
+        Ok(())
+    }
+
+    pub fn contains_keyword(&self, expected: &Keyword) -> bool {
+        let expected = expected.normalized();
+        self.payload()
+            .iter()
+            .any(|keyword| keyword.normalized() == expected)
+    }
+
+    pub fn contains_any(&self, expected: &Keywords) -> bool {
+        expected
+            .payload()
+            .iter()
+            .any(|keyword| self.contains_keyword(keyword))
+    }
+
+    pub fn contains_all(&self, expected: &Keywords) -> bool {
+        expected
+            .payload()
+            .iter()
+            .all(|keyword| self.contains_keyword(keyword))
+    }
+}
+
+impl Keyword {
+    pub fn normalized(&self) -> String {
+        self.payload().trim().to_lowercase()
+    }
+}
+
+impl Description {
+    pub fn trim(&self) -> &str {
+        self.payload().trim()
+    }
+
+    pub fn keywords(&self) -> Keywords {
+        let mut keywords = Vec::new();
+        let mut seen = BTreeSet::new();
+        let mut inside_keyword = false;
+        let mut keyword = String::new();
+        for character in self.payload().chars() {
+            if character == '*' {
+                if inside_keyword {
+                    let normalized = keyword.trim().to_lowercase();
+                    if !normalized.is_empty() && seen.insert(normalized.clone()) {
+                        keywords.push(Keyword::new(normalized));
+                    }
+                    keyword.clear();
+                    inside_keyword = false;
+                } else {
+                    keyword.clear();
+                    inside_keyword = true;
+                }
+            } else if inside_keyword {
+                keyword.push(character);
+            }
+        }
+        Keywords::new(keywords)
+    }
+
+    pub fn contains_search_text(&self, search_text: &SearchText) -> bool {
+        self.payload()
+            .to_lowercase()
+            .contains(&search_text.payload().trim().to_lowercase())
+    }
+
+    pub fn contains_description_text(&self, other: &Description) -> bool {
+        let other = other.payload().trim();
+        !other.is_empty() && self.contains_search_text(&SearchText::new(other))
+    }
+}
+
+impl StatementText {
+    pub fn trim(&self) -> &str {
+        self.payload().trim()
+    }
+}
+
+impl PrivacySelection {
+    pub fn private_floor() -> Magnitude {
+        Magnitude::Minimum
+    }
+
+    pub fn default_observation_privacy() -> Self {
+        Self::exact(Privacy::new(Magnitude::Zero))
+    }
+
+    pub fn matches(&self, privacy: &Privacy) -> bool {
+        match self {
+            Self::Any => true,
+            Self::Exact(expected) => privacy == expected.payload(),
+            Self::AtMost(maximum) => privacy.payload().rank() <= maximum.payload().payload().rank(),
+            Self::AtLeast(minimum) => privacy.payload().rank() >= minimum.payload().payload().rank(),
+        }
+    }
+}
+
+impl CertaintySelection {
+    pub fn default_observation_certainty() -> Self {
+        Self::at_least_certainty(Certainty::new(Magnitude::Minimum))
+    }
+
+    pub fn removal_candidate_certainty() -> Self {
+        Self::exact_certainty(Certainty::new(Magnitude::Zero))
+    }
+
+    pub fn matches(&self, certainty: &Certainty) -> bool {
+        let certainty = certainty.payload();
+        match self {
+            Self::Any => true,
+            Self::ExactCertainty(expected) => certainty == expected.payload().payload(),
+            Self::AtMostCertainty(maximum) => {
+                certainty.rank() <= maximum.payload().payload().rank()
+            }
+            Self::AtLeastCertainty(minimum) => {
+                certainty.rank() >= minimum.payload().payload().rank()
+            }
+        }
+    }
+}
+
+impl ImportanceSelection {
+    pub fn default_observation_importance() -> Self {
+        Self::Any
+    }
+
+    pub fn matches(&self, importance: &Importance) -> bool {
+        let importance = importance.payload();
+        match self {
+            Self::Any => true,
+            Self::ExactImportance(expected) => importance == expected.payload().payload(),
+            Self::AtMostImportance(maximum) => {
+                importance.rank() <= maximum.payload().payload().rank()
+            }
+            Self::AtLeastImportance(minimum) => {
+                importance.rank() >= minimum.payload().payload().rank()
+            }
+        }
+    }
+}
+
+impl Privacy {
+    pub fn rank(&self) -> u64 {
+        self.payload().rank()
+    }
+}
+
+impl Importance {
+    pub fn next(&self) -> Self {
+        Self::new(self.payload().next())
+    }
+}
+
+impl Magnitude {
+    pub fn rank(&self) -> u64 {
+        match self {
+            Self::Zero => 0,
+            Self::Minimum => 1,
+            Self::VeryLow => 2,
+            Self::Low => 3,
+            Self::Medium => 4,
+            Self::High => 5,
+            Self::VeryHigh => 6,
+            Self::Maximum => 7,
+        }
+    }
+
+    pub fn next(&self) -> Self {
+        match self {
+            Self::Zero => Self::Minimum,
+            Self::Minimum => Self::VeryLow,
+            Self::VeryLow => Self::Low,
+            Self::Low => Self::Medium,
+            Self::Medium => Self::High,
+            Self::High => Self::VeryHigh,
+            Self::VeryHigh | Self::Maximum => Self::Maximum,
+        }
+    }
+}
+
+impl DatabaseMarker {
+    pub fn zero() -> Self {
+        Self {
+            commit_sequence: CommitSequence::new(0),
+            state_digest: StateDigest::new(0),
+        }
+    }
+}
+
+impl ValidationError {
+    pub fn into_signal_output(self) -> Output {
+        Output::rejected(SignalRejection::new(self))
+    }
+}
+
+impl Domains {
+    pub fn from_strings(labels: Vec<String>) -> Self {
+        let mut domains = Vec::new();
+        for label in labels {
+            Domain::push_from_label(&label, &mut domains);
+        }
+        Self::new(domains)
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.payload().is_empty()
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &Domain> {
+        self.payload().iter()
+    }
+
+    pub fn matches_scope_set(&self, scope_set: &ScopeSet) -> bool {
+        self.iter().any(|domain| scope_set.matches_domain(domain))
+    }
+}
+
+impl DomainScopes {
+    pub fn from_strings(labels: Vec<String>) -> Self {
+        Self::from_domains(&Domains::from_strings(labels))
+    }
+
+    pub fn from_domains(domains: &Domains) -> Self {
+        Self::new(domains.iter().cloned().map(DomainScope::from).collect())
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.payload().is_empty()
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &DomainScope> {
+        self.payload().iter()
+    }
+
+    pub fn matches_any_domain(&self, domains: &Domains) -> bool {
+        self.iter()
+            .any(|scope| scope.expand().matches_any_domain(domains))
+    }
+}
+
+impl DomainScope {
+    pub fn matches_domain(&self, domain: &Domain) -> bool {
+        self.contains_domain(domain)
+    }
+}
+
+impl ScopeSet {
+    pub fn iter(&self) -> impl Iterator<Item = &DomainScope> {
+        self.payload().iter()
+    }
+
+    pub fn matches_domain(&self, domain: &Domain) -> bool {
+        self.iter().any(|scope| scope.matches_domain(domain))
+    }
+
+    pub fn matches_any_domain(&self, domains: &Domains) -> bool {
+        domains.matches_scope_set(self)
+    }
+}
+
+impl Domain {
+    pub fn matches_scope(&self, scope: &DomainScope) -> bool {
+        scope.contains_domain(self)
+    }
+
+    fn software(payload: Software) -> Self {
+        Self::Technology(Technology::Software(payload))
+    }
+
+    fn push_from_label(label: &str, domains: &mut Vec<Self>) {
+        let label = label.trim().to_ascii_lowercase();
+        if label.is_empty() {
+            return;
+        }
+        if Self::contains_any(
+            &label,
+            &["schema", "record-shape", "type-definition", "data-model"],
+        ) {
+            Self::push_unique(domains, Self::schema());
+        }
+        if Self::contains_any(&label, &["nota", "syntax", "delimiter", "parser"]) {
+            Self::push_unique(domains, Self::notation());
+        }
+        if Self::contains_any(&label, &["language", "naming", "vocabulary"]) {
+            Self::push_unique(domains, Self::terminology());
+        }
+        if Self::contains_any(&label, &["rust", "code", "program", "programming"]) {
+            Self::push_unique(domains, Self::programming());
+        }
+        if Self::contains_any(&label, &["test", "fixture", "trace", "verification"]) {
+            Self::push_unique(domains, Self::testing());
+        }
+        if Self::contains_any(
+            &label,
+            &[
+                "signal",
+                "nexus",
+                "sema",
+                "component",
+                "daemon",
+                "runtime",
+                "architecture",
+                "build",
+                "forge",
+            ],
+        ) {
+            Self::push_unique(domains, Self::architecture());
+        }
+        if Self::contains_any(
+            &label,
+            &[
+                "workspace",
+                "orchestrate",
+                "workflow",
+                "role",
+                "report",
+                "bead",
+                "discipline",
+                "intent",
+                "privacy",
+                "capture",
+            ],
+        ) {
+            Self::push_unique(domains, Self::documentation());
+        }
+        if Self::contains_any(
+            &label,
+            &[
+                "agent", "persona", "llm", "harness", "subagent", "model", "mail",
+            ],
+        ) {
+            Self::push_unique(domains, Self::intelligence());
+        }
+        if Self::contains_any(
+            &label,
+            &[
+                "cloud",
+                "deploy",
+                "nix",
+                "cluster",
+                "network",
+                "secret",
+                "production",
+                "upgrade",
+            ],
+        ) {
+            Self::push_unique(domains, Self::infrastructure());
+        }
+        if Self::contains_any(&label, &["assistant", "counselor", "personal", "health"]) {
+            Self::push_unique(domains, Self::wellbeing());
+        }
+        if Self::contains_any(&label, &["governing", "governance", "policy"]) {
+            Self::push_unique(domains, Self::policy());
+        }
+        if Self::contains_any(&label, &["relating", "relationship", "friendship"]) {
+            Self::push_unique(domains, Self::rapport());
+        }
+        if domains.is_empty() {
+            Self::push_unique(domains, Self::documentation());
+        }
+    }
+
+    fn schema() -> Self {
+        Self::software(Software::Data(Data::SchemaEvolution))
+    }
+
+    fn notation() -> Self {
+        Self::Language(Language::Notation)
+    }
+
+    fn terminology() -> Self {
+        Self::Language(Language::Terminology)
+    }
+
+    fn programming() -> Self {
+        Self::software(Software::Languages(Languages::ProgrammingLanguages))
+    }
+
+    fn testing() -> Self {
+        Self::software(Software::Quality(Quality::Testing))
+    }
+
+    fn architecture() -> Self {
+        Self::software(Software::Engineering(Engineering::SoftwareArchitecture))
+    }
+
+    fn documentation() -> Self {
+        Self::Information(Information::Documentation)
+    }
+
+    fn intelligence() -> Self {
+        Self::software(Software::Intelligence(Intelligence::AgentSystems))
+    }
+
+    fn infrastructure() -> Self {
+        Self::software(Software::Operations(Operations::InfrastructureAsCode))
+    }
+
+    fn wellbeing() -> Self {
+        Self::Selfhood(Selfhood::Wellbeing)
+    }
+
+    fn policy() -> Self {
+        Self::Governance(Governance::Policy)
+    }
+
+    fn rapport() -> Self {
+        Self::Kinship(Kinship::Rapport)
+    }
+
+    fn contains_any(label: &str, needles: &[&str]) -> bool {
+        needles.iter().any(|needle| label.contains(needle))
+    }
+
+    fn push_unique(domains: &mut Vec<Self>, domain: Self) {
+        if !domains.contains(&domain) {
+            domains.push(domain);
+        }
+    }
+}
+
+impl std::ops::Deref for RecordIdentifier {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        self.payload()
+    }
+}
+
+impl std::fmt::Display for RecordIdentifier {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.payload().fmt(formatter)
+    }
+}
+
+impl std::fmt::Display for StashHandle {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.payload().fmt(formatter)
+    }
+}
+
+impl std::fmt::Display for CommitSequence {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.payload().fmt(formatter)
+    }
+}
+
+impl PartialEq<&str> for Description {
+    fn eq(&self, other: &&str) -> bool {
+        self.payload() == other
+    }
+}
+
+impl PartialEq<&str> for ErrorMessage {
+    fn eq(&self, other: &&str) -> bool {
+        self.payload() == other
+    }
+}
+
+impl PartialEq<&str> for Statement {
+    fn eq(&self, other: &&str) -> bool {
+        self.payload().payload() == other
+    }
+}
+
+impl PartialEq<Magnitude> for Privacy {
+    fn eq(&self, other: &Magnitude) -> bool {
+        self.payload() == other
+    }
+}
+
+impl PartialEq<Magnitude> for Certainty {
+    fn eq(&self, other: &Magnitude) -> bool {
+        self.payload() == other
+    }
+}
+
+impl PartialEq<u64> for RecordCount {
+    fn eq(&self, other: &u64) -> bool {
+        self.payload() == other
+    }
+}
+
+impl PartialEq<u64> for StashHandle {
+    fn eq(&self, other: &u64) -> bool {
+        self.payload() == other
+    }
+}
+
+impl PartialEq<u64> for SubscriptionToken {
+    fn eq(&self, other: &u64) -> bool {
+        self.payload() == other
+    }
+}
+
+impl PartialOrd<u64> for SubscriptionToken {
+    fn partial_cmp(&self, other: &u64) -> Option<std::cmp::Ordering> {
+        self.payload().partial_cmp(other)
+    }
+}
+
+impl PartialEq<u64> for CommitSequence {
+    fn eq(&self, other: &u64) -> bool {
+        self.payload() == other
+    }
+}
+
+impl PartialOrd for CommitSequence {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.payload().partial_cmp(other.payload())
+    }
+}
+
+impl PartialEq<u64> for StateDigest {
+    fn eq(&self, other: &u64) -> bool {
+        self.payload() == other
+    }
+}
+
+impl PartialOrd for StateDigest {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for StateDigest {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.payload().cmp(other.payload())
+    }
+}
+
+impl std::ops::Deref for RecordsStashed {
+    type Target = StashedObservation;
+
+    fn deref(&self) -> &Self::Target {
+        self.payload()
+    }
+}
+
+impl std::ops::Deref for RecordsObserved {
+    type Target = ObservedRecords;
+
+    fn deref(&self) -> &Self::Target {
+        self.payload()
+    }
+}
+
+impl std::ops::Deref for RecordFound {
+    type Target = FoundRecord;
+
+    fn deref(&self) -> &Self::Target {
+        self.payload()
+    }
+}
+
+impl std::ops::Deref for RecordsCounted {
+    type Target = CountedRecords;
+
+    fn deref(&self) -> &Self::Target {
+        self.payload()
+    }
+}
+
+impl std::ops::Deref for SubscriptionStarted {
+    type Target = IntentSubscription;
+
+    fn deref(&self) -> &Self::Target {
+        self.payload()
+    }
+}
+
+impl std::ops::Deref for ObservationTapped {
+    type Target = ObserverSubscription;
+
+    fn deref(&self) -> &Self::Target {
+        self.payload()
+    }
+}
+
+impl std::ops::Deref for ObservationUntapped {
+    type Target = ObserverRetraction;
+
+    fn deref(&self) -> &Self::Target {
+        self.payload()
+    }
+}
+
+impl std::ops::Deref for ObservedOperations {
+    type Target = Vec<ObservedOperation>;
+
+    fn deref(&self) -> &Self::Target {
+        self.payload()
+    }
+}
+
+impl std::ops::Deref for CertaintyChanged {
+    type Target = CertaintyChangeReceipt;
+
+    fn deref(&self) -> &Self::Target {
+        self.payload()
+    }
+}
+
+impl std::ops::Deref for RecordChanged {
+    type Target = RecordChangeReceipt;
+
+    fn deref(&self) -> &Self::Target {
+        self.payload()
+    }
+}
+
+impl std::ops::Deref for RecordSet {
+    type Target = Vec<ObservedRecord>;
+
+    fn deref(&self) -> &Self::Target {
+        self.payload()
+    }
+}
+
+impl PartialEq<Vec<ObservedRecord>> for RecordSet {
+    fn eq(&self, other: &Vec<ObservedRecord>) -> bool {
+        self.payload() == other
+    }
 }
