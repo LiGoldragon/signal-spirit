@@ -17,6 +17,11 @@ pub type SpiritReply = Output;
 pub type SpiritFrame = signal_frame::StreamingFrame<Input, Output, IntentEvent>;
 pub type SpiritFrameBody = signal_frame::StreamingFrameBody<Input, Output, IntentEvent>;
 
+pub const DOMAIN_SCHEMA_SOURCE: &str = include_str!("../schema/domain.schema");
+pub const SIGNAL_SCHEMA_SOURCE: &str = include_str!("../schema/signal.schema");
+pub const DOMAIN_RUST_SOURCE: &str = include_str!("schema/domain.rs");
+pub const SIGNAL_RUST_SOURCE: &str = include_str!("schema/signal.rs");
+
 impl ConfigurationPath {
     pub fn as_str(&self) -> &str {
         self.payload().as_str()
