@@ -1,12 +1,14 @@
 [package]
 name         = "signal-spirit"
-version      = "0.5.3"
+version      = "0.6.0"
 edition      = "2024"
-rust-version = "1.88"
+rust-version = "1.89"
 license      = "MIT OR Apache-2.0"
 repository   = "https://github.com/LiGoldragon/signal-spirit"
 description  = "Signal contract for the ordinary spirit surface."
 publish      = false
+links        = "signal-spirit"
+build        = "build.rs"
 
 [lib]
 name = "signal_spirit"
@@ -26,6 +28,9 @@ nota-next    = { git = "https://github.com/LiGoldragon/nota-next.git", branch = 
 rkyv         = { version = "0.8", default-features = false, features = ["std", "bytecheck", "little_endian", "pointer_width_32", "unaligned"] }
 thiserror    = "2"
 version-projection = { git = "https://github.com/LiGoldragon/version-projection.git", branch = "main", default-features = false }
+
+[build-dependencies]
+schema-rust-next = { git = "https://github.com/LiGoldragon/schema-rust-next.git", branch = "main" }
 
 [dev-dependencies]
 nota-next = { git = "https://github.com/LiGoldragon/nota-next.git", branch = "main" }
