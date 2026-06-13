@@ -395,6 +395,58 @@ impl Query {
             && self.certainty_selection.matches(&entry.certainty)
             && self.importance_selection.matches(&entry.importance)
     }
+
+    pub fn matches_intent_event(&self, event: &IntentEvent) -> bool {
+        match event {
+            IntentEvent::IntentRecorded(recorded) => recorded.entry.matches(self),
+            IntentEvent::IntentClarified(clarified) => clarified.entry.matches(self),
+            IntentEvent::IntentSuperseded(superseded) => superseded
+                .replacements
+                .payload()
+                .iter()
+                .any(|entry| entry.matches(self)),
+            IntentEvent::IntentRetired(_retired) => false,
+        }
+    }
+}
+
+impl ObserverFilter {
+    pub fn observes_operation(&self, _operation: &OperationKind) -> bool {
+        match self {
+            Self::All | Self::OperationsOnly => true,
+            Self::EffectsOnly => false,
+        }
+    }
+}
+
+impl OperationKind {
+    pub fn from_input(input: &Input) -> Self {
+        match input {
+            Input::State(_) => Self::State,
+            Input::Record(_) => Self::Record,
+            Input::Propose(_) => Self::Propose,
+            Input::Clarify(_) => Self::Clarify,
+            Input::Supersede(_) => Self::Supersede,
+            Input::Retire(_) => Self::Retire,
+            Input::Observe(_) => Self::Observe,
+            Input::PublicRecords(_) => Self::PublicRecords,
+            Input::PrivateRecords(_) => Self::PrivateRecords,
+            Input::Lookup(_) => Self::Lookup,
+            Input::Count(_) => Self::Count,
+            Input::Remove(_) => Self::Remove,
+            Input::ChangeCertainty(_) => Self::ChangeCertainty,
+            Input::BumpImportance(_) => Self::BumpImportance,
+            Input::ChangeRecord(_) => Self::ChangeRecord,
+            Input::RegisterReferent(_) => Self::RegisterReferent,
+            Input::LookupStash(_) => Self::LookupStash,
+            Input::CollectRemovalCandidates(_) => Self::CollectRemovalCandidates,
+            Input::Tap(_) => Self::Tap,
+            Input::Untap(_) => Self::Untap,
+            Input::SubscribeIntent(_) => Self::SubscribeIntent,
+            Input::Version => Self::Version,
+            Input::Marker => Self::Marker,
+        }
+    }
 }
 
 impl DomainMatch {
