@@ -189,7 +189,16 @@ name = "nota-next"
 version = "0.4.0"
 source = "git+https://github.com/LiGoldragon/nota-next.git?branch=main#3d6c2cdf4a7a62b36640b8622fdcaa2b931f0d43"
 dependencies = [
- "nota-next-derive",
+ "nota-next-derive 0.2.0",
+ "rkyv",
+]
+
+[[package]]
+name = "nota-next"
+version = "0.5.0"
+source = "git+https://github.com/LiGoldragon/nota-next.git?branch=structural-forms-integration#00d00504ef2f6c590761916eb438ca1a66fdab94"
+dependencies = [
+ "nota-next-derive 0.3.0",
  "rkyv",
 ]
 
@@ -197,6 +206,16 @@ dependencies = [
 name = "nota-next-derive"
 version = "0.2.0"
 source = "git+https://github.com/LiGoldragon/nota-next.git?branch=main#3d6c2cdf4a7a62b36640b8622fdcaa2b931f0d43"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "nota-next-derive"
+version = "0.3.0"
+source = "git+https://github.com/LiGoldragon/nota-next.git?branch=structural-forms-integration#00d00504ef2f6c590761916eb438ca1a66fdab94"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -326,17 +345,17 @@ checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
 [[package]]
 name = "schema-next"
 version = "0.2.0"
-source = "git+https://github.com/LiGoldragon/schema-next.git?branch=main#f460e7b6e76ef8766e45b870c323becd0ef461bf"
+source = "git+https://github.com/LiGoldragon/schema-next.git?branch=structural-forms-integration#2bb0228e503972ba4112bf420b8a55835d366285"
 dependencies = [
  "blake3",
- "nota-next",
+ "nota-next 0.5.0",
  "rkyv",
 ]
 
 [[package]]
 name = "schema-rust-next"
 version = "0.5.3"
-source = "git+https://github.com/LiGoldragon/schema-rust-next.git?branch=main#7c15bc3fa3d07f4710acca16f14eef1aa68b02dd"
+source = "git+https://github.com/LiGoldragon/schema-rust-next.git?branch=structural-forms-integration#573375da23134be8f07172c0ffa72416580c403d"
 dependencies = [
  "prettyplease",
  "proc-macro2",
@@ -357,7 +376,7 @@ name = "signal-frame"
 version = "0.2.1"
 source = "git+https://github.com/LiGoldragon/signal-frame.git?branch=main#8b128d3648935d9d322d5c4985d5b347aaeecddd"
 dependencies = [
- "nota-next",
+ "nota-next 0.4.0",
  "paste",
  "rkyv",
  "signal-frame-macros",
@@ -378,7 +397,7 @@ dependencies = [
 name = "signal-spirit"
 version = "0.6.0"
 dependencies = [
- "nota-next",
+ "nota-next 0.5.0",
  "rkyv",
  "schema-rust-next",
  "signal-frame",
@@ -465,7 +484,7 @@ name = "version-projection"
 version = "0.1.0"
 source = "git+https://github.com/LiGoldragon/version-projection.git?branch=main#e40fd1493236b4506260a9e53a15e7bbda96951d"
 dependencies = [
- "nota-next",
+ "nota-next 0.4.0",
  "rkyv",
  "thiserror",
 ]
