@@ -25,9 +25,7 @@ fn generated_output_frame_round_trips() {
 
 #[test]
 fn generated_signal_contract_exports_domain_tree() {
-    let domain = Domain::Technology(Technology::Software(Software::Data(
-        Data::SchemaEvolution,
-    )));
+    let domain = Domain::Technology(Technology::Software(Software::Data(Data::SchemaEvolution)));
 
     assert!(matches!(domain, Domain::Technology(_)));
 }

@@ -80,7 +80,9 @@ impl SpiritGuardianAgentConfiguration {
     }
 
     pub fn model_name(&self) -> Option<&str> {
-        self.model_name.as_ref().map(SpiritGuardianModelName::as_str)
+        self.model_name
+            .as_ref()
+            .map(SpiritGuardianModelName::as_str)
     }
 
     pub fn timeout_milliseconds(&self) -> u64 {
@@ -128,7 +130,9 @@ impl SpiritDaemonConfiguration {
     }
 
     pub fn meta_socket_path(&self) -> Option<&str> {
-        self.meta_socket_path.as_ref().map(ConfigurationPath::as_str)
+        self.meta_socket_path
+            .as_ref()
+            .map(ConfigurationPath::as_str)
     }
 
     pub fn database_path(&self) -> &str {
@@ -136,7 +140,9 @@ impl SpiritDaemonConfiguration {
     }
 
     pub fn trace_socket_path(&self) -> Option<&str> {
-        self.trace_socket_path.as_ref().map(ConfigurationPath::as_str)
+        self.trace_socket_path
+            .as_ref()
+            .map(ConfigurationPath::as_str)
     }
 
     pub fn guardian_agent_configuration(&self) -> Option<&SpiritGuardianAgentConfiguration> {
@@ -519,7 +525,9 @@ impl TextMatch {
     pub fn matches(&self, description: &Description) -> bool {
         match self {
             Self::Any => true,
-            Self::ContainsText(search_text) => description.contains_search_text(search_text.payload()),
+            Self::ContainsText(search_text) => {
+                description.contains_search_text(search_text.payload())
+            }
         }
     }
 }
@@ -663,7 +671,9 @@ impl PrivacySelection {
             Self::Any => true,
             Self::Exact(expected) => privacy == expected.payload(),
             Self::AtMost(maximum) => privacy.payload().rank() <= maximum.payload().payload().rank(),
-            Self::AtLeast(minimum) => privacy.payload().rank() >= minimum.payload().payload().rank(),
+            Self::AtLeast(minimum) => {
+                privacy.payload().rank() >= minimum.payload().payload().rank()
+            }
         }
     }
 }
