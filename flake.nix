@@ -48,22 +48,6 @@
         checks = {
           build = craneLib.cargoBuild (commonArguments // { inherit cargoArtifacts; });
           test = craneLib.cargoTest (commonArguments // { inherit cargoArtifacts; });
-          test-round-trip = craneLib.cargoTest (commonArguments // {
-            inherit cargoArtifacts;
-            cargoTestExtraArgs = "--test round_trip";
-          });
-          test-short-header-dispatch = craneLib.cargoTest (commonArguments // {
-            inherit cargoArtifacts;
-            cargoTestExtraArgs = "--test short_header";
-          });
-          test-box-form = craneLib.cargoTest (commonArguments // {
-            inherit cargoArtifacts;
-            cargoTestExtraArgs = "--test box_form";
-          });
-          test-version-projection = craneLib.cargoTest (commonArguments // {
-            inherit cargoArtifacts;
-            cargoTestExtraArgs = "--test migration";
-          });
           doc = craneLib.cargoDoc (commonArguments // {
             inherit cargoArtifacts;
             RUSTDOCFLAGS = "-D warnings";
