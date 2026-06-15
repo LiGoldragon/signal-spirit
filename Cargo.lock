@@ -196,7 +196,7 @@ dependencies = [
 [[package]]
 name = "nota-next"
 version = "0.5.0"
-source = "git+https://github.com/LiGoldragon/nota-next.git?branch=structural-forms-integration#00d00504ef2f6c590761916eb438ca1a66fdab94"
+source = "git+https://github.com/LiGoldragon/nota-next.git?branch=structural-forms-integration#f9155de55353900ec023b3bb76336b902b8736c1"
 dependencies = [
  "nota-next-derive 0.3.0",
  "rkyv",
@@ -215,7 +215,7 @@ dependencies = [
 [[package]]
 name = "nota-next-derive"
 version = "0.3.0"
-source = "git+https://github.com/LiGoldragon/nota-next.git?branch=structural-forms-integration#00d00504ef2f6c590761916eb438ca1a66fdab94"
+source = "git+https://github.com/LiGoldragon/nota-next.git?branch=structural-forms-integration#f9155de55353900ec023b3bb76336b902b8736c1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -345,17 +345,18 @@ checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
 [[package]]
 name = "schema-next"
 version = "0.2.0"
-source = "git+https://github.com/LiGoldragon/schema-next.git?branch=structural-forms-integration#2bb0228e503972ba4112bf420b8a55835d366285"
+source = "git+https://github.com/LiGoldragon/schema-next.git?branch=structural-forms-integration#0543341e4327dc46c0d01968a6fe0f91864a589a"
 dependencies = [
  "blake3",
  "nota-next 0.5.0",
  "rkyv",
+ "thiserror",
 ]
 
 [[package]]
 name = "schema-rust-next"
 version = "0.5.3"
-source = "git+https://github.com/LiGoldragon/schema-rust-next.git?branch=structural-forms-integration#573375da23134be8f07172c0ffa72416580c403d"
+source = "git+https://github.com/LiGoldragon/schema-rust-next.git?branch=structural-forms-integration#660d350ee0eeb25680d0b225074f72ebcb419b9e"
 dependencies = [
  "prettyplease",
  "proc-macro2",

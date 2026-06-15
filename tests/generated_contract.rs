@@ -1,7 +1,10 @@
 use signal_spirit::{
-    Data, Domain, Input, InputRoute, Output, OutputRoute, Software, Technology, VersionReport,
-    VersionText,
+    DataLeaf, Domain, DomainScope, Input, InputRoute, Output, OutputRoute, Software, Technology,
+    VersionReport, VersionText,
 };
+
+#[cfg(feature = "nota-text")]
+use nota_next::{NotaEncode, NotaSource};
 
 #[test]
 fn generated_input_frame_round_trips() {
@@ -25,7 +28,96 @@ fn generated_output_frame_round_trips() {
 
 #[test]
 fn generated_signal_contract_exports_domain_tree() {
-    let domain = Domain::Technology(Technology::Software(Software::Data(Data::SchemaEvolution)));
+    let domain = Domain::Technology(Technology::Software(Software::Data(Some(
+        DataLeaf::SchemaEvolution,
+    ))));
 
     assert!(matches!(domain, Domain::Technology(_)));
+}
+
+#[cfg(feature = "nota-text")]
+#[test]
+fn terminal_value_domain_tags_round_trip_through_nota() {
+    let domain = "(Technology (Software Data))"
+        .parse_domain()
+        .expect("terminal data domain parses");
+
+    assert_eq!(
+        domain,
+        Domain::Technology(Technology::Software(Software::Data(None)))
+    );
+    assert_eq!(domain.to_nota(), "(Technology (Software Data))");
+}
+
+#[cfg(feature = "nota-text")]
+#[test]
+fn curated_leaf_domain_tags_round_trip_through_nota() {
+    let domain = "(Technology (Software (Data SchemaEvolution)))"
+        .parse_domain()
+        .expect("schema evolution domain parses");
+
+    assert_eq!(
+        domain,
+        Domain::Technology(Technology::Software(Software::Data(Some(
+            DataLeaf::SchemaEvolution,
+        ))))
+    );
+    assert_eq!(
+        domain.to_nota(),
+        "(Technology (Software (Data SchemaEvolution)))"
+    );
+}
+
+#[cfg(feature = "nota-text")]
+#[test]
+fn pure_terminal_theory_domain_round_trips_through_nota() {
+    let domain = "(Technology (Software Theory))"
+        .parse_domain()
+        .expect("theory terminal domain parses");
+
+    assert_eq!(
+        domain,
+        Domain::Technology(Technology::Software(Software::Theory))
+    );
+    assert_eq!(domain.to_nota(), "(Technology (Software Theory))");
+}
+
+#[cfg(feature = "nota-text")]
+#[test]
+fn deleted_software_leaves_do_not_parse() {
+    for deleted in [
+        "(Technology (Software (Distributed ServiceMesh)))",
+        "(Technology (Software (Quality UnitTesting)))",
+        "(Technology (Software (Engineering SoftwareArchitecture)))",
+    ] {
+        assert!(
+            deleted.parse_domain().is_err(),
+            "deleted domain leaf must not parse: {deleted}"
+        );
+    }
+}
+
+#[test]
+fn terminal_value_domains_convert_to_scope_all() {
+    let scope = DomainScope::from(Domain::Technology(Technology::Software(Software::Data(
+        None,
+    ))));
+
+    assert!(
+        scope.contains_domain(&Domain::Technology(Technology::Software(Software::Data(
+            Some(DataLeaf::SchemaEvolution),
+        ))))
+    );
+}
+
+#[cfg(feature = "nota-text")]
+trait DomainNotaTest {
+    fn parse_domain(&self) -> Result<Domain, nota_next::NotaDecodeError>;
+}
+
+#[cfg(feature = "nota-text")]
+impl DomainNotaTest for str {
+    fn parse_domain(&self) -> Result<Domain, nota_next::NotaDecodeError> {
+        NotaSource::new(self).parse::<Domain>()
+    }
 }

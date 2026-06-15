@@ -24,20 +24,19 @@
   Safety signal-spirit:domain:Safety
   Information signal-spirit:domain:Information
   Technology signal-spirit:domain:Technology
-  Hardware signal-spirit:domain:Hardware
+  HardwareLeaf signal-spirit:domain:HardwareLeaf
   Software signal-spirit:domain:Software
-  Languages signal-spirit:domain:Languages
-  Theory signal-spirit:domain:Theory
-  Systems signal-spirit:domain:Systems
-  Distributed signal-spirit:domain:Distributed
-  Data signal-spirit:domain:Data
-  Intelligence signal-spirit:domain:Intelligence
-  Security signal-spirit:domain:Security
-  Quality signal-spirit:domain:Quality
-  Operations signal-spirit:domain:Operations
-  Observability signal-spirit:domain:Observability
-  Surfaces signal-spirit:domain:Surfaces
-  Engineering signal-spirit:domain:Engineering
+  ProgrammingLeaf signal-spirit:domain:ProgrammingLeaf
+  SystemsLeaf signal-spirit:domain:SystemsLeaf
+  DistributedLeaf signal-spirit:domain:DistributedLeaf
+  DataLeaf signal-spirit:domain:DataLeaf
+  IntelligenceLeaf signal-spirit:domain:IntelligenceLeaf
+  SecurityLeaf signal-spirit:domain:SecurityLeaf
+  QualityLeaf signal-spirit:domain:QualityLeaf
+  OperationsLeaf signal-spirit:domain:OperationsLeaf
+  ObservabilityLeaf signal-spirit:domain:ObservabilityLeaf
+  SurfacesLeaf signal-spirit:domain:SurfacesLeaf
+  EngineeringLeaf signal-spirit:domain:EngineeringLeaf
   DomainScope signal-spirit:domain:DomainScope
   DomainScopes signal-spirit:domain:DomainScopes
   ScopeSet signal-spirit:domain:ScopeSet

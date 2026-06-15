@@ -60,33 +60,31 @@ pub use crate::schema::domain::Information as Information;
 #[rustfmt::skip]
 pub use crate::schema::domain::Technology as Technology;
 #[rustfmt::skip]
-pub use crate::schema::domain::Hardware as Hardware;
+pub use crate::schema::domain::HardwareLeaf as HardwareLeaf;
 #[rustfmt::skip]
 pub use crate::schema::domain::Software as Software;
 #[rustfmt::skip]
-pub use crate::schema::domain::Languages as Languages;
+pub use crate::schema::domain::ProgrammingLeaf as ProgrammingLeaf;
 #[rustfmt::skip]
-pub use crate::schema::domain::Theory as Theory;
+pub use crate::schema::domain::SystemsLeaf as SystemsLeaf;
 #[rustfmt::skip]
-pub use crate::schema::domain::Systems as Systems;
+pub use crate::schema::domain::DistributedLeaf as DistributedLeaf;
 #[rustfmt::skip]
-pub use crate::schema::domain::Distributed as Distributed;
+pub use crate::schema::domain::DataLeaf as DataLeaf;
 #[rustfmt::skip]
-pub use crate::schema::domain::Data as Data;
+pub use crate::schema::domain::IntelligenceLeaf as IntelligenceLeaf;
 #[rustfmt::skip]
-pub use crate::schema::domain::Intelligence as Intelligence;
+pub use crate::schema::domain::SecurityLeaf as SecurityLeaf;
 #[rustfmt::skip]
-pub use crate::schema::domain::Security as Security;
+pub use crate::schema::domain::QualityLeaf as QualityLeaf;
 #[rustfmt::skip]
-pub use crate::schema::domain::Quality as Quality;
+pub use crate::schema::domain::OperationsLeaf as OperationsLeaf;
 #[rustfmt::skip]
-pub use crate::schema::domain::Operations as Operations;
+pub use crate::schema::domain::ObservabilityLeaf as ObservabilityLeaf;
 #[rustfmt::skip]
-pub use crate::schema::domain::Observability as Observability;
+pub use crate::schema::domain::SurfacesLeaf as SurfacesLeaf;
 #[rustfmt::skip]
-pub use crate::schema::domain::Surfaces as Surfaces;
-#[rustfmt::skip]
-pub use crate::schema::domain::Engineering as Engineering;
+pub use crate::schema::domain::EngineeringLeaf as EngineeringLeaf;
 #[rustfmt::skip]
 pub use crate::schema::domain::DomainScope as DomainScope;
 #[rustfmt::skip]

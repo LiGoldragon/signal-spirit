@@ -26,29 +26,42 @@
     (Appearance [Clothing Grooming Style Cosmetics Etiquette Comportment])
     (Safety [Protection Preparedness Risk Cybersecurity Privacy Disaster Military Deterrence])
     (Information [Curation RecordKeeping Documentation News Broadcasting Archives Database Retrieval Classification])
-    (Technology [
-      (Hardware [Energy Power Automation Robotics Networking Materials Machinery Instrumentation Aerospace])
-      (Software [
-        (Languages [ProgrammingLanguages ProgrammingParadigms TypeSystems Compilation Interpretation Parsing LexicalAnalysis Grammars CodeGeneration Metaprogramming Macros DomainSpecificLanguages RuntimeEnvironments GarbageCollection MemoryManagement ForeignFunctionInterfaces])
-        (Theory [Algorithms DataStructures ComputationalComplexity AutomataTheory FormalLanguages GraphAlgorithms TypeTheory ProgramSemantics FormalMethods FormalVerification ModelChecking StaticAnalysis NumericalComputing Cryptanalysis])
-        (Systems [OperatingSystems SystemsProgramming Concurrency Parallelism Asynchrony Synchronization Scheduling FileSystems Virtualization Containerization EmbeddedSystems RealTimeSystems Firmware ResourceManagement KernelDevelopment DeviceDrivers])
-        (Distributed [DistributedSystems Networking NetworkProtocols ProtocolDesign Consensus Replication MessageQueuing EventDrivenArchitecture ServiceMesh LoadBalancing RemoteProcedureCall InterprocessCommunication Routing FaultTolerance Sharding])
-        (Data [DatabaseSystems QueryProcessing Indexing Transactions Caching Storage Persistence Serialization DataFormats Compression Encoding DataModeling DataPipelines StreamProcessing BatchProcessing SchemaEvolution DataMigration DataValidation])
-        (Intelligence [MachineLearning DeepLearning NeuralNetworks NaturalLanguageProcessing ComputerVision ReinforcementLearning ModelTraining ModelInference FeatureEngineering PromptEngineering RetrievalAugmentedGeneration AgentSystems InformationRetrieval Search Ranking RecommendationSystems KnowledgeRepresentation AutomatedReasoning])
-        (Security [Cryptography Authentication Authorization AccessControl AdmissionControl SecretsManagement ThreatModeling VulnerabilityManagement PenetrationTesting ApplicationSecurity NetworkSecurity Sandboxing Hardening Privacy IntrusionDetection ReverseEngineering InputSanitization])
-        (Quality [Testing UnitTesting IntegrationTesting EndToEndTesting PropertyBasedTesting Fuzzing TestAutomation Mocking CodeCoverage Debugging Profiling Benchmarking PerformanceOptimization LoadTesting CodeReview Refactoring Linting Formatting TechnicalDebt])
-        (Operations [ContinuousIntegration ContinuousDelivery BuildSystem ReleaseEngineering DependencyManagement PackageManagement ArtifactManagement Deployment Provisioning InfrastructureAsCode Orchestration ConfigurationManagement AutoScaling CapacityPlanning SiteReliability IncidentResponse DisasterRecovery RateLimiting])
-        (Observability [Logging Monitoring Alerting Tracing DistributedTracing Metrics Telemetry ErrorHandling AuditLogging])
-        (Surfaces [WebDevelopment FrontendDevelopment BackendDevelopment UserInterface InteractionDesign Rendering ComputerGraphics Animation Layout Styling StateManagement Accessibility Usability Internationalization Localization MobileDevelopment GameDevelopment Visualization SyntaxHighlighting CommandLineInterfaces])
-        (Engineering [SoftwareArchitecture SoftwareDesign DesignPatterns DomainDrivenDesign ApplicationProgrammingInterfaces Microservices Serverless CloudComputing EdgeComputing Scalability Reliability Maintainability Portability Interoperability Modularity Abstraction RequirementsEngineering Documentation VersionControl SoftwareDevelopmentProcess SoftwareMaintenance SoftwareEngineeringManagement])
-      ])
-    ])
+    (Technology)
   ]
+  Technology [
+    (Hardware (Optional HardwareLeaf))
+    (Software)
+  ]
+  HardwareLeaf [Networking]
+  Software [
+    (Programming (Optional ProgrammingLeaf))
+    Theory
+    (Systems (Optional SystemsLeaf))
+    (Distributed (Optional DistributedLeaf))
+    (Data (Optional DataLeaf))
+    (Intelligence (Optional IntelligenceLeaf))
+    (Security (Optional SecurityLeaf))
+    (Quality (Optional QualityLeaf))
+    (Operations (Optional OperationsLeaf))
+    (Observability (Optional ObservabilityLeaf))
+    (Surfaces (Optional SurfacesLeaf))
+    (Engineering (Optional EngineeringLeaf))
+  ]
+  ProgrammingLeaf [TypeSystems Compilation Parsing Grammars CodeGeneration Metaprogramming Macros DomainSpecificLanguages]
+  SystemsLeaf [SystemsProgramming Concurrency]
+  DistributedLeaf [ProtocolDesign EventDrivenArchitecture]
+  DataLeaf [Persistence Serialization Formats Modeling SchemaEvolution Migration]
+  IntelligenceLeaf [AgentSystems]
+  SecurityLeaf [Cryptography Authentication Authorization SecretsManagement Privacy]
+  QualityLeaf [Testing]
+  OperationsLeaf [BuildSystem ReleaseEngineering DependencyManagement Deployment ConfigurationManagement]
+  ObservabilityLeaf [Tracing]
+  SurfacesLeaf [Visualization CommandLineInterfaces]
+  EngineeringLeaf [Architecture Design ApplicationProgrammingInterfaces Documentation VersionControl DevelopmentProcess Management Modularity]
   DomainScope (ScopeOf Domain)
   DomainScopes (Vec DomainScope)
   ScopeSet (Vec DomainScope)
 }
 [
-  (Equivalence [(Technology Hardware Networking) (Technology Software Distributed Networking)])
-  (Equivalence [(Information Database) (Technology Software Data DatabaseSystems)])
+  (Equivalence [(Information Database) (Technology Software Data)])
 ]

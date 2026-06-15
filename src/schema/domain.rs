@@ -636,438 +636,6 @@ pub enum Information {
 
 #[rustfmt::skip]
 #[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
-#[derive(
-    rkyv::Archive,
-    rkyv::Serialize,
-    rkyv::Deserialize,
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-)]
-pub enum Hardware {
-    Energy,
-    Power,
-    Automation,
-    Robotics,
-    Networking,
-    Materials,
-    Machinery,
-    Instrumentation,
-    Aerospace,
-}
-
-#[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
-#[derive(
-    rkyv::Archive,
-    rkyv::Serialize,
-    rkyv::Deserialize,
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-)]
-pub enum Languages {
-    ProgrammingLanguages,
-    ProgrammingParadigms,
-    TypeSystems,
-    Compilation,
-    Interpretation,
-    Parsing,
-    LexicalAnalysis,
-    Grammars,
-    CodeGeneration,
-    Metaprogramming,
-    Macros,
-    DomainSpecificLanguages,
-    RuntimeEnvironments,
-    GarbageCollection,
-    MemoryManagement,
-    ForeignFunctionInterfaces,
-}
-
-#[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
-#[derive(
-    rkyv::Archive,
-    rkyv::Serialize,
-    rkyv::Deserialize,
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-)]
-pub enum Theory {
-    Algorithms,
-    DataStructures,
-    ComputationalComplexity,
-    AutomataTheory,
-    FormalLanguages,
-    GraphAlgorithms,
-    TypeTheory,
-    ProgramSemantics,
-    FormalMethods,
-    FormalVerification,
-    ModelChecking,
-    StaticAnalysis,
-    NumericalComputing,
-    Cryptanalysis,
-}
-
-#[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
-#[derive(
-    rkyv::Archive,
-    rkyv::Serialize,
-    rkyv::Deserialize,
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-)]
-pub enum Systems {
-    OperatingSystems,
-    SystemsProgramming,
-    Concurrency,
-    Parallelism,
-    Asynchrony,
-    Synchronization,
-    Scheduling,
-    FileSystems,
-    Virtualization,
-    Containerization,
-    EmbeddedSystems,
-    RealTimeSystems,
-    Firmware,
-    ResourceManagement,
-    KernelDevelopment,
-    DeviceDrivers,
-}
-
-#[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
-#[derive(
-    rkyv::Archive,
-    rkyv::Serialize,
-    rkyv::Deserialize,
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-)]
-pub enum Distributed {
-    DistributedSystems,
-    Networking,
-    NetworkProtocols,
-    ProtocolDesign,
-    Consensus,
-    Replication,
-    MessageQueuing,
-    EventDrivenArchitecture,
-    ServiceMesh,
-    LoadBalancing,
-    RemoteProcedureCall,
-    InterprocessCommunication,
-    Routing,
-    FaultTolerance,
-    Sharding,
-}
-
-#[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
-#[derive(
-    rkyv::Archive,
-    rkyv::Serialize,
-    rkyv::Deserialize,
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-)]
-pub enum Data {
-    DatabaseSystems,
-    QueryProcessing,
-    Indexing,
-    Transactions,
-    Caching,
-    Storage,
-    Persistence,
-    Serialization,
-    DataFormats,
-    Compression,
-    Encoding,
-    DataModeling,
-    DataPipelines,
-    StreamProcessing,
-    BatchProcessing,
-    SchemaEvolution,
-    DataMigration,
-    DataValidation,
-}
-
-#[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
-#[derive(
-    rkyv::Archive,
-    rkyv::Serialize,
-    rkyv::Deserialize,
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-)]
-pub enum Intelligence {
-    MachineLearning,
-    DeepLearning,
-    NeuralNetworks,
-    NaturalLanguageProcessing,
-    ComputerVision,
-    ReinforcementLearning,
-    ModelTraining,
-    ModelInference,
-    FeatureEngineering,
-    PromptEngineering,
-    RetrievalAugmentedGeneration,
-    AgentSystems,
-    InformationRetrieval,
-    Search,
-    Ranking,
-    RecommendationSystems,
-    KnowledgeRepresentation,
-    AutomatedReasoning,
-}
-
-#[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
-#[derive(
-    rkyv::Archive,
-    rkyv::Serialize,
-    rkyv::Deserialize,
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-)]
-pub enum Security {
-    Cryptography,
-    Authentication,
-    Authorization,
-    AccessControl,
-    AdmissionControl,
-    SecretsManagement,
-    ThreatModeling,
-    VulnerabilityManagement,
-    PenetrationTesting,
-    ApplicationSecurity,
-    NetworkSecurity,
-    Sandboxing,
-    Hardening,
-    Privacy,
-    IntrusionDetection,
-    ReverseEngineering,
-    InputSanitization,
-}
-
-#[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
-#[derive(
-    rkyv::Archive,
-    rkyv::Serialize,
-    rkyv::Deserialize,
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-)]
-pub enum Quality {
-    Testing,
-    UnitTesting,
-    IntegrationTesting,
-    EndToEndTesting,
-    PropertyBasedTesting,
-    Fuzzing,
-    TestAutomation,
-    Mocking,
-    CodeCoverage,
-    Debugging,
-    Profiling,
-    Benchmarking,
-    PerformanceOptimization,
-    LoadTesting,
-    CodeReview,
-    Refactoring,
-    Linting,
-    Formatting,
-    TechnicalDebt,
-}
-
-#[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
-#[derive(
-    rkyv::Archive,
-    rkyv::Serialize,
-    rkyv::Deserialize,
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-)]
-pub enum Operations {
-    ContinuousIntegration,
-    ContinuousDelivery,
-    BuildSystem,
-    ReleaseEngineering,
-    DependencyManagement,
-    PackageManagement,
-    ArtifactManagement,
-    Deployment,
-    Provisioning,
-    InfrastructureAsCode,
-    Orchestration,
-    ConfigurationManagement,
-    AutoScaling,
-    CapacityPlanning,
-    SiteReliability,
-    IncidentResponse,
-    DisasterRecovery,
-    RateLimiting,
-}
-
-#[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
-#[derive(
-    rkyv::Archive,
-    rkyv::Serialize,
-    rkyv::Deserialize,
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-)]
-pub enum Observability {
-    Logging,
-    Monitoring,
-    Alerting,
-    Tracing,
-    DistributedTracing,
-    Metrics,
-    Telemetry,
-    ErrorHandling,
-    AuditLogging,
-}
-
-#[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
-#[derive(
-    rkyv::Archive,
-    rkyv::Serialize,
-    rkyv::Deserialize,
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-)]
-pub enum Surfaces {
-    WebDevelopment,
-    FrontendDevelopment,
-    BackendDevelopment,
-    UserInterface,
-    InteractionDesign,
-    Rendering,
-    ComputerGraphics,
-    Animation,
-    Layout,
-    Styling,
-    StateManagement,
-    Accessibility,
-    Usability,
-    Internationalization,
-    Localization,
-    MobileDevelopment,
-    GameDevelopment,
-    Visualization,
-    SyntaxHighlighting,
-    CommandLineInterfaces,
-}
-
-#[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
-#[derive(
-    rkyv::Archive,
-    rkyv::Serialize,
-    rkyv::Deserialize,
-    Clone,
-    Copy,
-    Debug,
-    PartialEq,
-    Eq,
-)]
-pub enum Engineering {
-    SoftwareArchitecture,
-    SoftwareDesign,
-    DesignPatterns,
-    DomainDrivenDesign,
-    ApplicationProgrammingInterfaces,
-    Microservices,
-    Serverless,
-    CloudComputing,
-    EdgeComputing,
-    Scalability,
-    Reliability,
-    Maintainability,
-    Portability,
-    Interoperability,
-    Modularity,
-    Abstraction,
-    RequirementsEngineering,
-    Documentation,
-    VersionControl,
-    SoftwareDevelopmentProcess,
-    SoftwareMaintenance,
-    SoftwareEngineeringManagement,
-}
-
-#[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub enum Software {
-    Languages(Languages),
-    Theory(Theory),
-    Systems(Systems),
-    Distributed(Distributed),
-    Data(Data),
-    Intelligence(Intelligence),
-    Security(Security),
-    Quality(Quality),
-    Operations(Operations),
-    Observability(Observability),
-    Surfaces(Surfaces),
-    Engineering(Engineering),
-}
-
-#[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub enum Technology {
-    Hardware(Hardware),
-    Software(Software),
-}
-
-#[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum Domain {
     Health(Health),
@@ -1094,6 +662,638 @@ pub enum Domain {
     Safety(Safety),
     Information(Information),
     Technology(Technology),
+}
+
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub enum Technology {
+    Hardware(Option<HardwareLeaf>),
+    Software(Software),
+}
+#[rustfmt::skip]
+#[cfg(feature = "nota-text")]
+impl nota_next::NotaBodyDecode for Technology {
+    fn from_nota_body(
+        body: &nota_next::NotaBody<'_>,
+    ) -> Result<Self, nota_next::NotaDecodeError> {
+        let root_objects = body.root_objects();
+        if root_objects.len() == 1 {
+            if let Some(variant) = root_objects[0].demote_to_string() {
+                return match variant {
+                    "Hardware" => Ok(Self::Hardware(None)),
+                    other => {
+                        Err(nota_next::NotaDecodeError::UnknownVariant {
+                            enum_name: "Technology",
+                            variant: other.to_owned(),
+                        })
+                    }
+                };
+            }
+        }
+        let children = body.expect_fields("Technology", 2)?;
+        let variant = children[0]
+            .demote_to_string()
+            .ok_or(nota_next::NotaDecodeError::ExpectedAtom {
+                type_name: "enum variant",
+            })?;
+        match variant {
+            "Hardware" => {
+                Ok(
+                    Self::Hardware(
+                        Some(
+                            <HardwareLeaf as nota_next::NotaDecode>::from_nota_block(
+                                &children[1],
+                            )?,
+                        ),
+                    ),
+                )
+            }
+            "Software" => {
+                Ok(
+                    Self::Software(
+                        <Software as nota_next::NotaDecode>::from_nota_block(
+                            &children[1],
+                        )?,
+                    ),
+                )
+            }
+            other => {
+                Err(nota_next::NotaDecodeError::UnknownVariant {
+                    enum_name: "Technology",
+                    variant: other.to_owned(),
+                })
+            }
+        }
+    }
+}
+#[rustfmt::skip]
+#[cfg(feature = "nota-text")]
+impl nota_next::NotaDecode for Technology {
+    fn from_nota_block(
+        block: &nota_next::Block,
+    ) -> Result<Self, nota_next::NotaDecodeError> {
+        if block.demote_to_string().is_some() {
+            let root_objects = std::slice::from_ref(block);
+            let body = nota_next::NotaBody::new(root_objects);
+            return <Self as nota_next::NotaBodyDecode>::from_nota_body(&body);
+        }
+        let body = nota_next::NotaBlock::new(block)
+            .expect_body(nota_next::Delimiter::Parenthesis, "Technology")?;
+        <Self as nota_next::NotaBodyDecode>::from_nota_body(&body)
+    }
+}
+#[rustfmt::skip]
+#[cfg(feature = "nota-text")]
+impl nota_next::NotaBodyEncode for Technology {
+    fn to_nota_body(&self) -> nota_next::NotaBodyEncoding {
+        match self {
+            Self::Hardware(payload) => {
+                let mut fields = vec!["Hardware".to_owned()];
+                if let Some(payload) = payload {
+                    fields.push(nota_next::NotaEncode::to_nota(payload));
+                }
+                nota_next::NotaBodyEncoding::new(fields)
+            }
+            Self::Software(payload) => {
+                nota_next::NotaBodyEncoding::new(
+                    vec!["Software".to_owned(), nota_next::NotaEncode::to_nota(payload),],
+                )
+            }
+        }
+    }
+}
+#[rustfmt::skip]
+#[cfg(feature = "nota-text")]
+impl nota_next::NotaEncode for Technology {
+    fn to_nota(&self) -> String {
+        let body = <Self as nota_next::NotaBodyEncode>::to_nota_body(self);
+        if body.fields().len() == 1 {
+            body.to_nota()
+        } else {
+            body.to_delimited_nota(nota_next::Delimiter::Parenthesis)
+        }
+    }
+}
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(
+    rkyv::Archive,
+    rkyv::Serialize,
+    rkyv::Deserialize,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+)]
+pub enum HardwareLeaf {
+    Networking,
+}
+
+#[rustfmt::skip]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub enum Software {
+    Programming(Option<ProgrammingLeaf>),
+    Theory,
+    Systems(Option<SystemsLeaf>),
+    Distributed(Option<DistributedLeaf>),
+    Data(Option<DataLeaf>),
+    Intelligence(Option<IntelligenceLeaf>),
+    Security(Option<SecurityLeaf>),
+    Quality(Option<QualityLeaf>),
+    Operations(Option<OperationsLeaf>),
+    Observability(Option<ObservabilityLeaf>),
+    Surfaces(Option<SurfacesLeaf>),
+    Engineering(Option<EngineeringLeaf>),
+}
+#[rustfmt::skip]
+#[cfg(feature = "nota-text")]
+impl nota_next::NotaBodyDecode for Software {
+    fn from_nota_body(
+        body: &nota_next::NotaBody<'_>,
+    ) -> Result<Self, nota_next::NotaDecodeError> {
+        let root_objects = body.root_objects();
+        if root_objects.len() == 1 {
+            if let Some(variant) = root_objects[0].demote_to_string() {
+                return match variant {
+                    "Theory" => Ok(Self::Theory),
+                    "Programming" => Ok(Self::Programming(None)),
+                    "Systems" => Ok(Self::Systems(None)),
+                    "Distributed" => Ok(Self::Distributed(None)),
+                    "Data" => Ok(Self::Data(None)),
+                    "Intelligence" => Ok(Self::Intelligence(None)),
+                    "Security" => Ok(Self::Security(None)),
+                    "Quality" => Ok(Self::Quality(None)),
+                    "Operations" => Ok(Self::Operations(None)),
+                    "Observability" => Ok(Self::Observability(None)),
+                    "Surfaces" => Ok(Self::Surfaces(None)),
+                    "Engineering" => Ok(Self::Engineering(None)),
+                    other => {
+                        Err(nota_next::NotaDecodeError::UnknownVariant {
+                            enum_name: "Software",
+                            variant: other.to_owned(),
+                        })
+                    }
+                };
+            }
+        }
+        let children = body.expect_fields("Software", 2)?;
+        let variant = children[0]
+            .demote_to_string()
+            .ok_or(nota_next::NotaDecodeError::ExpectedAtom {
+                type_name: "enum variant",
+            })?;
+        match variant {
+            "Programming" => {
+                Ok(
+                    Self::Programming(
+                        Some(
+                            <ProgrammingLeaf as nota_next::NotaDecode>::from_nota_block(
+                                &children[1],
+                            )?,
+                        ),
+                    ),
+                )
+            }
+            "Systems" => {
+                Ok(
+                    Self::Systems(
+                        Some(
+                            <SystemsLeaf as nota_next::NotaDecode>::from_nota_block(
+                                &children[1],
+                            )?,
+                        ),
+                    ),
+                )
+            }
+            "Distributed" => {
+                Ok(
+                    Self::Distributed(
+                        Some(
+                            <DistributedLeaf as nota_next::NotaDecode>::from_nota_block(
+                                &children[1],
+                            )?,
+                        ),
+                    ),
+                )
+            }
+            "Data" => {
+                Ok(
+                    Self::Data(
+                        Some(
+                            <DataLeaf as nota_next::NotaDecode>::from_nota_block(
+                                &children[1],
+                            )?,
+                        ),
+                    ),
+                )
+            }
+            "Intelligence" => {
+                Ok(
+                    Self::Intelligence(
+                        Some(
+                            <IntelligenceLeaf as nota_next::NotaDecode>::from_nota_block(
+                                &children[1],
+                            )?,
+                        ),
+                    ),
+                )
+            }
+            "Security" => {
+                Ok(
+                    Self::Security(
+                        Some(
+                            <SecurityLeaf as nota_next::NotaDecode>::from_nota_block(
+                                &children[1],
+                            )?,
+                        ),
+                    ),
+                )
+            }
+            "Quality" => {
+                Ok(
+                    Self::Quality(
+                        Some(
+                            <QualityLeaf as nota_next::NotaDecode>::from_nota_block(
+                                &children[1],
+                            )?,
+                        ),
+                    ),
+                )
+            }
+            "Operations" => {
+                Ok(
+                    Self::Operations(
+                        Some(
+                            <OperationsLeaf as nota_next::NotaDecode>::from_nota_block(
+                                &children[1],
+                            )?,
+                        ),
+                    ),
+                )
+            }
+            "Observability" => {
+                Ok(
+                    Self::Observability(
+                        Some(
+                            <ObservabilityLeaf as nota_next::NotaDecode>::from_nota_block(
+                                &children[1],
+                            )?,
+                        ),
+                    ),
+                )
+            }
+            "Surfaces" => {
+                Ok(
+                    Self::Surfaces(
+                        Some(
+                            <SurfacesLeaf as nota_next::NotaDecode>::from_nota_block(
+                                &children[1],
+                            )?,
+                        ),
+                    ),
+                )
+            }
+            "Engineering" => {
+                Ok(
+                    Self::Engineering(
+                        Some(
+                            <EngineeringLeaf as nota_next::NotaDecode>::from_nota_block(
+                                &children[1],
+                            )?,
+                        ),
+                    ),
+                )
+            }
+            other => {
+                Err(nota_next::NotaDecodeError::UnknownVariant {
+                    enum_name: "Software",
+                    variant: other.to_owned(),
+                })
+            }
+        }
+    }
+}
+#[rustfmt::skip]
+#[cfg(feature = "nota-text")]
+impl nota_next::NotaDecode for Software {
+    fn from_nota_block(
+        block: &nota_next::Block,
+    ) -> Result<Self, nota_next::NotaDecodeError> {
+        if block.demote_to_string().is_some() {
+            let root_objects = std::slice::from_ref(block);
+            let body = nota_next::NotaBody::new(root_objects);
+            return <Self as nota_next::NotaBodyDecode>::from_nota_body(&body);
+        }
+        let body = nota_next::NotaBlock::new(block)
+            .expect_body(nota_next::Delimiter::Parenthesis, "Software")?;
+        <Self as nota_next::NotaBodyDecode>::from_nota_body(&body)
+    }
+}
+#[rustfmt::skip]
+#[cfg(feature = "nota-text")]
+impl nota_next::NotaBodyEncode for Software {
+    fn to_nota_body(&self) -> nota_next::NotaBodyEncoding {
+        match self {
+            Self::Programming(payload) => {
+                let mut fields = vec!["Programming".to_owned()];
+                if let Some(payload) = payload {
+                    fields.push(nota_next::NotaEncode::to_nota(payload));
+                }
+                nota_next::NotaBodyEncoding::new(fields)
+            }
+            Self::Theory => nota_next::NotaBodyEncoding::new(vec!["Theory".to_owned()]),
+            Self::Systems(payload) => {
+                let mut fields = vec!["Systems".to_owned()];
+                if let Some(payload) = payload {
+                    fields.push(nota_next::NotaEncode::to_nota(payload));
+                }
+                nota_next::NotaBodyEncoding::new(fields)
+            }
+            Self::Distributed(payload) => {
+                let mut fields = vec!["Distributed".to_owned()];
+                if let Some(payload) = payload {
+                    fields.push(nota_next::NotaEncode::to_nota(payload));
+                }
+                nota_next::NotaBodyEncoding::new(fields)
+            }
+            Self::Data(payload) => {
+                let mut fields = vec!["Data".to_owned()];
+                if let Some(payload) = payload {
+                    fields.push(nota_next::NotaEncode::to_nota(payload));
+                }
+                nota_next::NotaBodyEncoding::new(fields)
+            }
+            Self::Intelligence(payload) => {
+                let mut fields = vec!["Intelligence".to_owned()];
+                if let Some(payload) = payload {
+                    fields.push(nota_next::NotaEncode::to_nota(payload));
+                }
+                nota_next::NotaBodyEncoding::new(fields)
+            }
+            Self::Security(payload) => {
+                let mut fields = vec!["Security".to_owned()];
+                if let Some(payload) = payload {
+                    fields.push(nota_next::NotaEncode::to_nota(payload));
+                }
+                nota_next::NotaBodyEncoding::new(fields)
+            }
+            Self::Quality(payload) => {
+                let mut fields = vec!["Quality".to_owned()];
+                if let Some(payload) = payload {
+                    fields.push(nota_next::NotaEncode::to_nota(payload));
+                }
+                nota_next::NotaBodyEncoding::new(fields)
+            }
+            Self::Operations(payload) => {
+                let mut fields = vec!["Operations".to_owned()];
+                if let Some(payload) = payload {
+                    fields.push(nota_next::NotaEncode::to_nota(payload));
+                }
+                nota_next::NotaBodyEncoding::new(fields)
+            }
+            Self::Observability(payload) => {
+                let mut fields = vec!["Observability".to_owned()];
+                if let Some(payload) = payload {
+                    fields.push(nota_next::NotaEncode::to_nota(payload));
+                }
+                nota_next::NotaBodyEncoding::new(fields)
+            }
+            Self::Surfaces(payload) => {
+                let mut fields = vec!["Surfaces".to_owned()];
+                if let Some(payload) = payload {
+                    fields.push(nota_next::NotaEncode::to_nota(payload));
+                }
+                nota_next::NotaBodyEncoding::new(fields)
+            }
+            Self::Engineering(payload) => {
+                let mut fields = vec!["Engineering".to_owned()];
+                if let Some(payload) = payload {
+                    fields.push(nota_next::NotaEncode::to_nota(payload));
+                }
+                nota_next::NotaBodyEncoding::new(fields)
+            }
+        }
+    }
+}
+#[rustfmt::skip]
+#[cfg(feature = "nota-text")]
+impl nota_next::NotaEncode for Software {
+    fn to_nota(&self) -> String {
+        let body = <Self as nota_next::NotaBodyEncode>::to_nota_body(self);
+        if body.fields().len() == 1 {
+            body.to_nota()
+        } else {
+            body.to_delimited_nota(nota_next::Delimiter::Parenthesis)
+        }
+    }
+}
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(
+    rkyv::Archive,
+    rkyv::Serialize,
+    rkyv::Deserialize,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+)]
+pub enum ProgrammingLeaf {
+    TypeSystems,
+    Compilation,
+    Parsing,
+    Grammars,
+    CodeGeneration,
+    Metaprogramming,
+    Macros,
+    DomainSpecificLanguages,
+}
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(
+    rkyv::Archive,
+    rkyv::Serialize,
+    rkyv::Deserialize,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+)]
+pub enum SystemsLeaf {
+    SystemsProgramming,
+    Concurrency,
+}
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(
+    rkyv::Archive,
+    rkyv::Serialize,
+    rkyv::Deserialize,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+)]
+pub enum DistributedLeaf {
+    ProtocolDesign,
+    EventDrivenArchitecture,
+}
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(
+    rkyv::Archive,
+    rkyv::Serialize,
+    rkyv::Deserialize,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+)]
+pub enum DataLeaf {
+    Persistence,
+    Serialization,
+    Formats,
+    Modeling,
+    SchemaEvolution,
+    Migration,
+}
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(
+    rkyv::Archive,
+    rkyv::Serialize,
+    rkyv::Deserialize,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+)]
+pub enum IntelligenceLeaf {
+    AgentSystems,
+}
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(
+    rkyv::Archive,
+    rkyv::Serialize,
+    rkyv::Deserialize,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+)]
+pub enum SecurityLeaf {
+    Cryptography,
+    Authentication,
+    Authorization,
+    SecretsManagement,
+    Privacy,
+}
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(
+    rkyv::Archive,
+    rkyv::Serialize,
+    rkyv::Deserialize,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+)]
+pub enum QualityLeaf {
+    Testing,
+}
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(
+    rkyv::Archive,
+    rkyv::Serialize,
+    rkyv::Deserialize,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+)]
+pub enum OperationsLeaf {
+    BuildSystem,
+    ReleaseEngineering,
+    DependencyManagement,
+    Deployment,
+    ConfigurationManagement,
+}
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(
+    rkyv::Archive,
+    rkyv::Serialize,
+    rkyv::Deserialize,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+)]
+pub enum ObservabilityLeaf {
+    Tracing,
+}
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(
+    rkyv::Archive,
+    rkyv::Serialize,
+    rkyv::Deserialize,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+)]
+pub enum SurfacesLeaf {
+    Visualization,
+    CommandLineInterfaces,
+}
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(
+    rkyv::Archive,
+    rkyv::Serialize,
+    rkyv::Deserialize,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+)]
+pub enum EngineeringLeaf {
+    Architecture,
+    Design,
+    ApplicationProgrammingInterfaces,
+    Documentation,
+    VersionControl,
+    DevelopmentProcess,
+    Management,
+    Modularity,
 }
 
 #[rustfmt::skip]
@@ -1130,7 +1330,7 @@ pub enum DomainScope {
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum TechnologyScope {
     All,
-    Hardware(HardwareScope),
+    Hardware(HardwareLeafScope),
     Software(SoftwareScope),
 }
 #[rustfmt::skip]
@@ -1138,307 +1338,132 @@ pub enum TechnologyScope {
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum SoftwareScope {
     All,
-    Languages(LanguagesScope),
-    Theory(TheoryScope),
-    Systems(SystemsScope),
-    Distributed(DistributedScope),
-    Data(DataScope),
-    Intelligence(IntelligenceScope),
-    Security(SecurityScope),
-    Quality(QualityScope),
-    Operations(OperationsScope),
-    Observability(ObservabilityScope),
-    Surfaces(SurfacesScope),
-    Engineering(EngineeringScope),
+    Programming(ProgrammingLeafScope),
+    Theory,
+    Systems(SystemsLeafScope),
+    Distributed(DistributedLeafScope),
+    Data(DataLeafScope),
+    Intelligence(IntelligenceLeafScope),
+    Security(SecurityLeafScope),
+    Quality(QualityLeafScope),
+    Operations(OperationsLeafScope),
+    Observability(ObservabilityLeafScope),
+    Surfaces(SurfacesLeafScope),
+    Engineering(EngineeringLeafScope),
 }
 #[rustfmt::skip]
 #[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub enum EngineeringScope {
+pub enum EngineeringLeafScope {
     All,
-    SoftwareArchitecture,
-    SoftwareDesign,
-    DesignPatterns,
-    DomainDrivenDesign,
+    Architecture,
+    Design,
     ApplicationProgrammingInterfaces,
-    Microservices,
-    Serverless,
-    CloudComputing,
-    EdgeComputing,
-    Scalability,
-    Reliability,
-    Maintainability,
-    Portability,
-    Interoperability,
-    Modularity,
-    Abstraction,
-    RequirementsEngineering,
     Documentation,
     VersionControl,
-    SoftwareDevelopmentProcess,
-    SoftwareMaintenance,
-    SoftwareEngineeringManagement,
+    DevelopmentProcess,
+    Management,
+    Modularity,
 }
 #[rustfmt::skip]
 #[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub enum SurfacesScope {
+pub enum SurfacesLeafScope {
     All,
-    WebDevelopment,
-    FrontendDevelopment,
-    BackendDevelopment,
-    UserInterface,
-    InteractionDesign,
-    Rendering,
-    ComputerGraphics,
-    Animation,
-    Layout,
-    Styling,
-    StateManagement,
-    Accessibility,
-    Usability,
-    Internationalization,
-    Localization,
-    MobileDevelopment,
-    GameDevelopment,
     Visualization,
-    SyntaxHighlighting,
     CommandLineInterfaces,
 }
 #[rustfmt::skip]
 #[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub enum ObservabilityScope {
+pub enum ObservabilityLeafScope {
     All,
-    Logging,
-    Monitoring,
-    Alerting,
     Tracing,
-    DistributedTracing,
-    Metrics,
-    Telemetry,
-    ErrorHandling,
-    AuditLogging,
 }
 #[rustfmt::skip]
 #[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub enum OperationsScope {
+pub enum OperationsLeafScope {
     All,
-    ContinuousIntegration,
-    ContinuousDelivery,
     BuildSystem,
     ReleaseEngineering,
     DependencyManagement,
-    PackageManagement,
-    ArtifactManagement,
     Deployment,
-    Provisioning,
-    InfrastructureAsCode,
-    Orchestration,
     ConfigurationManagement,
-    AutoScaling,
-    CapacityPlanning,
-    SiteReliability,
-    IncidentResponse,
-    DisasterRecovery,
-    RateLimiting,
 }
 #[rustfmt::skip]
 #[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub enum QualityScope {
+pub enum QualityLeafScope {
     All,
     Testing,
-    UnitTesting,
-    IntegrationTesting,
-    EndToEndTesting,
-    PropertyBasedTesting,
-    Fuzzing,
-    TestAutomation,
-    Mocking,
-    CodeCoverage,
-    Debugging,
-    Profiling,
-    Benchmarking,
-    PerformanceOptimization,
-    LoadTesting,
-    CodeReview,
-    Refactoring,
-    Linting,
-    Formatting,
-    TechnicalDebt,
 }
 #[rustfmt::skip]
 #[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub enum SecurityScope {
+pub enum SecurityLeafScope {
     All,
     Cryptography,
     Authentication,
     Authorization,
-    AccessControl,
-    AdmissionControl,
     SecretsManagement,
-    ThreatModeling,
-    VulnerabilityManagement,
-    PenetrationTesting,
-    ApplicationSecurity,
-    NetworkSecurity,
-    Sandboxing,
-    Hardening,
     Privacy,
-    IntrusionDetection,
-    ReverseEngineering,
-    InputSanitization,
 }
 #[rustfmt::skip]
 #[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub enum IntelligenceScope {
+pub enum IntelligenceLeafScope {
     All,
-    MachineLearning,
-    DeepLearning,
-    NeuralNetworks,
-    NaturalLanguageProcessing,
-    ComputerVision,
-    ReinforcementLearning,
-    ModelTraining,
-    ModelInference,
-    FeatureEngineering,
-    PromptEngineering,
-    RetrievalAugmentedGeneration,
     AgentSystems,
-    InformationRetrieval,
-    Search,
-    Ranking,
-    RecommendationSystems,
-    KnowledgeRepresentation,
-    AutomatedReasoning,
 }
 #[rustfmt::skip]
 #[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub enum DataScope {
+pub enum DataLeafScope {
     All,
-    DatabaseSystems,
-    QueryProcessing,
-    Indexing,
-    Transactions,
-    Caching,
-    Storage,
     Persistence,
     Serialization,
-    DataFormats,
-    Compression,
-    Encoding,
-    DataModeling,
-    DataPipelines,
-    StreamProcessing,
-    BatchProcessing,
+    Formats,
+    Modeling,
     SchemaEvolution,
-    DataMigration,
-    DataValidation,
+    Migration,
 }
 #[rustfmt::skip]
 #[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub enum DistributedScope {
+pub enum DistributedLeafScope {
     All,
-    DistributedSystems,
-    Networking,
-    NetworkProtocols,
     ProtocolDesign,
-    Consensus,
-    Replication,
-    MessageQueuing,
     EventDrivenArchitecture,
-    ServiceMesh,
-    LoadBalancing,
-    RemoteProcedureCall,
-    InterprocessCommunication,
-    Routing,
-    FaultTolerance,
-    Sharding,
 }
 #[rustfmt::skip]
 #[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub enum SystemsScope {
+pub enum SystemsLeafScope {
     All,
-    OperatingSystems,
     SystemsProgramming,
     Concurrency,
-    Parallelism,
-    Asynchrony,
-    Synchronization,
-    Scheduling,
-    FileSystems,
-    Virtualization,
-    Containerization,
-    EmbeddedSystems,
-    RealTimeSystems,
-    Firmware,
-    ResourceManagement,
-    KernelDevelopment,
-    DeviceDrivers,
 }
 #[rustfmt::skip]
 #[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub enum TheoryScope {
+pub enum ProgrammingLeafScope {
     All,
-    Algorithms,
-    DataStructures,
-    ComputationalComplexity,
-    AutomataTheory,
-    FormalLanguages,
-    GraphAlgorithms,
-    TypeTheory,
-    ProgramSemantics,
-    FormalMethods,
-    FormalVerification,
-    ModelChecking,
-    StaticAnalysis,
-    NumericalComputing,
-    Cryptanalysis,
-}
-#[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub enum LanguagesScope {
-    All,
-    ProgrammingLanguages,
-    ProgrammingParadigms,
     TypeSystems,
     Compilation,
-    Interpretation,
     Parsing,
-    LexicalAnalysis,
     Grammars,
     CodeGeneration,
     Metaprogramming,
     Macros,
     DomainSpecificLanguages,
-    RuntimeEnvironments,
-    GarbageCollection,
-    MemoryManagement,
-    ForeignFunctionInterfaces,
 }
 #[rustfmt::skip]
 #[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub enum HardwareScope {
+pub enum HardwareLeafScope {
     All,
-    Energy,
-    Power,
-    Automation,
-    Robotics,
     Networking,
-    Materials,
-    Machinery,
-    Instrumentation,
-    Aerospace,
 }
 #[rustfmt::skip]
 #[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
@@ -2616,560 +2641,243 @@ impl InformationScope {
     }
 }
 #[rustfmt::skip]
-impl From<Hardware> for HardwareScope {
-    fn from(value: Hardware) -> Self {
+impl From<HardwareLeaf> for HardwareLeafScope {
+    fn from(value: HardwareLeaf) -> Self {
         match value {
-            Hardware::Energy => Self::Energy,
-            Hardware::Power => Self::Power,
-            Hardware::Automation => Self::Automation,
-            Hardware::Robotics => Self::Robotics,
-            Hardware::Networking => Self::Networking,
-            Hardware::Materials => Self::Materials,
-            Hardware::Machinery => Self::Machinery,
-            Hardware::Instrumentation => Self::Instrumentation,
-            Hardware::Aerospace => Self::Aerospace,
+            HardwareLeaf::Networking => Self::Networking,
         }
     }
 }
 #[rustfmt::skip]
-impl HardwareScope {
+impl HardwareLeafScope {
+    pub fn contains_scope(&self, scope: &Self) -> bool {
+        matches!((self, scope), (Self::All, _) | (Self::Networking, Self::Networking))
+    }
+}
+#[rustfmt::skip]
+impl From<ProgrammingLeaf> for ProgrammingLeafScope {
+    fn from(value: ProgrammingLeaf) -> Self {
+        match value {
+            ProgrammingLeaf::TypeSystems => Self::TypeSystems,
+            ProgrammingLeaf::Compilation => Self::Compilation,
+            ProgrammingLeaf::Parsing => Self::Parsing,
+            ProgrammingLeaf::Grammars => Self::Grammars,
+            ProgrammingLeaf::CodeGeneration => Self::CodeGeneration,
+            ProgrammingLeaf::Metaprogramming => Self::Metaprogramming,
+            ProgrammingLeaf::Macros => Self::Macros,
+            ProgrammingLeaf::DomainSpecificLanguages => Self::DomainSpecificLanguages,
+        }
+    }
+}
+#[rustfmt::skip]
+impl ProgrammingLeafScope {
     pub fn contains_scope(&self, scope: &Self) -> bool {
         matches!(
-            (self, scope), (Self::All, _) | (Self::Energy, Self::Energy) | (Self::Power,
-            Self::Power) | (Self::Automation, Self::Automation) | (Self::Robotics,
-            Self::Robotics) | (Self::Networking, Self::Networking) | (Self::Materials,
-            Self::Materials) | (Self::Machinery, Self::Machinery) |
-            (Self::Instrumentation, Self::Instrumentation) | (Self::Aerospace,
-            Self::Aerospace)
+            (self, scope), (Self::All, _) | (Self::TypeSystems, Self::TypeSystems) |
+            (Self::Compilation, Self::Compilation) | (Self::Parsing, Self::Parsing) |
+            (Self::Grammars, Self::Grammars) | (Self::CodeGeneration,
+            Self::CodeGeneration) | (Self::Metaprogramming, Self::Metaprogramming) |
+            (Self::Macros, Self::Macros) | (Self::DomainSpecificLanguages,
+            Self::DomainSpecificLanguages)
         )
     }
 }
 #[rustfmt::skip]
-impl From<Languages> for LanguagesScope {
-    fn from(value: Languages) -> Self {
+impl From<SystemsLeaf> for SystemsLeafScope {
+    fn from(value: SystemsLeaf) -> Self {
         match value {
-            Languages::ProgrammingLanguages => Self::ProgrammingLanguages,
-            Languages::ProgrammingParadigms => Self::ProgrammingParadigms,
-            Languages::TypeSystems => Self::TypeSystems,
-            Languages::Compilation => Self::Compilation,
-            Languages::Interpretation => Self::Interpretation,
-            Languages::Parsing => Self::Parsing,
-            Languages::LexicalAnalysis => Self::LexicalAnalysis,
-            Languages::Grammars => Self::Grammars,
-            Languages::CodeGeneration => Self::CodeGeneration,
-            Languages::Metaprogramming => Self::Metaprogramming,
-            Languages::Macros => Self::Macros,
-            Languages::DomainSpecificLanguages => Self::DomainSpecificLanguages,
-            Languages::RuntimeEnvironments => Self::RuntimeEnvironments,
-            Languages::GarbageCollection => Self::GarbageCollection,
-            Languages::MemoryManagement => Self::MemoryManagement,
-            Languages::ForeignFunctionInterfaces => Self::ForeignFunctionInterfaces,
+            SystemsLeaf::SystemsProgramming => Self::SystemsProgramming,
+            SystemsLeaf::Concurrency => Self::Concurrency,
         }
     }
 }
 #[rustfmt::skip]
-impl LanguagesScope {
+impl SystemsLeafScope {
     pub fn contains_scope(&self, scope: &Self) -> bool {
         matches!(
-            (self, scope), (Self::All, _) | (Self::ProgrammingLanguages,
-            Self::ProgrammingLanguages) | (Self::ProgrammingParadigms,
-            Self::ProgrammingParadigms) | (Self::TypeSystems, Self::TypeSystems) |
-            (Self::Compilation, Self::Compilation) | (Self::Interpretation,
-            Self::Interpretation) | (Self::Parsing, Self::Parsing) |
-            (Self::LexicalAnalysis, Self::LexicalAnalysis) | (Self::Grammars,
-            Self::Grammars) | (Self::CodeGeneration, Self::CodeGeneration) |
-            (Self::Metaprogramming, Self::Metaprogramming) | (Self::Macros, Self::Macros)
-            | (Self::DomainSpecificLanguages, Self::DomainSpecificLanguages) |
-            (Self::RuntimeEnvironments, Self::RuntimeEnvironments) |
-            (Self::GarbageCollection, Self::GarbageCollection) | (Self::MemoryManagement,
-            Self::MemoryManagement) | (Self::ForeignFunctionInterfaces,
-            Self::ForeignFunctionInterfaces)
+            (self, scope), (Self::All, _) | (Self::SystemsProgramming,
+            Self::SystemsProgramming) | (Self::Concurrency, Self::Concurrency)
         )
     }
 }
 #[rustfmt::skip]
-impl From<Theory> for TheoryScope {
-    fn from(value: Theory) -> Self {
+impl From<DistributedLeaf> for DistributedLeafScope {
+    fn from(value: DistributedLeaf) -> Self {
         match value {
-            Theory::Algorithms => Self::Algorithms,
-            Theory::DataStructures => Self::DataStructures,
-            Theory::ComputationalComplexity => Self::ComputationalComplexity,
-            Theory::AutomataTheory => Self::AutomataTheory,
-            Theory::FormalLanguages => Self::FormalLanguages,
-            Theory::GraphAlgorithms => Self::GraphAlgorithms,
-            Theory::TypeTheory => Self::TypeTheory,
-            Theory::ProgramSemantics => Self::ProgramSemantics,
-            Theory::FormalMethods => Self::FormalMethods,
-            Theory::FormalVerification => Self::FormalVerification,
-            Theory::ModelChecking => Self::ModelChecking,
-            Theory::StaticAnalysis => Self::StaticAnalysis,
-            Theory::NumericalComputing => Self::NumericalComputing,
-            Theory::Cryptanalysis => Self::Cryptanalysis,
+            DistributedLeaf::ProtocolDesign => Self::ProtocolDesign,
+            DistributedLeaf::EventDrivenArchitecture => Self::EventDrivenArchitecture,
         }
     }
 }
 #[rustfmt::skip]
-impl TheoryScope {
+impl DistributedLeafScope {
     pub fn contains_scope(&self, scope: &Self) -> bool {
         matches!(
-            (self, scope), (Self::All, _) | (Self::Algorithms, Self::Algorithms) |
-            (Self::DataStructures, Self::DataStructures) |
-            (Self::ComputationalComplexity, Self::ComputationalComplexity) |
-            (Self::AutomataTheory, Self::AutomataTheory) | (Self::FormalLanguages,
-            Self::FormalLanguages) | (Self::GraphAlgorithms, Self::GraphAlgorithms) |
-            (Self::TypeTheory, Self::TypeTheory) | (Self::ProgramSemantics,
-            Self::ProgramSemantics) | (Self::FormalMethods, Self::FormalMethods) |
-            (Self::FormalVerification, Self::FormalVerification) | (Self::ModelChecking,
-            Self::ModelChecking) | (Self::StaticAnalysis, Self::StaticAnalysis) |
-            (Self::NumericalComputing, Self::NumericalComputing) | (Self::Cryptanalysis,
-            Self::Cryptanalysis)
+            (self, scope), (Self::All, _) | (Self::ProtocolDesign, Self::ProtocolDesign)
+            | (Self::EventDrivenArchitecture, Self::EventDrivenArchitecture)
         )
     }
 }
 #[rustfmt::skip]
-impl From<Systems> for SystemsScope {
-    fn from(value: Systems) -> Self {
+impl From<DataLeaf> for DataLeafScope {
+    fn from(value: DataLeaf) -> Self {
         match value {
-            Systems::OperatingSystems => Self::OperatingSystems,
-            Systems::SystemsProgramming => Self::SystemsProgramming,
-            Systems::Concurrency => Self::Concurrency,
-            Systems::Parallelism => Self::Parallelism,
-            Systems::Asynchrony => Self::Asynchrony,
-            Systems::Synchronization => Self::Synchronization,
-            Systems::Scheduling => Self::Scheduling,
-            Systems::FileSystems => Self::FileSystems,
-            Systems::Virtualization => Self::Virtualization,
-            Systems::Containerization => Self::Containerization,
-            Systems::EmbeddedSystems => Self::EmbeddedSystems,
-            Systems::RealTimeSystems => Self::RealTimeSystems,
-            Systems::Firmware => Self::Firmware,
-            Systems::ResourceManagement => Self::ResourceManagement,
-            Systems::KernelDevelopment => Self::KernelDevelopment,
-            Systems::DeviceDrivers => Self::DeviceDrivers,
+            DataLeaf::Persistence => Self::Persistence,
+            DataLeaf::Serialization => Self::Serialization,
+            DataLeaf::Formats => Self::Formats,
+            DataLeaf::Modeling => Self::Modeling,
+            DataLeaf::SchemaEvolution => Self::SchemaEvolution,
+            DataLeaf::Migration => Self::Migration,
         }
     }
 }
 #[rustfmt::skip]
-impl SystemsScope {
+impl DataLeafScope {
     pub fn contains_scope(&self, scope: &Self) -> bool {
         matches!(
-            (self, scope), (Self::All, _) | (Self::OperatingSystems,
-            Self::OperatingSystems) | (Self::SystemsProgramming,
-            Self::SystemsProgramming) | (Self::Concurrency, Self::Concurrency) |
-            (Self::Parallelism, Self::Parallelism) | (Self::Asynchrony, Self::Asynchrony)
-            | (Self::Synchronization, Self::Synchronization) | (Self::Scheduling,
-            Self::Scheduling) | (Self::FileSystems, Self::FileSystems) |
-            (Self::Virtualization, Self::Virtualization) | (Self::Containerization,
-            Self::Containerization) | (Self::EmbeddedSystems, Self::EmbeddedSystems) |
-            (Self::RealTimeSystems, Self::RealTimeSystems) | (Self::Firmware,
-            Self::Firmware) | (Self::ResourceManagement, Self::ResourceManagement) |
-            (Self::KernelDevelopment, Self::KernelDevelopment) | (Self::DeviceDrivers,
-            Self::DeviceDrivers)
+            (self, scope), (Self::All, _) | (Self::Persistence, Self::Persistence) |
+            (Self::Serialization, Self::Serialization) | (Self::Formats, Self::Formats) |
+            (Self::Modeling, Self::Modeling) | (Self::SchemaEvolution,
+            Self::SchemaEvolution) | (Self::Migration, Self::Migration)
         )
     }
 }
 #[rustfmt::skip]
-impl From<Distributed> for DistributedScope {
-    fn from(value: Distributed) -> Self {
+impl From<IntelligenceLeaf> for IntelligenceLeafScope {
+    fn from(value: IntelligenceLeaf) -> Self {
         match value {
-            Distributed::DistributedSystems => Self::DistributedSystems,
-            Distributed::Networking => Self::Networking,
-            Distributed::NetworkProtocols => Self::NetworkProtocols,
-            Distributed::ProtocolDesign => Self::ProtocolDesign,
-            Distributed::Consensus => Self::Consensus,
-            Distributed::Replication => Self::Replication,
-            Distributed::MessageQueuing => Self::MessageQueuing,
-            Distributed::EventDrivenArchitecture => Self::EventDrivenArchitecture,
-            Distributed::ServiceMesh => Self::ServiceMesh,
-            Distributed::LoadBalancing => Self::LoadBalancing,
-            Distributed::RemoteProcedureCall => Self::RemoteProcedureCall,
-            Distributed::InterprocessCommunication => Self::InterprocessCommunication,
-            Distributed::Routing => Self::Routing,
-            Distributed::FaultTolerance => Self::FaultTolerance,
-            Distributed::Sharding => Self::Sharding,
+            IntelligenceLeaf::AgentSystems => Self::AgentSystems,
         }
     }
 }
 #[rustfmt::skip]
-impl DistributedScope {
+impl IntelligenceLeafScope {
     pub fn contains_scope(&self, scope: &Self) -> bool {
         matches!(
-            (self, scope), (Self::All, _) | (Self::DistributedSystems,
-            Self::DistributedSystems) | (Self::Networking, Self::Networking) |
-            (Self::NetworkProtocols, Self::NetworkProtocols) | (Self::ProtocolDesign,
-            Self::ProtocolDesign) | (Self::Consensus, Self::Consensus) |
-            (Self::Replication, Self::Replication) | (Self::MessageQueuing,
-            Self::MessageQueuing) | (Self::EventDrivenArchitecture,
-            Self::EventDrivenArchitecture) | (Self::ServiceMesh, Self::ServiceMesh) |
-            (Self::LoadBalancing, Self::LoadBalancing) | (Self::RemoteProcedureCall,
-            Self::RemoteProcedureCall) | (Self::InterprocessCommunication,
-            Self::InterprocessCommunication) | (Self::Routing, Self::Routing) |
-            (Self::FaultTolerance, Self::FaultTolerance) | (Self::Sharding,
-            Self::Sharding)
+            (self, scope), (Self::All, _) | (Self::AgentSystems, Self::AgentSystems)
         )
     }
 }
 #[rustfmt::skip]
-impl From<Data> for DataScope {
-    fn from(value: Data) -> Self {
+impl From<SecurityLeaf> for SecurityLeafScope {
+    fn from(value: SecurityLeaf) -> Self {
         match value {
-            Data::DatabaseSystems => Self::DatabaseSystems,
-            Data::QueryProcessing => Self::QueryProcessing,
-            Data::Indexing => Self::Indexing,
-            Data::Transactions => Self::Transactions,
-            Data::Caching => Self::Caching,
-            Data::Storage => Self::Storage,
-            Data::Persistence => Self::Persistence,
-            Data::Serialization => Self::Serialization,
-            Data::DataFormats => Self::DataFormats,
-            Data::Compression => Self::Compression,
-            Data::Encoding => Self::Encoding,
-            Data::DataModeling => Self::DataModeling,
-            Data::DataPipelines => Self::DataPipelines,
-            Data::StreamProcessing => Self::StreamProcessing,
-            Data::BatchProcessing => Self::BatchProcessing,
-            Data::SchemaEvolution => Self::SchemaEvolution,
-            Data::DataMigration => Self::DataMigration,
-            Data::DataValidation => Self::DataValidation,
+            SecurityLeaf::Cryptography => Self::Cryptography,
+            SecurityLeaf::Authentication => Self::Authentication,
+            SecurityLeaf::Authorization => Self::Authorization,
+            SecurityLeaf::SecretsManagement => Self::SecretsManagement,
+            SecurityLeaf::Privacy => Self::Privacy,
         }
     }
 }
 #[rustfmt::skip]
-impl DataScope {
-    pub fn contains_scope(&self, scope: &Self) -> bool {
-        matches!(
-            (self, scope), (Self::All, _) | (Self::DatabaseSystems,
-            Self::DatabaseSystems) | (Self::QueryProcessing, Self::QueryProcessing) |
-            (Self::Indexing, Self::Indexing) | (Self::Transactions, Self::Transactions) |
-            (Self::Caching, Self::Caching) | (Self::Storage, Self::Storage) |
-            (Self::Persistence, Self::Persistence) | (Self::Serialization,
-            Self::Serialization) | (Self::DataFormats, Self::DataFormats) |
-            (Self::Compression, Self::Compression) | (Self::Encoding, Self::Encoding) |
-            (Self::DataModeling, Self::DataModeling) | (Self::DataPipelines,
-            Self::DataPipelines) | (Self::StreamProcessing, Self::StreamProcessing) |
-            (Self::BatchProcessing, Self::BatchProcessing) | (Self::SchemaEvolution,
-            Self::SchemaEvolution) | (Self::DataMigration, Self::DataMigration) |
-            (Self::DataValidation, Self::DataValidation)
-        )
-    }
-}
-#[rustfmt::skip]
-impl From<Intelligence> for IntelligenceScope {
-    fn from(value: Intelligence) -> Self {
-        match value {
-            Intelligence::MachineLearning => Self::MachineLearning,
-            Intelligence::DeepLearning => Self::DeepLearning,
-            Intelligence::NeuralNetworks => Self::NeuralNetworks,
-            Intelligence::NaturalLanguageProcessing => Self::NaturalLanguageProcessing,
-            Intelligence::ComputerVision => Self::ComputerVision,
-            Intelligence::ReinforcementLearning => Self::ReinforcementLearning,
-            Intelligence::ModelTraining => Self::ModelTraining,
-            Intelligence::ModelInference => Self::ModelInference,
-            Intelligence::FeatureEngineering => Self::FeatureEngineering,
-            Intelligence::PromptEngineering => Self::PromptEngineering,
-            Intelligence::RetrievalAugmentedGeneration => {
-                Self::RetrievalAugmentedGeneration
-            }
-            Intelligence::AgentSystems => Self::AgentSystems,
-            Intelligence::InformationRetrieval => Self::InformationRetrieval,
-            Intelligence::Search => Self::Search,
-            Intelligence::Ranking => Self::Ranking,
-            Intelligence::RecommendationSystems => Self::RecommendationSystems,
-            Intelligence::KnowledgeRepresentation => Self::KnowledgeRepresentation,
-            Intelligence::AutomatedReasoning => Self::AutomatedReasoning,
-        }
-    }
-}
-#[rustfmt::skip]
-impl IntelligenceScope {
-    pub fn contains_scope(&self, scope: &Self) -> bool {
-        matches!(
-            (self, scope), (Self::All, _) | (Self::MachineLearning,
-            Self::MachineLearning) | (Self::DeepLearning, Self::DeepLearning) |
-            (Self::NeuralNetworks, Self::NeuralNetworks) |
-            (Self::NaturalLanguageProcessing, Self::NaturalLanguageProcessing) |
-            (Self::ComputerVision, Self::ComputerVision) | (Self::ReinforcementLearning,
-            Self::ReinforcementLearning) | (Self::ModelTraining, Self::ModelTraining) |
-            (Self::ModelInference, Self::ModelInference) | (Self::FeatureEngineering,
-            Self::FeatureEngineering) | (Self::PromptEngineering,
-            Self::PromptEngineering) | (Self::RetrievalAugmentedGeneration,
-            Self::RetrievalAugmentedGeneration) | (Self::AgentSystems,
-            Self::AgentSystems) | (Self::InformationRetrieval,
-            Self::InformationRetrieval) | (Self::Search, Self::Search) | (Self::Ranking,
-            Self::Ranking) | (Self::RecommendationSystems, Self::RecommendationSystems) |
-            (Self::KnowledgeRepresentation, Self::KnowledgeRepresentation) |
-            (Self::AutomatedReasoning, Self::AutomatedReasoning)
-        )
-    }
-}
-#[rustfmt::skip]
-impl From<Security> for SecurityScope {
-    fn from(value: Security) -> Self {
-        match value {
-            Security::Cryptography => Self::Cryptography,
-            Security::Authentication => Self::Authentication,
-            Security::Authorization => Self::Authorization,
-            Security::AccessControl => Self::AccessControl,
-            Security::AdmissionControl => Self::AdmissionControl,
-            Security::SecretsManagement => Self::SecretsManagement,
-            Security::ThreatModeling => Self::ThreatModeling,
-            Security::VulnerabilityManagement => Self::VulnerabilityManagement,
-            Security::PenetrationTesting => Self::PenetrationTesting,
-            Security::ApplicationSecurity => Self::ApplicationSecurity,
-            Security::NetworkSecurity => Self::NetworkSecurity,
-            Security::Sandboxing => Self::Sandboxing,
-            Security::Hardening => Self::Hardening,
-            Security::Privacy => Self::Privacy,
-            Security::IntrusionDetection => Self::IntrusionDetection,
-            Security::ReverseEngineering => Self::ReverseEngineering,
-            Security::InputSanitization => Self::InputSanitization,
-        }
-    }
-}
-#[rustfmt::skip]
-impl SecurityScope {
+impl SecurityLeafScope {
     pub fn contains_scope(&self, scope: &Self) -> bool {
         matches!(
             (self, scope), (Self::All, _) | (Self::Cryptography, Self::Cryptography) |
             (Self::Authentication, Self::Authentication) | (Self::Authorization,
-            Self::Authorization) | (Self::AccessControl, Self::AccessControl) |
-            (Self::AdmissionControl, Self::AdmissionControl) | (Self::SecretsManagement,
-            Self::SecretsManagement) | (Self::ThreatModeling, Self::ThreatModeling) |
-            (Self::VulnerabilityManagement, Self::VulnerabilityManagement) |
-            (Self::PenetrationTesting, Self::PenetrationTesting) |
-            (Self::ApplicationSecurity, Self::ApplicationSecurity) |
-            (Self::NetworkSecurity, Self::NetworkSecurity) | (Self::Sandboxing,
-            Self::Sandboxing) | (Self::Hardening, Self::Hardening) | (Self::Privacy,
-            Self::Privacy) | (Self::IntrusionDetection, Self::IntrusionDetection) |
-            (Self::ReverseEngineering, Self::ReverseEngineering) |
-            (Self::InputSanitization, Self::InputSanitization)
+            Self::Authorization) | (Self::SecretsManagement, Self::SecretsManagement) |
+            (Self::Privacy, Self::Privacy)
         )
     }
 }
 #[rustfmt::skip]
-impl From<Quality> for QualityScope {
-    fn from(value: Quality) -> Self {
+impl From<QualityLeaf> for QualityLeafScope {
+    fn from(value: QualityLeaf) -> Self {
         match value {
-            Quality::Testing => Self::Testing,
-            Quality::UnitTesting => Self::UnitTesting,
-            Quality::IntegrationTesting => Self::IntegrationTesting,
-            Quality::EndToEndTesting => Self::EndToEndTesting,
-            Quality::PropertyBasedTesting => Self::PropertyBasedTesting,
-            Quality::Fuzzing => Self::Fuzzing,
-            Quality::TestAutomation => Self::TestAutomation,
-            Quality::Mocking => Self::Mocking,
-            Quality::CodeCoverage => Self::CodeCoverage,
-            Quality::Debugging => Self::Debugging,
-            Quality::Profiling => Self::Profiling,
-            Quality::Benchmarking => Self::Benchmarking,
-            Quality::PerformanceOptimization => Self::PerformanceOptimization,
-            Quality::LoadTesting => Self::LoadTesting,
-            Quality::CodeReview => Self::CodeReview,
-            Quality::Refactoring => Self::Refactoring,
-            Quality::Linting => Self::Linting,
-            Quality::Formatting => Self::Formatting,
-            Quality::TechnicalDebt => Self::TechnicalDebt,
+            QualityLeaf::Testing => Self::Testing,
         }
     }
 }
 #[rustfmt::skip]
-impl QualityScope {
+impl QualityLeafScope {
     pub fn contains_scope(&self, scope: &Self) -> bool {
-        matches!(
-            (self, scope), (Self::All, _) | (Self::Testing, Self::Testing) |
-            (Self::UnitTesting, Self::UnitTesting) | (Self::IntegrationTesting,
-            Self::IntegrationTesting) | (Self::EndToEndTesting, Self::EndToEndTesting) |
-            (Self::PropertyBasedTesting, Self::PropertyBasedTesting) | (Self::Fuzzing,
-            Self::Fuzzing) | (Self::TestAutomation, Self::TestAutomation) |
-            (Self::Mocking, Self::Mocking) | (Self::CodeCoverage, Self::CodeCoverage) |
-            (Self::Debugging, Self::Debugging) | (Self::Profiling, Self::Profiling) |
-            (Self::Benchmarking, Self::Benchmarking) | (Self::PerformanceOptimization,
-            Self::PerformanceOptimization) | (Self::LoadTesting, Self::LoadTesting) |
-            (Self::CodeReview, Self::CodeReview) | (Self::Refactoring, Self::Refactoring)
-            | (Self::Linting, Self::Linting) | (Self::Formatting, Self::Formatting) |
-            (Self::TechnicalDebt, Self::TechnicalDebt)
-        )
+        matches!((self, scope), (Self::All, _) | (Self::Testing, Self::Testing))
     }
 }
 #[rustfmt::skip]
-impl From<Operations> for OperationsScope {
-    fn from(value: Operations) -> Self {
+impl From<OperationsLeaf> for OperationsLeafScope {
+    fn from(value: OperationsLeaf) -> Self {
         match value {
-            Operations::ContinuousIntegration => Self::ContinuousIntegration,
-            Operations::ContinuousDelivery => Self::ContinuousDelivery,
-            Operations::BuildSystem => Self::BuildSystem,
-            Operations::ReleaseEngineering => Self::ReleaseEngineering,
-            Operations::DependencyManagement => Self::DependencyManagement,
-            Operations::PackageManagement => Self::PackageManagement,
-            Operations::ArtifactManagement => Self::ArtifactManagement,
-            Operations::Deployment => Self::Deployment,
-            Operations::Provisioning => Self::Provisioning,
-            Operations::InfrastructureAsCode => Self::InfrastructureAsCode,
-            Operations::Orchestration => Self::Orchestration,
-            Operations::ConfigurationManagement => Self::ConfigurationManagement,
-            Operations::AutoScaling => Self::AutoScaling,
-            Operations::CapacityPlanning => Self::CapacityPlanning,
-            Operations::SiteReliability => Self::SiteReliability,
-            Operations::IncidentResponse => Self::IncidentResponse,
-            Operations::DisasterRecovery => Self::DisasterRecovery,
-            Operations::RateLimiting => Self::RateLimiting,
+            OperationsLeaf::BuildSystem => Self::BuildSystem,
+            OperationsLeaf::ReleaseEngineering => Self::ReleaseEngineering,
+            OperationsLeaf::DependencyManagement => Self::DependencyManagement,
+            OperationsLeaf::Deployment => Self::Deployment,
+            OperationsLeaf::ConfigurationManagement => Self::ConfigurationManagement,
         }
     }
 }
 #[rustfmt::skip]
-impl OperationsScope {
+impl OperationsLeafScope {
     pub fn contains_scope(&self, scope: &Self) -> bool {
         matches!(
-            (self, scope), (Self::All, _) | (Self::ContinuousIntegration,
-            Self::ContinuousIntegration) | (Self::ContinuousDelivery,
-            Self::ContinuousDelivery) | (Self::BuildSystem, Self::BuildSystem) |
+            (self, scope), (Self::All, _) | (Self::BuildSystem, Self::BuildSystem) |
             (Self::ReleaseEngineering, Self::ReleaseEngineering) |
-            (Self::DependencyManagement, Self::DependencyManagement) |
-            (Self::PackageManagement, Self::PackageManagement) |
-            (Self::ArtifactManagement, Self::ArtifactManagement) | (Self::Deployment,
-            Self::Deployment) | (Self::Provisioning, Self::Provisioning) |
-            (Self::InfrastructureAsCode, Self::InfrastructureAsCode) |
-            (Self::Orchestration, Self::Orchestration) | (Self::ConfigurationManagement,
-            Self::ConfigurationManagement) | (Self::AutoScaling, Self::AutoScaling) |
-            (Self::CapacityPlanning, Self::CapacityPlanning) | (Self::SiteReliability,
-            Self::SiteReliability) | (Self::IncidentResponse, Self::IncidentResponse) |
-            (Self::DisasterRecovery, Self::DisasterRecovery) | (Self::RateLimiting,
-            Self::RateLimiting)
+            (Self::DependencyManagement, Self::DependencyManagement) | (Self::Deployment,
+            Self::Deployment) | (Self::ConfigurationManagement,
+            Self::ConfigurationManagement)
         )
     }
 }
 #[rustfmt::skip]
-impl From<Observability> for ObservabilityScope {
-    fn from(value: Observability) -> Self {
+impl From<ObservabilityLeaf> for ObservabilityLeafScope {
+    fn from(value: ObservabilityLeaf) -> Self {
         match value {
-            Observability::Logging => Self::Logging,
-            Observability::Monitoring => Self::Monitoring,
-            Observability::Alerting => Self::Alerting,
-            Observability::Tracing => Self::Tracing,
-            Observability::DistributedTracing => Self::DistributedTracing,
-            Observability::Metrics => Self::Metrics,
-            Observability::Telemetry => Self::Telemetry,
-            Observability::ErrorHandling => Self::ErrorHandling,
-            Observability::AuditLogging => Self::AuditLogging,
+            ObservabilityLeaf::Tracing => Self::Tracing,
         }
     }
 }
 #[rustfmt::skip]
-impl ObservabilityScope {
+impl ObservabilityLeafScope {
     pub fn contains_scope(&self, scope: &Self) -> bool {
-        matches!(
-            (self, scope), (Self::All, _) | (Self::Logging, Self::Logging) |
-            (Self::Monitoring, Self::Monitoring) | (Self::Alerting, Self::Alerting) |
-            (Self::Tracing, Self::Tracing) | (Self::DistributedTracing,
-            Self::DistributedTracing) | (Self::Metrics, Self::Metrics) |
-            (Self::Telemetry, Self::Telemetry) | (Self::ErrorHandling,
-            Self::ErrorHandling) | (Self::AuditLogging, Self::AuditLogging)
-        )
+        matches!((self, scope), (Self::All, _) | (Self::Tracing, Self::Tracing))
     }
 }
 #[rustfmt::skip]
-impl From<Surfaces> for SurfacesScope {
-    fn from(value: Surfaces) -> Self {
+impl From<SurfacesLeaf> for SurfacesLeafScope {
+    fn from(value: SurfacesLeaf) -> Self {
         match value {
-            Surfaces::WebDevelopment => Self::WebDevelopment,
-            Surfaces::FrontendDevelopment => Self::FrontendDevelopment,
-            Surfaces::BackendDevelopment => Self::BackendDevelopment,
-            Surfaces::UserInterface => Self::UserInterface,
-            Surfaces::InteractionDesign => Self::InteractionDesign,
-            Surfaces::Rendering => Self::Rendering,
-            Surfaces::ComputerGraphics => Self::ComputerGraphics,
-            Surfaces::Animation => Self::Animation,
-            Surfaces::Layout => Self::Layout,
-            Surfaces::Styling => Self::Styling,
-            Surfaces::StateManagement => Self::StateManagement,
-            Surfaces::Accessibility => Self::Accessibility,
-            Surfaces::Usability => Self::Usability,
-            Surfaces::Internationalization => Self::Internationalization,
-            Surfaces::Localization => Self::Localization,
-            Surfaces::MobileDevelopment => Self::MobileDevelopment,
-            Surfaces::GameDevelopment => Self::GameDevelopment,
-            Surfaces::Visualization => Self::Visualization,
-            Surfaces::SyntaxHighlighting => Self::SyntaxHighlighting,
-            Surfaces::CommandLineInterfaces => Self::CommandLineInterfaces,
+            SurfacesLeaf::Visualization => Self::Visualization,
+            SurfacesLeaf::CommandLineInterfaces => Self::CommandLineInterfaces,
         }
     }
 }
 #[rustfmt::skip]
-impl SurfacesScope {
+impl SurfacesLeafScope {
     pub fn contains_scope(&self, scope: &Self) -> bool {
         matches!(
-            (self, scope), (Self::All, _) | (Self::WebDevelopment, Self::WebDevelopment)
-            | (Self::FrontendDevelopment, Self::FrontendDevelopment) |
-            (Self::BackendDevelopment, Self::BackendDevelopment) | (Self::UserInterface,
-            Self::UserInterface) | (Self::InteractionDesign, Self::InteractionDesign) |
-            (Self::Rendering, Self::Rendering) | (Self::ComputerGraphics,
-            Self::ComputerGraphics) | (Self::Animation, Self::Animation) | (Self::Layout,
-            Self::Layout) | (Self::Styling, Self::Styling) | (Self::StateManagement,
-            Self::StateManagement) | (Self::Accessibility, Self::Accessibility) |
-            (Self::Usability, Self::Usability) | (Self::Internationalization,
-            Self::Internationalization) | (Self::Localization, Self::Localization) |
-            (Self::MobileDevelopment, Self::MobileDevelopment) | (Self::GameDevelopment,
-            Self::GameDevelopment) | (Self::Visualization, Self::Visualization) |
-            (Self::SyntaxHighlighting, Self::SyntaxHighlighting) |
+            (self, scope), (Self::All, _) | (Self::Visualization, Self::Visualization) |
             (Self::CommandLineInterfaces, Self::CommandLineInterfaces)
         )
     }
 }
 #[rustfmt::skip]
-impl From<Engineering> for EngineeringScope {
-    fn from(value: Engineering) -> Self {
+impl From<EngineeringLeaf> for EngineeringLeafScope {
+    fn from(value: EngineeringLeaf) -> Self {
         match value {
-            Engineering::SoftwareArchitecture => Self::SoftwareArchitecture,
-            Engineering::SoftwareDesign => Self::SoftwareDesign,
-            Engineering::DesignPatterns => Self::DesignPatterns,
-            Engineering::DomainDrivenDesign => Self::DomainDrivenDesign,
-            Engineering::ApplicationProgrammingInterfaces => {
+            EngineeringLeaf::Architecture => Self::Architecture,
+            EngineeringLeaf::Design => Self::Design,
+            EngineeringLeaf::ApplicationProgrammingInterfaces => {
                 Self::ApplicationProgrammingInterfaces
             }
-            Engineering::Microservices => Self::Microservices,
-            Engineering::Serverless => Self::Serverless,
-            Engineering::CloudComputing => Self::CloudComputing,
-            Engineering::EdgeComputing => Self::EdgeComputing,
-            Engineering::Scalability => Self::Scalability,
-            Engineering::Reliability => Self::Reliability,
-            Engineering::Maintainability => Self::Maintainability,
-            Engineering::Portability => Self::Portability,
-            Engineering::Interoperability => Self::Interoperability,
-            Engineering::Modularity => Self::Modularity,
-            Engineering::Abstraction => Self::Abstraction,
-            Engineering::RequirementsEngineering => Self::RequirementsEngineering,
-            Engineering::Documentation => Self::Documentation,
-            Engineering::VersionControl => Self::VersionControl,
-            Engineering::SoftwareDevelopmentProcess => Self::SoftwareDevelopmentProcess,
-            Engineering::SoftwareMaintenance => Self::SoftwareMaintenance,
-            Engineering::SoftwareEngineeringManagement => {
-                Self::SoftwareEngineeringManagement
-            }
+            EngineeringLeaf::Documentation => Self::Documentation,
+            EngineeringLeaf::VersionControl => Self::VersionControl,
+            EngineeringLeaf::DevelopmentProcess => Self::DevelopmentProcess,
+            EngineeringLeaf::Management => Self::Management,
+            EngineeringLeaf::Modularity => Self::Modularity,
         }
     }
 }
 #[rustfmt::skip]
-impl EngineeringScope {
+impl EngineeringLeafScope {
     pub fn contains_scope(&self, scope: &Self) -> bool {
         matches!(
-            (self, scope), (Self::All, _) | (Self::SoftwareArchitecture,
-            Self::SoftwareArchitecture) | (Self::SoftwareDesign, Self::SoftwareDesign) |
-            (Self::DesignPatterns, Self::DesignPatterns) | (Self::DomainDrivenDesign,
-            Self::DomainDrivenDesign) | (Self::ApplicationProgrammingInterfaces,
-            Self::ApplicationProgrammingInterfaces) | (Self::Microservices,
-            Self::Microservices) | (Self::Serverless, Self::Serverless) |
-            (Self::CloudComputing, Self::CloudComputing) | (Self::EdgeComputing,
-            Self::EdgeComputing) | (Self::Scalability, Self::Scalability) |
-            (Self::Reliability, Self::Reliability) | (Self::Maintainability,
-            Self::Maintainability) | (Self::Portability, Self::Portability) |
-            (Self::Interoperability, Self::Interoperability) | (Self::Modularity,
-            Self::Modularity) | (Self::Abstraction, Self::Abstraction) |
-            (Self::RequirementsEngineering, Self::RequirementsEngineering) |
-            (Self::Documentation, Self::Documentation) | (Self::VersionControl,
-            Self::VersionControl) | (Self::SoftwareDevelopmentProcess,
-            Self::SoftwareDevelopmentProcess) | (Self::SoftwareMaintenance,
-            Self::SoftwareMaintenance) | (Self::SoftwareEngineeringManagement,
-            Self::SoftwareEngineeringManagement)
+            (self, scope), (Self::All, _) | (Self::Architecture, Self::Architecture) |
+            (Self::Design, Self::Design) | (Self::ApplicationProgrammingInterfaces,
+            Self::ApplicationProgrammingInterfaces) | (Self::Documentation,
+            Self::Documentation) | (Self::VersionControl, Self::VersionControl) |
+            (Self::DevelopmentProcess, Self::DevelopmentProcess) | (Self::Management,
+            Self::Management) | (Self::Modularity, Self::Modularity)
         )
     }
 }
@@ -3177,18 +2885,73 @@ impl EngineeringScope {
 impl From<Software> for SoftwareScope {
     fn from(value: Software) -> Self {
         match value {
-            Software::Languages(payload) => Self::Languages(payload.into()),
-            Software::Theory(payload) => Self::Theory(payload.into()),
-            Software::Systems(payload) => Self::Systems(payload.into()),
-            Software::Distributed(payload) => Self::Distributed(payload.into()),
-            Software::Data(payload) => Self::Data(payload.into()),
-            Software::Intelligence(payload) => Self::Intelligence(payload.into()),
-            Software::Security(payload) => Self::Security(payload.into()),
-            Software::Quality(payload) => Self::Quality(payload.into()),
-            Software::Operations(payload) => Self::Operations(payload.into()),
-            Software::Observability(payload) => Self::Observability(payload.into()),
-            Software::Surfaces(payload) => Self::Surfaces(payload.into()),
-            Software::Engineering(payload) => Self::Engineering(payload.into()),
+            Software::Programming(payload) => {
+                match payload {
+                    Some(payload) => Self::Programming(payload.into()),
+                    None => Self::Programming(ProgrammingLeafScope::All),
+                }
+            }
+            Software::Theory => Self::Theory,
+            Software::Systems(payload) => {
+                match payload {
+                    Some(payload) => Self::Systems(payload.into()),
+                    None => Self::Systems(SystemsLeafScope::All),
+                }
+            }
+            Software::Distributed(payload) => {
+                match payload {
+                    Some(payload) => Self::Distributed(payload.into()),
+                    None => Self::Distributed(DistributedLeafScope::All),
+                }
+            }
+            Software::Data(payload) => {
+                match payload {
+                    Some(payload) => Self::Data(payload.into()),
+                    None => Self::Data(DataLeafScope::All),
+                }
+            }
+            Software::Intelligence(payload) => {
+                match payload {
+                    Some(payload) => Self::Intelligence(payload.into()),
+                    None => Self::Intelligence(IntelligenceLeafScope::All),
+                }
+            }
+            Software::Security(payload) => {
+                match payload {
+                    Some(payload) => Self::Security(payload.into()),
+                    None => Self::Security(SecurityLeafScope::All),
+                }
+            }
+            Software::Quality(payload) => {
+                match payload {
+                    Some(payload) => Self::Quality(payload.into()),
+                    None => Self::Quality(QualityLeafScope::All),
+                }
+            }
+            Software::Operations(payload) => {
+                match payload {
+                    Some(payload) => Self::Operations(payload.into()),
+                    None => Self::Operations(OperationsLeafScope::All),
+                }
+            }
+            Software::Observability(payload) => {
+                match payload {
+                    Some(payload) => Self::Observability(payload.into()),
+                    None => Self::Observability(ObservabilityLeafScope::All),
+                }
+            }
+            Software::Surfaces(payload) => {
+                match payload {
+                    Some(payload) => Self::Surfaces(payload.into()),
+                    None => Self::Surfaces(SurfacesLeafScope::All),
+                }
+            }
+            Software::Engineering(payload) => {
+                match payload {
+                    Some(payload) => Self::Engineering(payload.into()),
+                    None => Self::Engineering(EngineeringLeafScope::All),
+                }
+            }
         }
     }
 }
@@ -3197,8 +2960,10 @@ impl SoftwareScope {
     pub fn contains_scope(&self, scope: &Self) -> bool {
         match (self, scope) {
             (Self::All, _) => true,
-            (Self::Languages(left), Self::Languages(right)) => left.contains_scope(right),
-            (Self::Theory(left), Self::Theory(right)) => left.contains_scope(right),
+            (Self::Programming(left), Self::Programming(right)) => {
+                left.contains_scope(right)
+            }
+            (Self::Theory, Self::Theory) => true,
             (Self::Systems(left), Self::Systems(right)) => left.contains_scope(right),
             (Self::Distributed(left), Self::Distributed(right)) => {
                 left.contains_scope(right)
@@ -3227,7 +2992,12 @@ impl SoftwareScope {
 impl From<Technology> for TechnologyScope {
     fn from(value: Technology) -> Self {
         match value {
-            Technology::Hardware(payload) => Self::Hardware(payload.into()),
+            Technology::Hardware(payload) => {
+                match payload {
+                    Some(payload) => Self::Hardware(payload.into()),
+                    None => Self::Hardware(HardwareLeafScope::All),
+                }
+            }
             Technology::Software(payload) => Self::Software(payload.into()),
         }
     }
@@ -3384,56 +3154,6 @@ impl From<Vec<DomainScope>> for ScopeSet {
 }
 
 #[rustfmt::skip]
-impl Software {
-    pub fn languages(payload: Languages) -> Self {
-        Self::Languages(payload)
-    }
-    pub fn theory(payload: Theory) -> Self {
-        Self::Theory(payload)
-    }
-    pub fn systems(payload: Systems) -> Self {
-        Self::Systems(payload)
-    }
-    pub fn distributed(payload: Distributed) -> Self {
-        Self::Distributed(payload)
-    }
-    pub fn data(payload: Data) -> Self {
-        Self::Data(payload)
-    }
-    pub fn intelligence(payload: Intelligence) -> Self {
-        Self::Intelligence(payload)
-    }
-    pub fn security(payload: Security) -> Self {
-        Self::Security(payload)
-    }
-    pub fn quality(payload: Quality) -> Self {
-        Self::Quality(payload)
-    }
-    pub fn operations(payload: Operations) -> Self {
-        Self::Operations(payload)
-    }
-    pub fn observability(payload: Observability) -> Self {
-        Self::Observability(payload)
-    }
-    pub fn surfaces(payload: Surfaces) -> Self {
-        Self::Surfaces(payload)
-    }
-    pub fn engineering(payload: Engineering) -> Self {
-        Self::Engineering(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl Technology {
-    pub fn hardware(payload: Hardware) -> Self {
-        Self::Hardware(payload)
-    }
-    pub fn software(payload: Software) -> Self {
-        Self::Software(payload)
-    }
-}
-
-#[rustfmt::skip]
 impl Domain {
     pub fn health(payload: Health) -> Self {
         Self::Health(payload)
@@ -3510,100 +3230,49 @@ impl Domain {
 }
 
 #[rustfmt::skip]
-impl From<Languages> for Software {
-    fn from(payload: Languages) -> Self {
-        Self::Languages(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl From<Theory> for Software {
-    fn from(payload: Theory) -> Self {
-        Self::Theory(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl From<Systems> for Software {
-    fn from(payload: Systems) -> Self {
-        Self::Systems(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl From<Distributed> for Software {
-    fn from(payload: Distributed) -> Self {
-        Self::Distributed(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl From<Data> for Software {
-    fn from(payload: Data) -> Self {
-        Self::Data(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl From<Intelligence> for Software {
-    fn from(payload: Intelligence) -> Self {
-        Self::Intelligence(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl From<Security> for Software {
-    fn from(payload: Security) -> Self {
-        Self::Security(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl From<Quality> for Software {
-    fn from(payload: Quality) -> Self {
-        Self::Quality(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl From<Operations> for Software {
-    fn from(payload: Operations) -> Self {
-        Self::Operations(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl From<Observability> for Software {
-    fn from(payload: Observability) -> Self {
-        Self::Observability(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl From<Surfaces> for Software {
-    fn from(payload: Surfaces) -> Self {
-        Self::Surfaces(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl From<Engineering> for Software {
-    fn from(payload: Engineering) -> Self {
-        Self::Engineering(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl From<Hardware> for Technology {
-    fn from(payload: Hardware) -> Self {
+impl Technology {
+    pub fn hardware(payload: Option<HardwareLeaf>) -> Self {
         Self::Hardware(payload)
     }
+    pub fn software(payload: Software) -> Self {
+        Self::Software(payload)
+    }
 }
 
 #[rustfmt::skip]
-impl From<Software> for Technology {
-    fn from(payload: Software) -> Self {
-        Self::Software(payload)
+impl Software {
+    pub fn programming(payload: Option<ProgrammingLeaf>) -> Self {
+        Self::Programming(payload)
+    }
+    pub fn systems(payload: Option<SystemsLeaf>) -> Self {
+        Self::Systems(payload)
+    }
+    pub fn distributed(payload: Option<DistributedLeaf>) -> Self {
+        Self::Distributed(payload)
+    }
+    pub fn data(payload: Option<DataLeaf>) -> Self {
+        Self::Data(payload)
+    }
+    pub fn intelligence(payload: Option<IntelligenceLeaf>) -> Self {
+        Self::Intelligence(payload)
+    }
+    pub fn security(payload: Option<SecurityLeaf>) -> Self {
+        Self::Security(payload)
+    }
+    pub fn quality(payload: Option<QualityLeaf>) -> Self {
+        Self::Quality(payload)
+    }
+    pub fn operations(payload: Option<OperationsLeaf>) -> Self {
+        Self::Operations(payload)
+    }
+    pub fn observability(payload: Option<ObservabilityLeaf>) -> Self {
+        Self::Observability(payload)
+    }
+    pub fn surfaces(payload: Option<SurfacesLeaf>) -> Self {
+        Self::Surfaces(payload)
+    }
+    pub fn engineering(payload: Option<EngineeringLeaf>) -> Self {
+        Self::Engineering(payload)
     }
 }
 
@@ -3776,6 +3445,13 @@ impl From<Technology> for Domain {
 }
 
 #[rustfmt::skip]
+impl From<Software> for Technology {
+    fn from(payload: Software) -> Self {
+        Self::Software(payload)
+    }
+}
+
+#[rustfmt::skip]
 impl DomainScope {
     pub fn expand(&self) -> ScopeSet {
         let mut scopes = vec![self.clone()];
@@ -3792,10 +3468,8 @@ impl DomainScope {
     }
     pub fn equivalence_relations() -> Vec<Vec<DomainScope>> {
         vec![
-            vec![DomainScope::Technology(TechnologyScope::Hardware(HardwareScope::Networking)),
-            DomainScope::Technology(TechnologyScope::Software(SoftwareScope::Distributed(DistributedScope::Networking)))],
             vec![DomainScope::Information(InformationScope::Database),
-            DomainScope::Technology(TechnologyScope::Software(SoftwareScope::Data(DataScope::DatabaseSystems)))]
+            DomainScope::Technology(TechnologyScope::Software(SoftwareScope::Data(DataLeafScope::All)))]
         ]
     }
 }
