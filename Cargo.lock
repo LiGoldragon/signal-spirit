@@ -343,20 +343,34 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
 
 [[package]]
+name = "schema-cc"
+version = "0.1.0"
+source = "git+https://github.com/LiGoldragon/schema-next.git?branch=structural-forms-integration#453f40acb53de425f9df76624f0b0b51372252e9"
+dependencies = [
+ "nota-next 0.4.0",
+ "prettyplease",
+ "proc-macro2",
+ "quote",
+ "syn",
+ "thiserror",
+]
+
+[[package]]
 name = "schema-next"
 version = "0.2.0"
-source = "git+https://github.com/LiGoldragon/schema-next.git?branch=structural-forms-integration#1abdcd22c0d1ceb1df03fb7e28a731e3d98fd825"
+source = "git+https://github.com/LiGoldragon/schema-next.git?branch=structural-forms-integration#453f40acb53de425f9df76624f0b0b51372252e9"
 dependencies = [
  "blake3",
  "nota-next 0.5.0",
  "rkyv",
+ "schema-cc",
  "thiserror",
 ]
 
 [[package]]
 name = "schema-rust-next"
 version = "0.5.3"
-source = "git+https://github.com/LiGoldragon/schema-rust-next.git?branch=structural-forms-integration#e6d139408d5cda41577a446d26e6a243f5175caf"
+source = "git+https://github.com/LiGoldragon/schema-rust-next.git?branch=structural-forms-integration#df2bd9229a376c3c43ae52753df73e634d3d9c51"
 dependencies = [
  "prettyplease",
  "proc-macro2",
