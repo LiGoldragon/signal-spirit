@@ -356,7 +356,7 @@ dependencies = [
 [[package]]
 name = "schema-rust-next"
 version = "0.5.3"
-source = "git+https://github.com/LiGoldragon/schema-rust-next.git?branch=structural-forms-integration#660d350ee0eeb25680d0b225074f72ebcb419b9e"
+source = "git+https://github.com/LiGoldragon/schema-rust-next.git?branch=structural-forms-integration#e6d139408d5cda41577a446d26e6a243f5175caf"
 dependencies = [
  "prettyplease",
  "proc-macro2",

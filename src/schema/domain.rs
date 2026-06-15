@@ -677,18 +677,18 @@ impl nota_next::NotaBodyDecode for Technology {
         body: &nota_next::NotaBody<'_>,
     ) -> Result<Self, nota_next::NotaDecodeError> {
         let root_objects = body.root_objects();
-        if root_objects.len() == 1 {
-            if let Some(variant) = root_objects[0].demote_to_string() {
-                return match variant {
-                    "Hardware" => Ok(Self::Hardware(None)),
-                    other => {
-                        Err(nota_next::NotaDecodeError::UnknownVariant {
-                            enum_name: "Technology",
-                            variant: other.to_owned(),
-                        })
-                    }
-                };
-            }
+        if root_objects.len() == 1
+            && let Some(variant) = root_objects[0].demote_to_string()
+        {
+            return match variant {
+                "Hardware" => Ok(Self::Hardware(None)),
+                other => {
+                    Err(nota_next::NotaDecodeError::UnknownVariant {
+                        enum_name: "Technology",
+                        variant: other.to_owned(),
+                    })
+                }
+            };
         }
         let children = body.expect_fields("Technology", 2)?;
         let variant = children[0]
@@ -814,29 +814,29 @@ impl nota_next::NotaBodyDecode for Software {
         body: &nota_next::NotaBody<'_>,
     ) -> Result<Self, nota_next::NotaDecodeError> {
         let root_objects = body.root_objects();
-        if root_objects.len() == 1 {
-            if let Some(variant) = root_objects[0].demote_to_string() {
-                return match variant {
-                    "Theory" => Ok(Self::Theory),
-                    "Programming" => Ok(Self::Programming(None)),
-                    "Systems" => Ok(Self::Systems(None)),
-                    "Distributed" => Ok(Self::Distributed(None)),
-                    "Data" => Ok(Self::Data(None)),
-                    "Intelligence" => Ok(Self::Intelligence(None)),
-                    "Security" => Ok(Self::Security(None)),
-                    "Quality" => Ok(Self::Quality(None)),
-                    "Operations" => Ok(Self::Operations(None)),
-                    "Observability" => Ok(Self::Observability(None)),
-                    "Surfaces" => Ok(Self::Surfaces(None)),
-                    "Engineering" => Ok(Self::Engineering(None)),
-                    other => {
-                        Err(nota_next::NotaDecodeError::UnknownVariant {
-                            enum_name: "Software",
-                            variant: other.to_owned(),
-                        })
-                    }
-                };
-            }
+        if root_objects.len() == 1
+            && let Some(variant) = root_objects[0].demote_to_string()
+        {
+            return match variant {
+                "Theory" => Ok(Self::Theory),
+                "Programming" => Ok(Self::Programming(None)),
+                "Systems" => Ok(Self::Systems(None)),
+                "Distributed" => Ok(Self::Distributed(None)),
+                "Data" => Ok(Self::Data(None)),
+                "Intelligence" => Ok(Self::Intelligence(None)),
+                "Security" => Ok(Self::Security(None)),
+                "Quality" => Ok(Self::Quality(None)),
+                "Operations" => Ok(Self::Operations(None)),
+                "Observability" => Ok(Self::Observability(None)),
+                "Surfaces" => Ok(Self::Surfaces(None)),
+                "Engineering" => Ok(Self::Engineering(None)),
+                other => {
+                    Err(nota_next::NotaDecodeError::UnknownVariant {
+                        enum_name: "Software",
+                        variant: other.to_owned(),
+                    })
+                }
+            };
         }
         let children = body.expect_fields("Software", 2)?;
         let variant = children[0]
