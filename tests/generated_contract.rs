@@ -1,5 +1,8 @@
 use signal_spirit::{
-    DataLeaf, Domain, DomainScope, Input, InputRoute, Output, OutputRoute, Software, Technology,
+    ClarificationRecordIdentifier, ClarificationResolution, ClarificationResolutionReceipt,
+    DataLeaf, Description, Domain, DomainScope, Input, InputRoute, Justification, Output,
+    OutputRoute, QuoteText, Reasoning, RecordIdentifier, RecordIdentifiers, Software,
+    TargetClarification, TargetClarifications, Technology, Testimony, VerbatimQuote,
     VersionReport, VersionText,
 };
 
@@ -23,6 +26,46 @@ fn generated_output_frame_round_trips() {
     let (route, decoded) = Output::decode_signal_frame(&bytes).expect("decode output frame");
 
     assert_eq!(route, OutputRoute::VersionReported);
+    assert_eq!(decoded, output);
+}
+
+#[test]
+fn generated_resolve_clarification_frame_round_trips() {
+    let input = Input::resolve_clarification(ClarificationResolution {
+        clarification_record_identifier: ClarificationRecordIdentifier::new(
+            RecordIdentifier::new("clar1"),
+        ),
+        target_clarifications: TargetClarifications::new(vec![TargetClarification {
+            record_identifier: RecordIdentifier::new("targ1"),
+            description: Description::new("clarified target"),
+        }]),
+        justification: Justification {
+            testimony: Testimony::new(vec![VerbatimQuote {
+                quote_text: QuoteText::new("clarification means edit"),
+                antecedent: None,
+            }]),
+            reasoning: Reasoning::new("fold standalone clarification into target"),
+        },
+    });
+    let bytes = input.encode_signal_frame().expect("encode input frame");
+    let (route, decoded) = Input::decode_signal_frame(&bytes).expect("decode input frame");
+
+    assert_eq!(route, InputRoute::ResolveClarification);
+    assert_eq!(decoded, input);
+}
+
+#[test]
+fn generated_clarification_resolved_frame_round_trips() {
+    let output = Output::clarification_resolved(ClarificationResolutionReceipt {
+        clarification_record_identifier: ClarificationRecordIdentifier::new(
+            RecordIdentifier::new("clar1"),
+        ),
+        record_identifiers: RecordIdentifiers::new(vec![RecordIdentifier::new("targ1")]),
+    });
+    let bytes = output.encode_signal_frame().expect("encode output frame");
+    let (route, decoded) = Output::decode_signal_frame(&bytes).expect("decode output frame");
+
+    assert_eq!(route, OutputRoute::ClarificationResolved);
     assert_eq!(decoded, output);
 }
 

@@ -168,6 +168,11 @@ pub struct Retire(Retirement);
 #[rustfmt::skip]
 #[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct ResolveClarification(ClarificationResolution);
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct Observe(Query);
 
 #[rustfmt::skip]
@@ -264,6 +269,11 @@ pub struct Superseded(SupersessionReceipt);
 #[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct Retired(RetirementReceipt);
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct ClarificationResolved(ClarificationResolutionReceipt);
 
 #[rustfmt::skip]
 #[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
@@ -1007,6 +1017,7 @@ pub enum OperationKind {
     Clarify,
     Supersede,
     Retire,
+    ResolveClarification,
     Observe,
     PublicRecords,
     PrivateRecords,
@@ -1110,6 +1121,41 @@ pub struct Clarification {
 #[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct ClarificationReceipt(RecordIdentifier);
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct ClarificationRecordIdentifier(RecordIdentifier);
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct TargetClarification {
+    pub record_identifier: RecordIdentifier,
+    pub description: Description,
+}
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct TargetClarifications(Vec<TargetClarification>);
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct ClarificationResolution {
+    pub clarification_record_identifier: ClarificationRecordIdentifier,
+    pub target_clarifications: TargetClarifications,
+    pub justification: Justification,
+}
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct ClarificationResolutionReceipt {
+    pub clarification_record_identifier: ClarificationRecordIdentifier,
+    pub record_identifiers: RecordIdentifiers,
+}
 
 #[rustfmt::skip]
 #[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
@@ -1321,6 +1367,7 @@ pub enum Input {
     Clarify(Clarify),
     Supersede(Supersede),
     Retire(Retire),
+    ResolveClarification(ResolveClarification),
     Observe(Observe),
     PublicRecords(PublicRecords),
     PrivateRecords(PrivateRecords),
@@ -1349,6 +1396,7 @@ pub enum Output {
     Clarified(Clarified),
     Superseded(Superseded),
     Retired(Retired),
+    ClarificationResolved(ClarificationResolved),
     GuardianRejected(GuardianRejected),
     ReferentGuardianRejected(ReferentGuardianRejected),
     RecordsObserved(RecordsObserved),
@@ -1538,6 +1586,25 @@ impl Retire {
 #[rustfmt::skip]
 impl From<Retirement> for Retire {
     fn from(payload: Retirement) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl ResolveClarification {
+    pub fn new(payload: ClarificationResolution) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &ClarificationResolution {
+        &self.0
+    }
+    pub fn into_payload(self) -> ClarificationResolution {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<ClarificationResolution> for ResolveClarification {
+    fn from(payload: ClarificationResolution) -> Self {
         Self::new(payload)
     }
 }
@@ -1918,6 +1985,25 @@ impl Retired {
 #[rustfmt::skip]
 impl From<RetirementReceipt> for Retired {
     fn from(payload: RetirementReceipt) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl ClarificationResolved {
+    pub fn new(payload: ClarificationResolutionReceipt) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &ClarificationResolutionReceipt {
+        &self.0
+    }
+    pub fn into_payload(self) -> ClarificationResolutionReceipt {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<ClarificationResolutionReceipt> for ClarificationResolved {
+    fn from(payload: ClarificationResolutionReceipt) -> Self {
         Self::new(payload)
     }
 }
@@ -3538,6 +3624,44 @@ impl From<RecordIdentifier> for ClarificationReceipt {
 }
 
 #[rustfmt::skip]
+impl ClarificationRecordIdentifier {
+    pub fn new(payload: RecordIdentifier) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &RecordIdentifier {
+        &self.0
+    }
+    pub fn into_payload(self) -> RecordIdentifier {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<RecordIdentifier> for ClarificationRecordIdentifier {
+    fn from(payload: RecordIdentifier) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl TargetClarifications {
+    pub fn new(payload: Vec<TargetClarification>) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &Vec<TargetClarification> {
+        &self.0
+    }
+    pub fn into_payload(self) -> Vec<TargetClarification> {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<Vec<TargetClarification>> for TargetClarifications {
+    fn from(payload: Vec<TargetClarification>) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
 impl Replacements {
     pub fn new(payload: Vec<Entry>) -> Self {
         Self(payload)
@@ -3782,6 +3906,9 @@ impl Input {
     pub fn retire(payload: Retirement) -> Self {
         Self::Retire(Retire::new(payload))
     }
+    pub fn resolve_clarification(payload: ClarificationResolution) -> Self {
+        Self::ResolveClarification(ResolveClarification::new(payload))
+    }
     pub fn observe(payload: Query) -> Self {
         Self::Observe(Observe::new(payload))
     }
@@ -3845,6 +3972,9 @@ impl Output {
     }
     pub fn retired(payload: RetirementReceipt) -> Self {
         Self::Retired(Retired::new(payload))
+    }
+    pub fn clarification_resolved(payload: ClarificationResolutionReceipt) -> Self {
+        Self::ClarificationResolved(ClarificationResolved::new(payload))
     }
     pub fn guardian_rejected(payload: GuardianRejection) -> Self {
         Self::GuardianRejected(GuardianRejected::new(payload))
@@ -4091,6 +4221,13 @@ impl From<Retire> for Input {
 }
 
 #[rustfmt::skip]
+impl From<ResolveClarification> for Input {
+    fn from(payload: ResolveClarification) -> Self {
+        Self::ResolveClarification(payload)
+    }
+}
+
+#[rustfmt::skip]
 impl From<Observe> for Input {
     fn from(payload: Observe) -> Self {
         Self::Observe(payload)
@@ -4227,6 +4364,13 @@ impl From<Superseded> for Output {
 impl From<Retired> for Output {
     fn from(payload: Retired) -> Self {
         Self::Retired(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<ClarificationResolved> for Output {
+    fn from(payload: ClarificationResolved) -> Self {
+        Self::ClarificationResolved(payload)
     }
 }
 
@@ -4410,48 +4554,50 @@ pub mod short_header {
     pub const INPUT_CLARIFY: u64 = 0x0003000000000000;
     pub const INPUT_SUPERSEDE: u64 = 0x0004000000000000;
     pub const INPUT_RETIRE: u64 = 0x0005000000000000;
-    pub const INPUT_OBSERVE: u64 = 0x0006000000000000;
-    pub const INPUT_PUBLIC_RECORDS: u64 = 0x0007000000000000;
-    pub const INPUT_PRIVATE_RECORDS: u64 = 0x0008000000000000;
-    pub const INPUT_LOOKUP: u64 = 0x0009000000000000;
-    pub const INPUT_COUNT: u64 = 0x000A000000000000;
-    pub const INPUT_REMOVE: u64 = 0x000B000000000000;
-    pub const INPUT_CHANGE_CERTAINTY: u64 = 0x000C000000000000;
-    pub const INPUT_BUMP_IMPORTANCE: u64 = 0x000D000000000000;
-    pub const INPUT_CHANGE_RECORD: u64 = 0x000E000000000000;
-    pub const INPUT_REGISTER_REFERENT: u64 = 0x000F000000000000;
-    pub const INPUT_LOOKUP_STASH: u64 = 0x0010000000000000;
-    pub const INPUT_COLLECT_REMOVAL_CANDIDATES: u64 = 0x0011000000000000;
-    pub const INPUT_TAP: u64 = 0x0012000000000000;
-    pub const INPUT_UNTAP: u64 = 0x0013000000000000;
-    pub const INPUT_SUBSCRIBE_INTENT: u64 = 0x0014000000000000;
-    pub const INPUT_VERSION: u64 = 0x0015000000000000;
-    pub const INPUT_MARKER: u64 = 0x0016000000000000;
+    pub const INPUT_RESOLVE_CLARIFICATION: u64 = 0x0006000000000000;
+    pub const INPUT_OBSERVE: u64 = 0x0007000000000000;
+    pub const INPUT_PUBLIC_RECORDS: u64 = 0x0008000000000000;
+    pub const INPUT_PRIVATE_RECORDS: u64 = 0x0009000000000000;
+    pub const INPUT_LOOKUP: u64 = 0x000A000000000000;
+    pub const INPUT_COUNT: u64 = 0x000B000000000000;
+    pub const INPUT_REMOVE: u64 = 0x000C000000000000;
+    pub const INPUT_CHANGE_CERTAINTY: u64 = 0x000D000000000000;
+    pub const INPUT_BUMP_IMPORTANCE: u64 = 0x000E000000000000;
+    pub const INPUT_CHANGE_RECORD: u64 = 0x000F000000000000;
+    pub const INPUT_REGISTER_REFERENT: u64 = 0x0010000000000000;
+    pub const INPUT_LOOKUP_STASH: u64 = 0x0011000000000000;
+    pub const INPUT_COLLECT_REMOVAL_CANDIDATES: u64 = 0x0012000000000000;
+    pub const INPUT_TAP: u64 = 0x0013000000000000;
+    pub const INPUT_UNTAP: u64 = 0x0014000000000000;
+    pub const INPUT_SUBSCRIBE_INTENT: u64 = 0x0015000000000000;
+    pub const INPUT_VERSION: u64 = 0x0016000000000000;
+    pub const INPUT_MARKER: u64 = 0x0017000000000000;
     pub const OUTPUT_RECORD_ACCEPTED: u64 = 0x0100000000000000;
     pub const OUTPUT_PROPOSED: u64 = 0x0101000000000000;
     pub const OUTPUT_CLARIFIED: u64 = 0x0102000000000000;
     pub const OUTPUT_SUPERSEDED: u64 = 0x0103000000000000;
     pub const OUTPUT_RETIRED: u64 = 0x0104000000000000;
-    pub const OUTPUT_GUARDIAN_REJECTED: u64 = 0x0105000000000000;
-    pub const OUTPUT_REFERENT_GUARDIAN_REJECTED: u64 = 0x0106000000000000;
-    pub const OUTPUT_RECORDS_OBSERVED: u64 = 0x0107000000000000;
-    pub const OUTPUT_RECORDS_STASHED: u64 = 0x0108000000000000;
-    pub const OUTPUT_RECORD_FOUND: u64 = 0x0109000000000000;
-    pub const OUTPUT_RECORDS_COUNTED: u64 = 0x010A000000000000;
-    pub const OUTPUT_RECORD_REMOVED: u64 = 0x010B000000000000;
-    pub const OUTPUT_CERTAINTY_CHANGED: u64 = 0x010C000000000000;
-    pub const OUTPUT_IMPORTANCE_BUMPED: u64 = 0x010D000000000000;
-    pub const OUTPUT_RECORD_CHANGED: u64 = 0x010E000000000000;
-    pub const OUTPUT_REFERENT_REGISTERED: u64 = 0x010F000000000000;
-    pub const OUTPUT_REMOVAL_CANDIDATES_COLLECTED: u64 = 0x0110000000000000;
-    pub const OUTPUT_OBSERVATION_TAPPED: u64 = 0x0111000000000000;
-    pub const OUTPUT_OBSERVATION_UNTAPPED: u64 = 0x0112000000000000;
-    pub const OUTPUT_SUBSCRIPTION_STARTED: u64 = 0x0113000000000000;
-    pub const OUTPUT_VERSION_REPORTED: u64 = 0x0114000000000000;
-    pub const OUTPUT_MARKER_REPORTED: u64 = 0x0115000000000000;
-    pub const OUTPUT_EVENT: u64 = 0x0116000000000000;
-    pub const OUTPUT_ERROR: u64 = 0x0117000000000000;
-    pub const OUTPUT_REJECTED: u64 = 0x0118000000000000;
+    pub const OUTPUT_CLARIFICATION_RESOLVED: u64 = 0x0105000000000000;
+    pub const OUTPUT_GUARDIAN_REJECTED: u64 = 0x0106000000000000;
+    pub const OUTPUT_REFERENT_GUARDIAN_REJECTED: u64 = 0x0107000000000000;
+    pub const OUTPUT_RECORDS_OBSERVED: u64 = 0x0108000000000000;
+    pub const OUTPUT_RECORDS_STASHED: u64 = 0x0109000000000000;
+    pub const OUTPUT_RECORD_FOUND: u64 = 0x010A000000000000;
+    pub const OUTPUT_RECORDS_COUNTED: u64 = 0x010B000000000000;
+    pub const OUTPUT_RECORD_REMOVED: u64 = 0x010C000000000000;
+    pub const OUTPUT_CERTAINTY_CHANGED: u64 = 0x010D000000000000;
+    pub const OUTPUT_IMPORTANCE_BUMPED: u64 = 0x010E000000000000;
+    pub const OUTPUT_RECORD_CHANGED: u64 = 0x010F000000000000;
+    pub const OUTPUT_REFERENT_REGISTERED: u64 = 0x0110000000000000;
+    pub const OUTPUT_REMOVAL_CANDIDATES_COLLECTED: u64 = 0x0111000000000000;
+    pub const OUTPUT_OBSERVATION_TAPPED: u64 = 0x0112000000000000;
+    pub const OUTPUT_OBSERVATION_UNTAPPED: u64 = 0x0113000000000000;
+    pub const OUTPUT_SUBSCRIPTION_STARTED: u64 = 0x0114000000000000;
+    pub const OUTPUT_VERSION_REPORTED: u64 = 0x0115000000000000;
+    pub const OUTPUT_MARKER_REPORTED: u64 = 0x0116000000000000;
+    pub const OUTPUT_EVENT: u64 = 0x0117000000000000;
+    pub const OUTPUT_ERROR: u64 = 0x0118000000000000;
+    pub const OUTPUT_REJECTED: u64 = 0x0119000000000000;
 }
 
 #[rustfmt::skip]
@@ -4508,6 +4654,7 @@ pub enum InputRoute {
     Clarify,
     Supersede,
     Retire,
+    ResolveClarification,
     Observe,
     PublicRecords,
     PrivateRecords,
@@ -4545,6 +4692,7 @@ pub enum OutputRoute {
     Clarified,
     Superseded,
     Retired,
+    ClarificationResolved,
     GuardianRejected,
     ReferentGuardianRejected,
     RecordsObserved,
@@ -4577,6 +4725,7 @@ impl Input {
             Self::Clarify(_) => InputRoute::Clarify,
             Self::Supersede(_) => InputRoute::Supersede,
             Self::Retire(_) => InputRoute::Retire,
+            Self::ResolveClarification(_) => InputRoute::ResolveClarification,
             Self::Observe(_) => InputRoute::Observe,
             Self::PublicRecords(_) => InputRoute::PublicRecords,
             Self::PrivateRecords(_) => InputRoute::PrivateRecords,
@@ -4604,6 +4753,7 @@ impl Input {
             Self::Clarify(_) => short_header::INPUT_CLARIFY,
             Self::Supersede(_) => short_header::INPUT_SUPERSEDE,
             Self::Retire(_) => short_header::INPUT_RETIRE,
+            Self::ResolveClarification(_) => short_header::INPUT_RESOLVE_CLARIFICATION,
             Self::Observe(_) => short_header::INPUT_OBSERVE,
             Self::PublicRecords(_) => short_header::INPUT_PUBLIC_RECORDS,
             Self::PrivateRecords(_) => short_header::INPUT_PRIVATE_RECORDS,
@@ -4633,6 +4783,9 @@ impl Input {
             short_header::INPUT_CLARIFY => Ok(InputRoute::Clarify),
             short_header::INPUT_SUPERSEDE => Ok(InputRoute::Supersede),
             short_header::INPUT_RETIRE => Ok(InputRoute::Retire),
+            short_header::INPUT_RESOLVE_CLARIFICATION => {
+                Ok(InputRoute::ResolveClarification)
+            }
             short_header::INPUT_OBSERVE => Ok(InputRoute::Observe),
             short_header::INPUT_PUBLIC_RECORDS => Ok(InputRoute::PublicRecords),
             short_header::INPUT_PRIVATE_RECORDS => Ok(InputRoute::PrivateRecords),
@@ -4707,6 +4860,7 @@ impl Output {
             Self::Clarified(_) => OutputRoute::Clarified,
             Self::Superseded(_) => OutputRoute::Superseded,
             Self::Retired(_) => OutputRoute::Retired,
+            Self::ClarificationResolved(_) => OutputRoute::ClarificationResolved,
             Self::GuardianRejected(_) => OutputRoute::GuardianRejected,
             Self::ReferentGuardianRejected(_) => OutputRoute::ReferentGuardianRejected,
             Self::RecordsObserved(_) => OutputRoute::RecordsObserved,
@@ -4738,6 +4892,7 @@ impl Output {
             Self::Clarified(_) => short_header::OUTPUT_CLARIFIED,
             Self::Superseded(_) => short_header::OUTPUT_SUPERSEDED,
             Self::Retired(_) => short_header::OUTPUT_RETIRED,
+            Self::ClarificationResolved(_) => short_header::OUTPUT_CLARIFICATION_RESOLVED,
             Self::GuardianRejected(_) => short_header::OUTPUT_GUARDIAN_REJECTED,
             Self::ReferentGuardianRejected(_) => {
                 short_header::OUTPUT_REFERENT_GUARDIAN_REJECTED
@@ -4773,6 +4928,9 @@ impl Output {
             short_header::OUTPUT_CLARIFIED => Ok(OutputRoute::Clarified),
             short_header::OUTPUT_SUPERSEDED => Ok(OutputRoute::Superseded),
             short_header::OUTPUT_RETIRED => Ok(OutputRoute::Retired),
+            short_header::OUTPUT_CLARIFICATION_RESOLVED => {
+                Ok(OutputRoute::ClarificationResolved)
+            }
             short_header::OUTPUT_GUARDIAN_REJECTED => Ok(OutputRoute::GuardianRejected),
             short_header::OUTPUT_REFERENT_GUARDIAN_REJECTED => {
                 Ok(OutputRoute::ReferentGuardianRejected)
@@ -4860,6 +5018,7 @@ impl signal_frame::SignalOperationHeads for Input {
         "Clarify",
         "Supersede",
         "Retire",
+        "ResolveClarification",
         "Observe",
         "PublicRecords",
         "PrivateRecords",

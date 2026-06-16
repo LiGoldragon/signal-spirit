@@ -178,6 +178,7 @@ impl Input {
             Self::Propose(propose) => propose.payload().validate(),
             Self::Clarify(clarify) => clarify.payload().validate(),
             Self::Supersede(supersede) => supersede.payload().validate(),
+            Self::ResolveClarification(resolution) => resolution.payload().validate(),
             Self::Observe(observe) => observe.payload().validate(),
             Self::PublicRecords(selection) => selection.payload().validate(),
             Self::PrivateRecords(selection) => selection.payload().validate(),
@@ -320,6 +321,34 @@ impl Clarification {
     }
 }
 
+impl TargetClarification {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        if self.description.trim().is_empty() {
+            return Err(ValidationError::EmptyDescription);
+        }
+        Ok(())
+    }
+}
+
+impl TargetClarifications {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        if self.payload().is_empty() {
+            return Err(ValidationError::EmptyDescription);
+        }
+        for target in self.payload() {
+            target.validate()?;
+        }
+        Ok(())
+    }
+}
+
+impl ClarificationResolution {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        self.target_clarifications.validate()?;
+        self.justification.validate()
+    }
+}
+
 impl Supersession {
     pub fn validate(&self) -> Result<(), ValidationError> {
         if self.retired_identifiers.payload().is_empty() {
@@ -439,6 +468,7 @@ impl OperationKind {
             Input::Clarify(_) => Self::Clarify,
             Input::Supersede(_) => Self::Supersede,
             Input::Retire(_) => Self::Retire,
+            Input::ResolveClarification(_) => Self::ResolveClarification,
             Input::Observe(_) => Self::Observe,
             Input::PublicRecords(_) => Self::PublicRecords,
             Input::PrivateRecords(_) => Self::PrivateRecords,
