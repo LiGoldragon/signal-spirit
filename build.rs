@@ -1,6 +1,8 @@
 use std::{env, path::PathBuf};
 
-use schema_rust_next::build::{GenerationDriver, GenerationPlan, ModuleEmission};
+use schema_rust_next::build::{
+    CargoSchemaMetadata, GenerationDriver, GenerationPlan, ModuleEmission,
+};
 
 fn main() {
     SchemaBuild::from_environment().run();
@@ -32,5 +34,6 @@ impl SchemaBuild {
             .expect("generate signal-spirit schema artifacts")
             .write_or_check("SIGNAL_SPIRIT_UPDATE_SCHEMA_ARTIFACTS")
             .expect("checked-in signal-spirit schema artifacts are fresh");
+        CargoSchemaMetadata::new("signal-spirit").emit_schema_directory(&self.crate_root);
     }
 }
