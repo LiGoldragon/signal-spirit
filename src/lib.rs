@@ -1040,36 +1040,6 @@ impl std::ops::Deref for RecordIdentifier {
     }
 }
 
-impl std::fmt::Display for RecordIdentifier {
-    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.payload().fmt(formatter)
-    }
-}
-
-impl std::fmt::Display for StashHandle {
-    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.payload().fmt(formatter)
-    }
-}
-
-impl std::fmt::Display for CommitSequence {
-    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.payload().fmt(formatter)
-    }
-}
-
-impl PartialEq<&str> for Description {
-    fn eq(&self, other: &&str) -> bool {
-        self.payload() == other
-    }
-}
-
-impl PartialEq<&str> for ErrorMessage {
-    fn eq(&self, other: &&str) -> bool {
-        self.payload() == other
-    }
-}
-
 impl PartialEq<&str> for Statement {
     fn eq(&self, other: &&str) -> bool {
         self.payload().payload() == other
@@ -1088,45 +1058,9 @@ impl PartialEq<Magnitude> for Certainty {
     }
 }
 
-impl PartialEq<u64> for RecordCount {
-    fn eq(&self, other: &u64) -> bool {
-        self.payload() == other
-    }
-}
-
-impl PartialEq<u64> for StashHandle {
-    fn eq(&self, other: &u64) -> bool {
-        self.payload() == other
-    }
-}
-
-impl PartialEq<u64> for SubscriptionToken {
-    fn eq(&self, other: &u64) -> bool {
-        self.payload() == other
-    }
-}
-
-impl PartialOrd<u64> for SubscriptionToken {
-    fn partial_cmp(&self, other: &u64) -> Option<std::cmp::Ordering> {
-        self.payload().partial_cmp(other)
-    }
-}
-
-impl PartialEq<u64> for CommitSequence {
-    fn eq(&self, other: &u64) -> bool {
-        self.payload() == other
-    }
-}
-
 impl PartialOrd for CommitSequence {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         self.payload().partial_cmp(other.payload())
-    }
-}
-
-impl PartialEq<u64> for StateDigest {
-    fn eq(&self, other: &u64) -> bool {
-        self.payload() == other
     }
 }
 

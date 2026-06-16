@@ -2,8 +2,8 @@ use signal_spirit::{
     ClarificationRecordIdentifier, ClarificationResolution, ClarificationResolutionReceipt,
     DataLeaf, Description, Domain, DomainScope, Input, InputRoute, Justification, Output,
     OutputRoute, QuoteText, Reasoning, RecordIdentifier, RecordIdentifiers, Software,
-    TargetClarification, TargetClarifications, Technology, Testimony, VerbatimQuote,
-    VersionReport, VersionText,
+    TargetClarification, TargetClarifications, Technology, Testimony, VerbatimQuote, VersionReport,
+    VersionText,
 };
 
 #[cfg(feature = "nota-text")]
@@ -32,9 +32,9 @@ fn generated_output_frame_round_trips() {
 #[test]
 fn generated_resolve_clarification_frame_round_trips() {
     let input = Input::resolve_clarification(ClarificationResolution {
-        clarification_record_identifier: ClarificationRecordIdentifier::new(
-            RecordIdentifier::new("clar1"),
-        ),
+        clarification_record_identifier: ClarificationRecordIdentifier::new(RecordIdentifier::new(
+            "clar1",
+        )),
         target_clarifications: TargetClarifications::new(vec![TargetClarification {
             record_identifier: RecordIdentifier::new("targ1"),
             description: Description::new("clarified target"),
@@ -57,9 +57,9 @@ fn generated_resolve_clarification_frame_round_trips() {
 #[test]
 fn generated_clarification_resolved_frame_round_trips() {
     let output = Output::clarification_resolved(ClarificationResolutionReceipt {
-        clarification_record_identifier: ClarificationRecordIdentifier::new(
-            RecordIdentifier::new("clar1"),
-        ),
+        clarification_record_identifier: ClarificationRecordIdentifier::new(RecordIdentifier::new(
+            "clar1",
+        )),
         record_identifiers: RecordIdentifiers::new(vec![RecordIdentifier::new("targ1")]),
     });
     let bytes = output.encode_signal_frame().expect("encode output frame");
