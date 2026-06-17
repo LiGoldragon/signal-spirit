@@ -1,9 +1,9 @@
 use signal_spirit::{
     ClarificationRecordIdentifier, ClarificationResolution, ClarificationResolutionReceipt,
-    DataLeaf, Description, Domain, DomainScope, Input, InputRoute, Justification, Output,
-    OutputRoute, QuoteText, Reasoning, RecordIdentifier, RecordIdentifiers, Software,
-    TargetClarification, TargetClarifications, Technology, Testimony, VerbatimQuote, VersionReport,
-    VersionText,
+    DataLeaf, Description, Domain, DomainScope, GuardianRejectionReason, Input, InputRoute,
+    Justification, Output, OutputRoute, QuoteText, Reasoning, RecordIdentifier, RecordIdentifiers,
+    Software, TargetClarification, TargetClarifications, Technology, Testimony, VerbatimQuote,
+    VersionReport, VersionText,
 };
 
 #[cfg(feature = "nota-text")]
@@ -67,6 +67,20 @@ fn generated_clarification_resolved_frame_round_trips() {
 
     assert_eq!(route, OutputRoute::ClarificationResolved);
     assert_eq!(decoded, output);
+}
+
+#[cfg(feature = "nota-text")]
+#[test]
+fn negative_guideline_rejection_reason_round_trips_through_nota() {
+    let rendered = GuardianRejectionReason::NegativeGuideline.to_nota();
+
+    assert_eq!(rendered, "NegativeGuideline");
+    assert_eq!(
+        NotaSource::new(&rendered)
+            .parse::<GuardianRejectionReason>()
+            .expect("parse NegativeGuideline reason"),
+        GuardianRejectionReason::NegativeGuideline
+    );
 }
 
 #[test]

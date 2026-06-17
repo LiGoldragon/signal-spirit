@@ -1231,6 +1231,7 @@ pub enum GuardianRejectionReason {
     Contradiction,
     Compound,
     NonIntent,
+    NegativeGuideline,
     UnclearPrivacy,
     UnclearDomain,
     ClarifyTramples,

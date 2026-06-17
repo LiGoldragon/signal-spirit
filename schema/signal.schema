@@ -239,7 +239,7 @@
   RetirementReceipt { RecordIdentifier * }
   RetiredIdentifier RecordIdentifier
   RetiredIdentifiers (Vec RetiredIdentifier)
-  GuardianRejectionReason [Duplicate Contradiction Compound NonIntent UnclearPrivacy UnclearDomain ClarifyTramples ClarifyLosesMeaning SupersedeTargetMissing RetrievalInsufficient MissingTestimony TestimonyFabricated InsufficientWarrant Overstated ImportanceUnsupported HarnessUnavailable HarnessMalformed HarnessTimedOut]
+  GuardianRejectionReason [Duplicate Contradiction Compound NonIntent NegativeGuideline UnclearPrivacy UnclearDomain ClarifyTramples ClarifyLosesMeaning SupersedeTargetMissing RetrievalInsufficient MissingTestimony TestimonyFabricated InsufficientWarrant Overstated ImportanceUnsupported HarnessUnavailable HarnessMalformed HarnessTimedOut]
   GuardianRejection { GuardianRejectionReason * RecordSet * Explanation * }
   ReferentGuardianRejectionReason [Duplicate Ambiguous TooVague AliasCollision NonReferent UnclearJustification HarnessUnavailable HarnessMalformed HarnessTimedOut]
   ReferentGuardianRejection { ReferentGuardianRejectionReason * RegisteredReferents * Explanation * }
