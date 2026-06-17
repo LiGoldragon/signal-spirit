@@ -41,7 +41,7 @@
   DomainScopes signal-spirit:domain:DomainScopes
   ScopeSet signal-spirit:domain:ScopeSet
 }
-[State Record Propose Clarify Supersede Retire ResolveClarification Observe PublicRecords PrivateRecords Lookup Count Remove ChangeCertainty BumpImportance ChangeRecord RegisterReferent LookupStash CollectRemovalCandidates Tap Untap (SubscribeIntent SubscribeIntent opens IntentEventStream) Version Marker]
+[State Record Propose Clarify Supersede Retire ResolveClarification Observe PublicTextSearch PublicRecords PrivateRecords Lookup Count Remove ChangeCertainty BumpImportance ChangeRecord RegisterReferent LookupStash CollectRemovalCandidates Tap Untap (SubscribeIntent SubscribeIntent opens IntentEventStream) Version Marker]
 [RecordAccepted Proposed Clarified Superseded Retired ClarificationResolved GuardianRejected ReferentGuardianRejected RecordsObserved RecordsStashed RecordFound RecordsCounted RecordRemoved CertaintyChanged ImportanceBumped RecordChanged ReferentRegistered RemovalCandidatesCollected ObservationTapped ObservationUntapped SubscriptionStarted VersionReported MarkerReported (Event IntentEvent) Error Rejected]
 {
   SourcePath String
@@ -59,6 +59,7 @@
   Retire Retirement
   ResolveClarification ClarificationResolution
   Observe Query
+  PublicTextSearch SearchText
   PublicRecords RecordSelection
   PrivateRecords RecordSelection
   Lookup RecordIdentifier
@@ -211,7 +212,7 @@
   ObserverFilter [All OperationsOnly EffectsOnly]
   ObserverSubscription { SubscriptionToken * ObserverFilter * ObservedOperations * }
   ObserverRetraction { SubscriptionToken * ObservedOperations * }
-  OperationKind [State Record Propose Clarify Supersede Retire ResolveClarification Observe PublicRecords PrivateRecords Lookup Count Remove ChangeCertainty BumpImportance ChangeRecord RegisterReferent LookupStash CollectRemovalCandidates Tap Untap SubscribeIntent Version Marker]
+  OperationKind [State Record Propose Clarify Supersede Retire ResolveClarification Observe PublicTextSearch PublicRecords PrivateRecords Lookup Count Remove ChangeCertainty BumpImportance ChangeRecord RegisterReferent LookupStash CollectRemovalCandidates Tap Untap SubscribeIntent Version Marker]
   ObservedOperation { OperationKind * }
   ObservedOperations (Vec ObservedOperation)
 

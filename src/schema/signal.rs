@@ -178,6 +178,11 @@ pub struct Observe(Query);
 #[rustfmt::skip]
 #[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct PublicTextSearch(SearchText);
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct PublicRecords(RecordSelection);
 
 #[rustfmt::skip]
@@ -1019,6 +1024,7 @@ pub enum OperationKind {
     Retire,
     ResolveClarification,
     Observe,
+    PublicTextSearch,
     PublicRecords,
     PrivateRecords,
     Lookup,
@@ -1369,6 +1375,7 @@ pub enum Input {
     Retire(Retire),
     ResolveClarification(ResolveClarification),
     Observe(Observe),
+    PublicTextSearch(PublicTextSearch),
     PublicRecords(PublicRecords),
     PrivateRecords(PrivateRecords),
     Lookup(Lookup),
@@ -1678,6 +1685,25 @@ impl Observe {
 #[rustfmt::skip]
 impl From<Query> for Observe {
     fn from(payload: Query) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl PublicTextSearch {
+    pub fn new(payload: SearchText) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &SearchText {
+        &self.0
+    }
+    pub fn into_payload(self) -> SearchText {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<SearchText> for PublicTextSearch {
+    fn from(payload: SearchText) -> Self {
         Self::new(payload)
     }
 }
@@ -4362,6 +4388,9 @@ impl Input {
     pub fn observe(payload: Query) -> Self {
         Self::Observe(Observe::new(payload))
     }
+    pub fn public_text_search(payload: SearchText) -> Self {
+        Self::PublicTextSearch(PublicTextSearch::new(payload))
+    }
     pub fn public_records(payload: RecordSelection) -> Self {
         Self::PublicRecords(PublicRecords::new(payload))
     }
@@ -4681,6 +4710,13 @@ impl From<ResolveClarification> for Input {
 impl From<Observe> for Input {
     fn from(payload: Observe) -> Self {
         Self::Observe(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<PublicTextSearch> for Input {
+    fn from(payload: PublicTextSearch) -> Self {
+        Self::PublicTextSearch(payload)
     }
 }
 
@@ -5006,22 +5042,23 @@ pub mod short_header {
     pub const INPUT_RETIRE: u64 = 0x0005000000000000;
     pub const INPUT_RESOLVE_CLARIFICATION: u64 = 0x0006000000000000;
     pub const INPUT_OBSERVE: u64 = 0x0007000000000000;
-    pub const INPUT_PUBLIC_RECORDS: u64 = 0x0008000000000000;
-    pub const INPUT_PRIVATE_RECORDS: u64 = 0x0009000000000000;
-    pub const INPUT_LOOKUP: u64 = 0x000A000000000000;
-    pub const INPUT_COUNT: u64 = 0x000B000000000000;
-    pub const INPUT_REMOVE: u64 = 0x000C000000000000;
-    pub const INPUT_CHANGE_CERTAINTY: u64 = 0x000D000000000000;
-    pub const INPUT_BUMP_IMPORTANCE: u64 = 0x000E000000000000;
-    pub const INPUT_CHANGE_RECORD: u64 = 0x000F000000000000;
-    pub const INPUT_REGISTER_REFERENT: u64 = 0x0010000000000000;
-    pub const INPUT_LOOKUP_STASH: u64 = 0x0011000000000000;
-    pub const INPUT_COLLECT_REMOVAL_CANDIDATES: u64 = 0x0012000000000000;
-    pub const INPUT_TAP: u64 = 0x0013000000000000;
-    pub const INPUT_UNTAP: u64 = 0x0014000000000000;
-    pub const INPUT_SUBSCRIBE_INTENT: u64 = 0x0015000000000000;
-    pub const INPUT_VERSION: u64 = 0x0016000000000000;
-    pub const INPUT_MARKER: u64 = 0x0017000000000000;
+    pub const INPUT_PUBLIC_TEXT_SEARCH: u64 = 0x0008000000000000;
+    pub const INPUT_PUBLIC_RECORDS: u64 = 0x0009000000000000;
+    pub const INPUT_PRIVATE_RECORDS: u64 = 0x000A000000000000;
+    pub const INPUT_LOOKUP: u64 = 0x000B000000000000;
+    pub const INPUT_COUNT: u64 = 0x000C000000000000;
+    pub const INPUT_REMOVE: u64 = 0x000D000000000000;
+    pub const INPUT_CHANGE_CERTAINTY: u64 = 0x000E000000000000;
+    pub const INPUT_BUMP_IMPORTANCE: u64 = 0x000F000000000000;
+    pub const INPUT_CHANGE_RECORD: u64 = 0x0010000000000000;
+    pub const INPUT_REGISTER_REFERENT: u64 = 0x0011000000000000;
+    pub const INPUT_LOOKUP_STASH: u64 = 0x0012000000000000;
+    pub const INPUT_COLLECT_REMOVAL_CANDIDATES: u64 = 0x0013000000000000;
+    pub const INPUT_TAP: u64 = 0x0014000000000000;
+    pub const INPUT_UNTAP: u64 = 0x0015000000000000;
+    pub const INPUT_SUBSCRIBE_INTENT: u64 = 0x0016000000000000;
+    pub const INPUT_VERSION: u64 = 0x0017000000000000;
+    pub const INPUT_MARKER: u64 = 0x0018000000000000;
     pub const OUTPUT_RECORD_ACCEPTED: u64 = 0x0100000000000000;
     pub const OUTPUT_PROPOSED: u64 = 0x0101000000000000;
     pub const OUTPUT_CLARIFIED: u64 = 0x0102000000000000;
@@ -5106,6 +5143,7 @@ pub enum InputRoute {
     Retire,
     ResolveClarification,
     Observe,
+    PublicTextSearch,
     PublicRecords,
     PrivateRecords,
     Lookup,
@@ -5177,6 +5215,7 @@ impl Input {
             Self::Retire(_) => InputRoute::Retire,
             Self::ResolveClarification(_) => InputRoute::ResolveClarification,
             Self::Observe(_) => InputRoute::Observe,
+            Self::PublicTextSearch(_) => InputRoute::PublicTextSearch,
             Self::PublicRecords(_) => InputRoute::PublicRecords,
             Self::PrivateRecords(_) => InputRoute::PrivateRecords,
             Self::Lookup(_) => InputRoute::Lookup,
@@ -5205,6 +5244,7 @@ impl Input {
             Self::Retire(_) => short_header::INPUT_RETIRE,
             Self::ResolveClarification(_) => short_header::INPUT_RESOLVE_CLARIFICATION,
             Self::Observe(_) => short_header::INPUT_OBSERVE,
+            Self::PublicTextSearch(_) => short_header::INPUT_PUBLIC_TEXT_SEARCH,
             Self::PublicRecords(_) => short_header::INPUT_PUBLIC_RECORDS,
             Self::PrivateRecords(_) => short_header::INPUT_PRIVATE_RECORDS,
             Self::Lookup(_) => short_header::INPUT_LOOKUP,
@@ -5237,6 +5277,7 @@ impl Input {
                 Ok(InputRoute::ResolveClarification)
             }
             short_header::INPUT_OBSERVE => Ok(InputRoute::Observe),
+            short_header::INPUT_PUBLIC_TEXT_SEARCH => Ok(InputRoute::PublicTextSearch),
             short_header::INPUT_PUBLIC_RECORDS => Ok(InputRoute::PublicRecords),
             short_header::INPUT_PRIVATE_RECORDS => Ok(InputRoute::PrivateRecords),
             short_header::INPUT_LOOKUP => Ok(InputRoute::Lookup),
@@ -5470,6 +5511,7 @@ impl signal_frame::SignalOperationHeads for Input {
         "Retire",
         "ResolveClarification",
         "Observe",
+        "PublicTextSearch",
         "PublicRecords",
         "PrivateRecords",
         "Lookup",

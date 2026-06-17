@@ -180,6 +180,7 @@ impl Input {
             Self::Supersede(supersede) => supersede.payload().validate(),
             Self::ResolveClarification(resolution) => resolution.payload().validate(),
             Self::Observe(observe) => observe.payload().validate(),
+            Self::PublicTextSearch(search) => search.payload().validate(),
             Self::PublicRecords(selection) => selection.payload().validate(),
             Self::PrivateRecords(selection) => selection.payload().validate(),
             Self::Lookup(_)
@@ -470,6 +471,7 @@ impl OperationKind {
             Input::Retire(_) => Self::Retire,
             Input::ResolveClarification(_) => Self::ResolveClarification,
             Input::Observe(_) => Self::Observe,
+            Input::PublicTextSearch(_) => Self::PublicTextSearch,
             Input::PublicRecords(_) => Self::PublicRecords,
             Input::PrivateRecords(_) => Self::PrivateRecords,
             Input::Lookup(_) => Self::Lookup,
@@ -543,12 +545,7 @@ impl TextMatch {
     pub fn validate(&self) -> Result<(), ValidationError> {
         match self {
             Self::Any => Ok(()),
-            Self::ContainsText(search_text) => {
-                if search_text.payload().payload().trim().is_empty() {
-                    return Err(ValidationError::EmptySearchText);
-                }
-                Ok(())
-            }
+            Self::ContainsText(search_text) => search_text.payload().validate(),
         }
     }
 
@@ -559,6 +556,15 @@ impl TextMatch {
                 description.contains_search_text(search_text.payload())
             }
         }
+    }
+}
+
+impl SearchText {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        if self.payload().trim().is_empty() {
+            return Err(ValidationError::EmptySearchText);
+        }
+        Ok(())
     }
 }
 
