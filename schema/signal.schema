@@ -132,7 +132,7 @@
   CountedRecords { RecordCount * }
   ErrorReport { ErrorMessage * }
   SignalRejection { ValidationError * }
-  StashedObservation { StashHandle * RecordCount * }
+  StashedObservation { StashHandle * RecordCount * ObservedRecords * }
   IntentSubscription { SubscriptionToken * }
   QuoteText String
   Antecedent String

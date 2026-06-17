@@ -543,6 +543,7 @@ pub struct SignalRejection(ValidationError);
 pub struct StashedObservation {
     pub stash_handle: StashHandle,
     pub record_count: RecordCount,
+    pub observed_records: ObservedRecords,
 }
 
 #[rustfmt::skip]
