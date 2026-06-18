@@ -564,9 +564,14 @@ pub struct Antecedent(String);
 #[rustfmt::skip]
 #[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub(crate) struct OptionalAntecedent(Option<Antecedent>);
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct VerbatimQuote {
     pub quote_text: QuoteText,
-    pub antecedent: Option<Antecedent>,
+    pub(crate) optional_antecedent: OptionalAntecedent,
 }
 
 #[rustfmt::skip]
@@ -705,23 +710,53 @@ pub enum ValidationError {
 #[rustfmt::skip]
 #[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub(crate) struct ProviderName(Option<SpiritGuardianProviderName>);
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub(crate) struct ModelName(Option<SpiritGuardianModelName>);
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub(crate) struct MaximumOutputTokens(Option<SpiritGuardianMaximumOutputTokens>);
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct SpiritGuardianAgentConfiguration {
     pub agent_socket_path: ConfigurationPath,
-    pub provider_name: Option<SpiritGuardianProviderName>,
-    pub model_name: Option<SpiritGuardianModelName>,
+    pub(crate) provider_name: ProviderName,
+    pub(crate) model_name: ModelName,
     pub timeout_milliseconds: SpiritGuardianTimeoutMilliseconds,
-    pub maximum_output_tokens: Option<SpiritGuardianMaximumOutputTokens>,
+    pub(crate) maximum_output_tokens: MaximumOutputTokens,
 }
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub(crate) struct MetaSocketPath(Option<ConfigurationPath>);
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub(crate) struct TraceSocketPath(Option<ConfigurationPath>);
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub(crate) struct GuardianAgentConfiguration(Option<SpiritGuardianAgentConfiguration>);
 
 #[rustfmt::skip]
 #[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct SpiritDaemonConfiguration {
     pub socket_path: ConfigurationPath,
-    pub meta_socket_path: Option<ConfigurationPath>,
+    pub(crate) meta_socket_path: MetaSocketPath,
     pub database_path: ConfigurationPath,
-    pub trace_socket_path: Option<ConfigurationPath>,
-    pub guardian_agent_configuration: Option<SpiritGuardianAgentConfiguration>,
+    pub(crate) trace_socket_path: TraceSocketPath,
+    pub(crate) guardian_agent_configuration: GuardianAgentConfiguration,
 }
 
 #[rustfmt::skip]
@@ -1293,9 +1328,14 @@ pub struct ReferentGuardianRejection {
 #[rustfmt::skip]
 #[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct SelectedKind(Option<Kind>);
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct RecordSelection {
     pub domain_match: DomainMatch,
-    pub kind: Option<Kind>,
+    pub selected_kind: SelectedKind,
 }
 
 #[rustfmt::skip]
@@ -1306,7 +1346,7 @@ pub struct Query {
     pub keyword_match: KeywordMatch,
     pub text_match: TextMatch,
     pub referent_selection: ReferentSelection,
-    pub kind: Option<Kind>,
+    pub selected_kind: SelectedKind,
     pub privacy_selection: PrivacySelection,
     pub certainty_selection: CertaintySelection,
     pub importance_selection: ImportanceSelection,
@@ -3381,6 +3421,25 @@ impl PartialEq<&str> for Antecedent {
 }
 
 #[rustfmt::skip]
+impl OptionalAntecedent {
+    pub fn new(payload: Option<Antecedent>) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &Option<Antecedent> {
+        &self.0
+    }
+    pub fn into_payload(self) -> Option<Antecedent> {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<Option<Antecedent>> for OptionalAntecedent {
+    fn from(payload: Option<Antecedent>) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
 impl Testimony {
     pub fn new(payload: Vec<VerbatimQuote>) -> Self {
         Self(payload)
@@ -3527,6 +3586,120 @@ impl IntentRetired {
 #[rustfmt::skip]
 impl From<RecordIdentifier> for IntentRetired {
     fn from(payload: RecordIdentifier) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl ProviderName {
+    pub fn new(payload: Option<SpiritGuardianProviderName>) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &Option<SpiritGuardianProviderName> {
+        &self.0
+    }
+    pub fn into_payload(self) -> Option<SpiritGuardianProviderName> {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<Option<SpiritGuardianProviderName>> for ProviderName {
+    fn from(payload: Option<SpiritGuardianProviderName>) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl ModelName {
+    pub fn new(payload: Option<SpiritGuardianModelName>) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &Option<SpiritGuardianModelName> {
+        &self.0
+    }
+    pub fn into_payload(self) -> Option<SpiritGuardianModelName> {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<Option<SpiritGuardianModelName>> for ModelName {
+    fn from(payload: Option<SpiritGuardianModelName>) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl MaximumOutputTokens {
+    pub fn new(payload: Option<SpiritGuardianMaximumOutputTokens>) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &Option<SpiritGuardianMaximumOutputTokens> {
+        &self.0
+    }
+    pub fn into_payload(self) -> Option<SpiritGuardianMaximumOutputTokens> {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<Option<SpiritGuardianMaximumOutputTokens>> for MaximumOutputTokens {
+    fn from(payload: Option<SpiritGuardianMaximumOutputTokens>) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl MetaSocketPath {
+    pub fn new(payload: Option<ConfigurationPath>) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &Option<ConfigurationPath> {
+        &self.0
+    }
+    pub fn into_payload(self) -> Option<ConfigurationPath> {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<Option<ConfigurationPath>> for MetaSocketPath {
+    fn from(payload: Option<ConfigurationPath>) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl TraceSocketPath {
+    pub fn new(payload: Option<ConfigurationPath>) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &Option<ConfigurationPath> {
+        &self.0
+    }
+    pub fn into_payload(self) -> Option<ConfigurationPath> {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<Option<ConfigurationPath>> for TraceSocketPath {
+    fn from(payload: Option<ConfigurationPath>) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl GuardianAgentConfiguration {
+    pub fn new(payload: Option<SpiritGuardianAgentConfiguration>) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &Option<SpiritGuardianAgentConfiguration> {
+        &self.0
+    }
+    pub fn into_payload(self) -> Option<SpiritGuardianAgentConfiguration> {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<Option<SpiritGuardianAgentConfiguration>> for GuardianAgentConfiguration {
+    fn from(payload: Option<SpiritGuardianAgentConfiguration>) -> Self {
         Self::new(payload)
     }
 }
@@ -4230,6 +4403,25 @@ impl RetiredIdentifiers {
 #[rustfmt::skip]
 impl From<Vec<RetiredIdentifier>> for RetiredIdentifiers {
     fn from(payload: Vec<RetiredIdentifier>) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl SelectedKind {
+    pub fn new(payload: Option<Kind>) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &Option<Kind> {
+        &self.0
+    }
+    pub fn into_payload(self) -> Option<Kind> {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<Option<Kind>> for SelectedKind {
+    fn from(payload: Option<Kind>) -> Self {
         Self::new(payload)
     }
 }

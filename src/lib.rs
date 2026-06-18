@@ -5,6 +5,7 @@
 //! as a wire contract. Runtime actors, sockets, storage, guardian calls, and
 //! daemon lowering live in `spirit`.
 
+#[allow(dead_code)]
 #[rustfmt::skip]
 pub mod schema;
 
@@ -52,6 +53,19 @@ impl SpiritGuardianMaximumOutputTokens {
     }
 }
 
+impl VerbatimQuote {
+    pub fn new(quote_text: QuoteText, antecedent: Option<Antecedent>) -> Self {
+        Self {
+            quote_text,
+            optional_antecedent: OptionalAntecedent::new(antecedent),
+        }
+    }
+
+    pub fn antecedent(&self) -> Option<&Antecedent> {
+        self.optional_antecedent.payload().as_ref()
+    }
+}
+
 impl SpiritGuardianAgentConfiguration {
     pub fn new(
         agent_socket_path: ConfigurationPath,
@@ -62,10 +76,10 @@ impl SpiritGuardianAgentConfiguration {
     ) -> Self {
         Self {
             agent_socket_path,
-            provider_name,
-            model_name,
+            provider_name: ProviderName::new(provider_name),
+            model_name: ModelName::new(model_name),
             timeout_milliseconds,
-            maximum_output_tokens,
+            maximum_output_tokens: MaximumOutputTokens::new(maximum_output_tokens),
         }
     }
 
@@ -75,12 +89,14 @@ impl SpiritGuardianAgentConfiguration {
 
     pub fn provider_name(&self) -> Option<&str> {
         self.provider_name
+            .payload()
             .as_ref()
             .map(SpiritGuardianProviderName::as_str)
     }
 
     pub fn model_name(&self) -> Option<&str> {
         self.model_name
+            .payload()
             .as_ref()
             .map(SpiritGuardianModelName::as_str)
     }
@@ -91,6 +107,7 @@ impl SpiritGuardianAgentConfiguration {
 
     pub fn maximum_output_tokens(&self) -> Option<u64> {
         self.maximum_output_tokens
+            .payload()
             .clone()
             .map(SpiritGuardianMaximumOutputTokens::into_u64)
     }
@@ -100,15 +117,15 @@ impl SpiritDaemonConfiguration {
     pub fn new(socket_path: ConfigurationPath, database_path: ConfigurationPath) -> Self {
         Self {
             socket_path,
-            meta_socket_path: None,
+            meta_socket_path: MetaSocketPath::new(None),
             database_path,
-            trace_socket_path: None,
-            guardian_agent_configuration: None,
+            trace_socket_path: TraceSocketPath::new(None),
+            guardian_agent_configuration: GuardianAgentConfiguration::new(None),
         }
     }
 
     pub fn with_meta_socket_path(mut self, meta_socket_path: ConfigurationPath) -> Self {
-        self.meta_socket_path = Some(meta_socket_path);
+        self.meta_socket_path = MetaSocketPath::new(Some(meta_socket_path));
         self
     }
 
@@ -116,12 +133,13 @@ impl SpiritDaemonConfiguration {
         mut self,
         guardian_agent_configuration: SpiritGuardianAgentConfiguration,
     ) -> Self {
-        self.guardian_agent_configuration = Some(guardian_agent_configuration);
+        self.guardian_agent_configuration =
+            GuardianAgentConfiguration::new(Some(guardian_agent_configuration));
         self
     }
 
     pub fn with_trace_socket_path(mut self, trace_socket_path: ConfigurationPath) -> Self {
-        self.trace_socket_path = Some(trace_socket_path);
+        self.trace_socket_path = TraceSocketPath::new(Some(trace_socket_path));
         self
     }
 
@@ -131,6 +149,7 @@ impl SpiritDaemonConfiguration {
 
     pub fn meta_socket_path(&self) -> Option<&str> {
         self.meta_socket_path
+            .payload()
             .as_ref()
             .map(ConfigurationPath::as_str)
     }
@@ -141,12 +160,13 @@ impl SpiritDaemonConfiguration {
 
     pub fn trace_socket_path(&self) -> Option<&str> {
         self.trace_socket_path
+            .payload()
             .as_ref()
             .map(ConfigurationPath::as_str)
     }
 
     pub fn guardian_agent_configuration(&self) -> Option<&SpiritGuardianAgentConfiguration> {
-        self.guardian_agent_configuration.as_ref()
+        self.guardian_agent_configuration.payload().as_ref()
     }
 
     pub fn from_rkyv_bytes(bytes: &[u8]) -> Result<Self, SpiritDaemonConfigurationArchiveError> {
@@ -245,7 +265,8 @@ impl Justification {
                 return Err(ValidationError::EmptyDescription);
             }
             if quote
-                .antecedent
+                .optional_antecedent
+                .payload()
                 .as_ref()
                 .is_some_and(|antecedent| antecedent.payload().trim().is_empty())
             {
@@ -395,7 +416,7 @@ impl RecordSelection {
             keyword_match: KeywordMatch::Any,
             text_match: TextMatch::Any,
             referent_selection: ReferentSelection::Any,
-            kind: self.kind,
+            selected_kind: self.selected_kind,
             privacy_selection: PrivacySelection::default_observation_privacy(),
             certainty_selection: CertaintySelection::default_observation_certainty(),
             importance_selection: ImportanceSelection::default_observation_importance(),
@@ -408,7 +429,7 @@ impl RecordSelection {
             keyword_match: KeywordMatch::Any,
             text_match: TextMatch::Any,
             referent_selection: ReferentSelection::Any,
-            kind: self.kind,
+            selected_kind: self.selected_kind,
             privacy_selection: PrivacySelection::at_least(Privacy::new(
                 PrivacySelection::private_floor(),
             )),
@@ -431,7 +452,11 @@ impl Query {
             && self.keyword_match.matches(&entry.description)
             && self.text_match.matches(&entry.description)
             && self.referent_selection.matches(&entry.referents)
-            && self.kind.as_ref().is_none_or(|kind| &entry.kind == kind)
+            && self
+                .selected_kind
+                .payload()
+                .as_ref()
+                .is_none_or(|kind| &entry.kind == kind)
             && self.privacy_selection.matches(&entry.privacy)
             && self.certainty_selection.matches(&entry.certainty)
             && self.importance_selection.matches(&entry.importance)

@@ -47,9 +47,9 @@
   SourcePath String
   LocalPath String
   PublicPath String
-  Import { SourcePath * LocalPath * }
-  Export { LocalPath * PublicPath * }
-  SignalReuse { Import * Export * }
+  Import { SourcePath LocalPath }
+  Export { LocalPath PublicPath }
+  SignalReuse { Import Export }
 
   State Statement
   Record RecordRequest
@@ -123,51 +123,51 @@
   SpiritGuardianTimeoutMilliseconds Integer
   SpiritGuardianMaximumOutputTokens Integer
 
-  DatabaseMarker { CommitSequence * StateDigest * }
-  SemaReceipt { RecordIdentifier * DatabaseMarker * }
-  RemoveReceipt { RecordIdentifier * }
-  ObservedRecords { RecordSet * }
-  ObservedRecord { RecordIdentifier * Entry * }
-  FoundRecord { RecordIdentifier * Entry * }
-  CountedRecords { RecordCount * }
-  ErrorReport { ErrorMessage * }
-  SignalRejection { ValidationError * }
-  StashedObservation { StashHandle * RecordCount * ObservedRecords * }
-  IntentSubscription { SubscriptionToken * }
+  DatabaseMarker { CommitSequence StateDigest }
+  SemaReceipt { RecordIdentifier DatabaseMarker }
+  RemoveReceipt { RecordIdentifier }
+  ObservedRecords { RecordSet }
+  ObservedRecord { RecordIdentifier Entry }
+  FoundRecord { RecordIdentifier Entry }
+  CountedRecords { RecordCount }
+  ErrorReport { ErrorMessage }
+  SignalRejection { ValidationError }
+  StashedObservation { StashHandle RecordCount ObservedRecords }
+  IntentSubscription { SubscriptionToken }
   QuoteText String
   Antecedent String
-  VerbatimQuote { QuoteText * antecedent (Optional Antecedent) }
+  VerbatimQuote { QuoteText (OptionalAntecedent (Optional Antecedent)) }
   Testimony (Vec VerbatimQuote)
   Reasoning String
-  Justification { Testimony * Reasoning * }
-  RecordRequest { Entry * Justification * }
-  Proposal { Entry * Justification * }
-  ReferentRegistration { Referent * aliases Referents Justification * }
-  ReferentRegistrationReceipt { Referent * }
-  RegisteredReferent { Referent * aliases Referents }
+  Justification { Testimony Reasoning }
+  RecordRequest { Entry Justification }
+  Proposal { Entry Justification }
+  ReferentRegistration { Referent aliases.Referents Justification }
+  ReferentRegistrationReceipt { Referent }
+  RegisteredReferent { Referent aliases.Referents }
   RegisteredReferents (Vec RegisteredReferent)
   VersionReported VersionReport
-  VersionReport { VersionText * }
-  IntentRecorded { Entry * RecordIdentifier * }
-  IntentClarified { RecordIdentifier * Entry * }
-  IntentSuperseded { RetiredIdentifiers * Replacements * RecordIdentifiers * }
-  IntentRetired { RecordIdentifier * }
+  VersionReport { VersionText }
+  IntentRecorded { Entry RecordIdentifier }
+  IntentClarified { RecordIdentifier Entry }
+  IntentSuperseded { RetiredIdentifiers Replacements RecordIdentifiers }
+  IntentRetired { RecordIdentifier }
   IntentEvent [(IntentRecorded IntentRecorded belongs IntentEventStream) (IntentClarified IntentClarified belongs IntentEventStream) (IntentSuperseded IntentSuperseded belongs IntentEventStream) (IntentRetired IntentRetired belongs IntentEventStream)]
   IntentEventStream (Stream { token SubscriptionToken opened SubscriptionStarted event IntentEvent close SubscriptionToken })
   ValidationError [EmptyDomain EmptyDescription EmptyQueryDomain EmptyKeyword EmptySearchText EmptyQueryReferent StashHandleNotFound]
   SpiritGuardianAgentConfiguration {
-    agent_socket_path ConfigurationPath
-    provider_name (Optional SpiritGuardianProviderName)
-    model_name (Optional SpiritGuardianModelName)
-    timeout_milliseconds SpiritGuardianTimeoutMilliseconds
-    maximum_output_tokens (Optional SpiritGuardianMaximumOutputTokens)
+    agent_socket_path.ConfigurationPath
+    (ProviderName (Optional SpiritGuardianProviderName))
+    (ModelName (Optional SpiritGuardianModelName))
+    timeout_milliseconds.SpiritGuardianTimeoutMilliseconds
+    (MaximumOutputTokens (Optional SpiritGuardianMaximumOutputTokens))
   }
   SpiritDaemonConfiguration {
-    socket_path ConfigurationPath
-    meta_socket_path (Optional ConfigurationPath)
-    database_path ConfigurationPath
-    trace_socket_path (Optional ConfigurationPath)
-    guardian_agent_configuration (Optional SpiritGuardianAgentConfiguration)
+    socket_path.ConfigurationPath
+    (MetaSocketPath (Optional ConfigurationPath))
+    database_path.ConfigurationPath
+    (TraceSocketPath (Optional ConfigurationPath))
+    (GuardianAgentConfiguration (Optional SpiritGuardianAgentConfiguration))
   }
 
   DomainMatch [Any (Partial) (Full)]
@@ -197,54 +197,55 @@
   AtMostImportance Importance
   AtLeastImportance Importance
 
-  Removal { RecordIdentifier * Justification * }
-  RemovalCandidateCollection { RecordQuery * Justification * }
+  Removal { RecordIdentifier Justification }
+  RemovalCandidateCollection { RecordQuery Justification }
   RecordQuery Query
-  RemovalArchiveRecord { RecordIdentifier * Entry * }
+  RemovalArchiveRecord { RecordIdentifier Entry }
   RemovalArchiveRecords (Vec RemovalArchiveRecord)
   RemovedIdentifier RecordIdentifier
   RemovedIdentifiers (Vec RemovedIdentifier)
   RemovalCandidateSkipReason [ArchiveFailed RecordChanged RecordAlreadyRemoved NoLongerCandidate]
-  SkippedRemovalCandidate { RecordIdentifier * RemovalCandidateSkipReason * }
+  SkippedRemovalCandidate { RecordIdentifier RemovalCandidateSkipReason }
   SkippedRemovalCandidates (Vec SkippedRemovalCandidate)
-  RemovalCandidatesCollection { RemovalArchiveRecords * RemovedIdentifiers * SkippedRemovalCandidates * }
+  RemovalCandidatesCollection { RemovalArchiveRecords RemovedIdentifiers SkippedRemovalCandidates }
 
   ObserverFilter [All OperationsOnly EffectsOnly]
-  ObserverSubscription { SubscriptionToken * ObserverFilter * ObservedOperations * }
-  ObserverRetraction { SubscriptionToken * ObservedOperations * }
+  ObserverSubscription { SubscriptionToken ObserverFilter ObservedOperations }
+  ObserverRetraction { SubscriptionToken ObservedOperations }
   OperationKind [State Record Propose Clarify Supersede Retire ResolveClarification Observe PublicTextSearch PublicRecords PrivateRecords Lookup Count Remove ChangeCertainty BumpImportance ChangeRecord RegisterReferent LookupStash CollectRemovalCandidates Tap Untap SubscribeIntent Version Marker]
-  ObservedOperation { OperationKind * }
+  ObservedOperation { OperationKind }
   ObservedOperations (Vec ObservedOperation)
 
-  Entry { Domains * Kind * Description * Certainty * Importance * Privacy * Referents * }
-  Statement { StatementText * }
-  CertaintyChange { RecordIdentifier * Certainty * }
-  CertaintyChangeReceipt { RecordIdentifier * Certainty * }
-  ImportanceBump { RecordIdentifier * }
-  ImportanceBumpReceipt { RecordIdentifier * Importance * }
-  RecordChange { RecordIdentifier * Entry * Justification * }
-  RecordChangeReceipt { RecordIdentifier * }
-  Clarification { RecordIdentifier * Description * Justification * }
-  ClarificationReceipt { RecordIdentifier * }
+  Entry { Domains Kind Description Certainty Importance Privacy Referents }
+  Statement { StatementText }
+  CertaintyChange { RecordIdentifier Certainty }
+  CertaintyChangeReceipt { RecordIdentifier Certainty }
+  ImportanceBump { RecordIdentifier }
+  ImportanceBumpReceipt { RecordIdentifier Importance }
+  RecordChange { RecordIdentifier Entry Justification }
+  RecordChangeReceipt { RecordIdentifier }
+  Clarification { RecordIdentifier Description Justification }
+  ClarificationReceipt { RecordIdentifier }
   ClarificationRecordIdentifier RecordIdentifier
-  TargetClarification { RecordIdentifier * Description * }
+  TargetClarification { RecordIdentifier Description }
   TargetClarifications (Vec TargetClarification)
-  ClarificationResolution { ClarificationRecordIdentifier * TargetClarifications * Justification * }
-  ClarificationResolutionReceipt { ClarificationRecordIdentifier * RecordIdentifiers * }
+  ClarificationResolution { ClarificationRecordIdentifier TargetClarifications Justification }
+  ClarificationResolutionReceipt { ClarificationRecordIdentifier RecordIdentifiers }
   Replacements (Vec Entry)
   RecordIdentifiers (Vec RecordIdentifier)
-  Supersession { RetiredIdentifiers * Replacements * Justification * }
-  SupersessionReceipt { RetiredIdentifiers * RecordIdentifiers * }
-  Retirement { RecordIdentifier * Justification * }
-  RetirementReceipt { RecordIdentifier * }
+  Supersession { RetiredIdentifiers Replacements Justification }
+  SupersessionReceipt { RetiredIdentifiers RecordIdentifiers }
+  Retirement { RecordIdentifier Justification }
+  RetirementReceipt { RecordIdentifier }
   RetiredIdentifier RecordIdentifier
   RetiredIdentifiers (Vec RetiredIdentifier)
   GuardianRejectionReason [Duplicate Contradiction Compound NonIntent NegativeGuideline UnclearPrivacy UnclearDomain ClarifyTramples ClarifyLosesMeaning SupersedeTargetMissing RetrievalInsufficient MissingTestimony TestimonyFabricated InsufficientWarrant Overstated ImportanceUnsupported HarnessUnavailable HarnessMalformed HarnessTimedOut]
-  GuardianRejection { GuardianRejectionReason * RecordSet * Explanation * }
+  GuardianRejection { GuardianRejectionReason RecordSet Explanation }
   ReferentGuardianRejectionReason [Duplicate Ambiguous TooVague AliasCollision NonReferent UnclearJustification HarnessUnavailable HarnessMalformed HarnessTimedOut]
-  ReferentGuardianRejection { ReferentGuardianRejectionReason * RegisteredReferents * Explanation * }
-  RecordSelection { DomainMatch * kind (Optional Kind) }
-  Query { DomainMatch * keyword_match KeywordMatch text_match TextMatch referent_selection ReferentSelection kind (Optional Kind) privacy_selection PrivacySelection certainty_selection CertaintySelection importance_selection ImportanceSelection }
+  ReferentGuardianRejection { ReferentGuardianRejectionReason RegisteredReferents Explanation }
+  SelectedKind (Optional Kind)
+  RecordSelection { DomainMatch SelectedKind }
+  Query { DomainMatch KeywordMatch TextMatch ReferentSelection SelectedKind PrivacySelection CertaintySelection ImportanceSelection }
   Records (Vec ObservedRecord)
   RecordSet (Vec ObservedRecord)
   Kind [Decision Principle Correction Clarification Constraint]

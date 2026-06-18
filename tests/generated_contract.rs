@@ -1,9 +1,9 @@
 use signal_spirit::{
     ClarificationRecordIdentifier, ClarificationResolution, ClarificationResolutionReceipt,
-    DataLeaf, Description, Domain, DomainScope, GuardianRejectionReason, Input, InputRoute,
-    Justification, Output, OutputRoute, QuoteText, Reasoning, RecordIdentifier, RecordIdentifiers,
-    Software, TargetClarification, TargetClarifications, Technology, Testimony, VerbatimQuote,
-    VersionReport, VersionText,
+    DataLeaf, Description, Domain, DomainScope, Input, InputRoute, Justification, Output,
+    OutputRoute, QuoteText, Reasoning, RecordIdentifier, RecordIdentifiers, Software,
+    TargetClarification, TargetClarifications, Technology, Testimony, VerbatimQuote, VersionReport,
+    VersionText,
 };
 
 #[cfg(feature = "nota-text")]
@@ -40,10 +40,10 @@ fn generated_resolve_clarification_frame_round_trips() {
             description: Description::new("clarified target"),
         }]),
         justification: Justification {
-            testimony: Testimony::new(vec![VerbatimQuote {
-                quote_text: QuoteText::new("clarification means edit"),
-                antecedent: None,
-            }]),
+            testimony: Testimony::new(vec![VerbatimQuote::new(
+                QuoteText::new("clarification means edit"),
+                None,
+            )]),
             reasoning: Reasoning::new("fold standalone clarification into target"),
         },
     });
@@ -72,14 +72,14 @@ fn generated_clarification_resolved_frame_round_trips() {
 #[cfg(feature = "nota-text")]
 #[test]
 fn negative_guideline_rejection_reason_round_trips_through_nota() {
-    let rendered = GuardianRejectionReason::NegativeGuideline.to_nota();
+    let rendered = signal_spirit::GuardianRejectionReason::NegativeGuideline.to_nota();
 
     assert_eq!(rendered, "NegativeGuideline");
     assert_eq!(
         NotaSource::new(&rendered)
-            .parse::<GuardianRejectionReason>()
+            .parse::<signal_spirit::GuardianRejectionReason>()
             .expect("parse NegativeGuideline reason"),
-        GuardianRejectionReason::NegativeGuideline
+        signal_spirit::GuardianRejectionReason::NegativeGuideline
     );
 }
 
