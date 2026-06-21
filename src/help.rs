@@ -78,22 +78,29 @@ impl HelpRequest {
 
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct HelpResponse {
-    lines: Vec<String>,
+    entries: HelpEntries,
 }
 
 impl HelpResponse {
-    pub fn new(lines: Vec<String>) -> Self {
-        Self { lines }
+    pub fn new(entries: HelpEntries) -> Self {
+        Self { entries }
     }
 
-    pub fn lines(&self) -> &[String] {
-        &self.lines
+    pub fn entries(&self) -> &HelpEntries {
+        &self.entries
     }
 }
 
 impl fmt::Display for HelpResponse {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        formatter.write_str(&self.lines.join("\n"))
+        let lines = self
+            .entries
+            .entries()
+            .iter()
+            .map(HelpEntry::render)
+            .collect::<Vec<_>>()
+            .join("\n");
+        formatter.write_str(&lines)
     }
 }
 
@@ -111,21 +118,17 @@ impl HelpModel {
 
     pub fn render(&self, request: &HelpRequest) -> Result<HelpResponse, HelpError> {
         match request.target() {
-            None => Ok(HelpResponse::new(
-                self.roots
-                    .roots()
-                    .iter()
-                    .map(HelpRoot::render)
-                    .collect::<Vec<_>>(),
-            )),
+            None => Ok(HelpResponse::new(HelpEntries::from_roots(
+                self.roots.roots(),
+            ))),
             Some(target) => self
                 .roots
                 .find(target)
-                .map(|root| HelpResponse::new(vec![root.render()]))
+                .map(|root| HelpResponse::new(HelpEntries::single(HelpEntry::from_root(root))))
                 .or_else(|| {
-                    self.nodes
-                        .find(target)
-                        .map(|node| HelpResponse::new(vec![node.render()]))
+                    self.nodes.find(target).map(|node| {
+                        HelpResponse::new(HelpEntries::single(HelpEntry::from_node(node)))
+                    })
                 })
                 .ok_or_else(|| HelpError::UnknownTarget(target.as_str().to_owned())),
         }
@@ -317,8 +320,8 @@ impl HelpRoot {
         &self.name
     }
 
-    fn render(&self) -> String {
-        self.body.render_with_name(&self.name)
+    fn body(&self) -> &HelpBody {
+        &self.body
     }
 }
 
@@ -367,10 +370,82 @@ impl HelpNode {
     fn body(&self) -> &HelpBody {
         &self.body
     }
+}
+
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct HelpEntries {
+    entries: Vec<HelpEntry>,
+}
+
+impl HelpEntries {
+    fn single(entry: HelpEntry) -> Self {
+        Self {
+            entries: vec![entry],
+        }
+    }
+
+    fn from_roots(roots: &[HelpRoot]) -> Self {
+        Self {
+            entries: roots.iter().map(HelpEntry::from_root).collect(),
+        }
+    }
+
+    pub fn entries(&self) -> &[HelpEntry] {
+        &self.entries
+    }
+}
+
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct HelpEntry {
+    origin: HelpEntryOrigin,
+    name: HelpName,
+    body: HelpBody,
+}
+
+impl HelpEntry {
+    fn from_root(root: &HelpRoot) -> Self {
+        Self {
+            origin: HelpEntryOrigin::Root(root.plane),
+            name: root.name().clone(),
+            body: root.body().clone(),
+        }
+    }
+
+    fn from_node(node: &HelpNode) -> Self {
+        Self {
+            origin: HelpEntryOrigin::Node,
+            name: node.name().clone(),
+            body: node.body().clone(),
+        }
+    }
+
+    pub fn origin(&self) -> HelpEntryOrigin {
+        self.origin
+    }
+
+    pub fn name(&self) -> &HelpName {
+        &self.name
+    }
+
+    pub fn body(&self) -> &HelpBody {
+        &self.body
+    }
 
     fn render(&self) -> String {
         self.body.render_with_name(&self.name)
     }
+}
+
+impl fmt::Display for HelpEntry {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str(&self.render())
+    }
+}
+
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Copy, Debug, Eq, PartialEq)]
+pub enum HelpEntryOrigin {
+    Root(HelpPlane),
+    Node,
 }
 
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -405,6 +480,10 @@ impl HelpBody {
         Self::Enumeration(HelpVariantTypes::from_enum_body(body))
     }
 
+    pub fn render_with_help_name(&self, name: &HelpName) -> String {
+        self.render_with_name(name)
+    }
+
     fn render_with_name(&self, name: &HelpName) -> String {
         match self {
             Self::Unit => format!("({name})"),
@@ -430,6 +509,10 @@ impl HelpFieldTypes {
                 .map(HelpTypeExpression::from_field)
                 .collect(),
         }
+    }
+
+    pub fn fields(&self) -> &[HelpTypeExpression] {
+        &self.fields
     }
 
     fn render(&self) -> String {
@@ -459,6 +542,10 @@ impl HelpVariantTypes {
         }
     }
 
+    pub fn variants(&self) -> &[HelpTypeExpression] {
+        &self.variants
+    }
+
     fn render(&self) -> String {
         let variants = self
             .variants
@@ -472,26 +559,43 @@ impl HelpVariantTypes {
 
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct HelpTypeExpression {
-    text: String,
-    plain_name: Option<HelpName>,
+    expression: HelpTypeExpressionKind,
 }
 
 impl HelpTypeExpression {
-    fn new(text: impl Into<String>, plain_name: Option<HelpName>) -> Self {
-        Self {
-            text: text.into(),
-            plain_name,
-        }
+    fn new(expression: HelpTypeExpressionKind) -> Self {
+        Self { expression }
     }
 
     fn from_name(name: &Name) -> Self {
-        Self::new(name.as_str(), Some(HelpName::from(name)))
+        Self::new(HelpTypeExpressionKind::Name(HelpName::from(name)))
     }
 
     fn from_reference(reference: &SourceReference) -> Self {
         match reference {
             SourceReference::Plain(name) => Self::from_name(name),
-            _ => Self::new(reference.to_schema_text(), None),
+            SourceReference::FixedBytes(width) => {
+                Self::new(HelpTypeExpressionKind::FixedBytes(*width))
+            }
+            SourceReference::Vector(reference) => Self::new(HelpTypeExpressionKind::Vector(
+                Box::new(Self::from_reference(reference)),
+            )),
+            SourceReference::Optional(reference) => Self::new(HelpTypeExpressionKind::Optional(
+                Box::new(Self::from_reference(reference)),
+            )),
+            SourceReference::ScopeOf(reference) => Self::new(HelpTypeExpressionKind::ScopeOf(
+                Box::new(Self::from_reference(reference)),
+            )),
+            SourceReference::Map(key, value) => Self::new(HelpTypeExpressionKind::Map(
+                Box::new(Self::from_reference(key)),
+                Box::new(Self::from_reference(value)),
+            )),
+            SourceReference::Application { head, arguments } => {
+                Self::new(HelpTypeExpressionKind::Application {
+                    head: HelpName::from(head),
+                    arguments: HelpTypeExpressions::from_references(arguments),
+                })
+            }
         }
     }
 
@@ -505,30 +609,150 @@ impl HelpTypeExpression {
             SourceFieldValue::Declaration(_) if HelpName::from(field.name()).is_type_name() => {
                 Self::from_name(field.name())
             }
-            SourceFieldValue::Declaration(value) => Self::new(value.to_schema_text(), None),
+            SourceFieldValue::Declaration(value) => Self::inline(value.to_schema_text()),
         }
     }
 
     fn from_variant(variant: &SourceVariantSignature) -> Self {
         match variant.payload_source() {
-            Some(SourceVariantPayload::Reference(reference)) => Self::new(
-                format!("({} {})", variant.name(), reference.to_schema_text()),
-                None,
-            ),
-            Some(SourceVariantPayload::Declaration(value)) => Self::new(
-                format!("({} {})", variant.name(), value.to_schema_text()),
-                None,
-            ),
+            Some(SourceVariantPayload::Reference(reference)) => {
+                Self::application(variant.name(), vec![Self::from_reference(reference)])
+            }
+            Some(SourceVariantPayload::Declaration(value)) => {
+                Self::application(variant.name(), vec![Self::inline(value.to_schema_text())])
+            }
             None => Self::from_name(variant.name()),
         }
     }
 
+    pub fn kind(&self) -> &HelpTypeExpressionKind {
+        &self.expression
+    }
+
     fn plain_name(&self) -> Option<&HelpName> {
-        self.plain_name.as_ref()
+        match &self.expression {
+            HelpTypeExpressionKind::Name(name) => Some(name),
+            HelpTypeExpressionKind::FixedBytes(_)
+            | HelpTypeExpressionKind::Vector(_)
+            | HelpTypeExpressionKind::Optional(_)
+            | HelpTypeExpressionKind::ScopeOf(_)
+            | HelpTypeExpressionKind::Map(..)
+            | HelpTypeExpressionKind::Application { .. }
+            | HelpTypeExpressionKind::Inline(_) => None,
+        }
     }
 
     fn render(&self) -> String {
-        self.text.clone()
+        match &self.expression {
+            HelpTypeExpressionKind::Name(name) => name.to_string(),
+            HelpTypeExpressionKind::FixedBytes(width) => format!("(Bytes {width})"),
+            HelpTypeExpressionKind::Vector(reference) => {
+                format!("(Vector {})", reference.render())
+            }
+            HelpTypeExpressionKind::Optional(reference) => {
+                format!("(Optional {})", reference.render())
+            }
+            HelpTypeExpressionKind::ScopeOf(reference) => {
+                format!("(ScopeOf {})", reference.render())
+            }
+            HelpTypeExpressionKind::Map(key, value) => {
+                format!("(Map {} {})", key.render(), value.render())
+            }
+            HelpTypeExpressionKind::Application { head, arguments } => {
+                let arguments = arguments.render();
+                if arguments.is_empty() {
+                    format!("({head})")
+                } else {
+                    format!("({head} {arguments})")
+                }
+            }
+            HelpTypeExpressionKind::Inline(text) => text.clone(),
+        }
+    }
+
+    fn inline(text: impl Into<String>) -> Self {
+        Self::new(HelpTypeExpressionKind::Inline(text.into()))
+    }
+
+    fn application(name: &Name, arguments: Vec<Self>) -> Self {
+        Self::new(HelpTypeExpressionKind::Application {
+            head: HelpName::from(name),
+            arguments: HelpTypeExpressions::new(arguments),
+        })
+    }
+}
+
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
+#[rkyv(
+    bytecheck(bounds(
+        __C: rkyv::validation::ArchiveContext,
+        __C::Error: rkyv::rancor::Source
+    )),
+    serialize_bounds(
+        __S: rkyv::ser::Writer + rkyv::ser::Allocator,
+        __S::Error: rkyv::rancor::Source
+    ),
+    deserialize_bounds(__D::Error: rkyv::rancor::Source)
+)]
+pub enum HelpTypeExpressionKind {
+    Name(HelpName),
+    FixedBytes(u64),
+    Vector(#[rkyv(omit_bounds)] Box<HelpTypeExpression>),
+    Optional(#[rkyv(omit_bounds)] Box<HelpTypeExpression>),
+    ScopeOf(#[rkyv(omit_bounds)] Box<HelpTypeExpression>),
+    Map(
+        #[rkyv(omit_bounds)] Box<HelpTypeExpression>,
+        #[rkyv(omit_bounds)] Box<HelpTypeExpression>,
+    ),
+    Application {
+        head: HelpName,
+        #[rkyv(omit_bounds)]
+        arguments: HelpTypeExpressions,
+    },
+    Inline(String),
+}
+
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
+#[rkyv(
+    bytecheck(bounds(
+        __C: rkyv::validation::ArchiveContext,
+        __C::Error: rkyv::rancor::Source
+    )),
+    serialize_bounds(
+        __S: rkyv::ser::Writer + rkyv::ser::Allocator,
+        __S::Error: rkyv::rancor::Source
+    ),
+    deserialize_bounds(__D::Error: rkyv::rancor::Source)
+)]
+pub struct HelpTypeExpressions {
+    #[rkyv(omit_bounds)]
+    expressions: Vec<HelpTypeExpression>,
+}
+
+impl HelpTypeExpressions {
+    fn new(expressions: Vec<HelpTypeExpression>) -> Self {
+        Self { expressions }
+    }
+
+    fn from_references(references: &[SourceReference]) -> Self {
+        Self {
+            expressions: references
+                .iter()
+                .map(HelpTypeExpression::from_reference)
+                .collect(),
+        }
+    }
+
+    pub fn expressions(&self) -> &[HelpTypeExpression] {
+        &self.expressions
+    }
+
+    fn render(&self) -> String {
+        self.expressions
+            .iter()
+            .map(HelpTypeExpression::render)
+            .collect::<Vec<_>>()
+            .join(" ")
     }
 }
 

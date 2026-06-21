@@ -128,9 +128,10 @@ fn generated_help_model_renders_spirit_one_level_shapes() {
         model
             .render(&signal_spirit::HelpRequest::new(None))
             .expect("render top-level help")
-            .lines()
+            .entries()
+            .entries()
             .iter()
-            .any(|line| line == "(Record { Entry Justification })"),
+            .any(|entry| entry.to_string() == "(Record { Entry Justification })"),
         "top-level help should include Record's one-level payload shape"
     );
     assert_eq!(
@@ -179,6 +180,20 @@ fn generated_help_model_round_trips_through_rkyv() {
         .expect("decode help model");
 
     assert_eq!(decoded, model);
+
+    let response = model
+        .render(&signal_spirit::HelpRequest::for_name("Entry"))
+        .expect("render typed help response");
+    let bytes = rkyv::to_bytes::<rkyv::rancor::Error>(&response).expect("archive help response");
+    let decoded = rkyv::from_bytes::<signal_spirit::HelpResponse, rkyv::rancor::Error>(&bytes)
+        .expect("decode help response");
+
+    assert_eq!(decoded, response);
+    assert_eq!(
+        decoded.entries().entries()[0].name().as_str(),
+        "Entry",
+        "help response should preserve the typed entry name before rendering"
+    );
 }
 
 #[cfg(feature = "nota-text")]
