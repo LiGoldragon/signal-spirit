@@ -1,6 +1,9 @@
 use std::fmt;
 
-use nota_next::{Block, Delimiter, Document};
+use nota_next::{
+    Block, Delimiter, Document, NotaBlock, NotaBody, NotaBodyEncoding, NotaDecode, NotaDecodeError,
+    NotaDocumentBody, NotaDocumentDecode, NotaDocumentEncode, NotaDocumentEncoding, NotaEncode,
+};
 use schema_next::{
     Name, SchemaError, SchemaSource, SourceDeclarationValue, SourceEnumBody, SourceField,
     SourceFieldValue, SourceImport, SourceNamespace, SourceReference, SourceRootEnum,
@@ -93,14 +96,44 @@ impl HelpResponse {
 
 impl fmt::Display for HelpResponse {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let lines = self
-            .entries
-            .entries()
+        formatter.write_str(&self.to_nota_document_body().to_nota())
+    }
+}
+
+impl NotaDocumentEncode for HelpResponse {
+    fn to_nota_document_body(&self) -> NotaDocumentEncoding {
+        NotaBodyEncoding::new(
+            self.entries()
+                .entries()
+                .iter()
+                .map(HelpEntry::to_nota)
+                .collect(),
+        )
+    }
+}
+
+impl NotaDocumentDecode for HelpResponse {
+    fn from_nota_document_body(body: &NotaDocumentBody<'_>) -> Result<Self, NotaDecodeError> {
+        let entries = body
+            .root_objects()
             .iter()
-            .map(HelpEntry::render)
-            .collect::<Vec<_>>()
-            .join("\n");
-        formatter.write_str(&lines)
+            .map(HelpEntry::from_nota_block)
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(Self::new(HelpEntries::new(entries)))
+    }
+}
+
+impl NotaEncode for HelpResponse {
+    fn to_nota(&self) -> String {
+        self.to_nota_document_body().to_nota()
+    }
+}
+
+impl NotaDecode for HelpResponse {
+    fn from_nota_block(block: &Block) -> Result<Self, NotaDecodeError> {
+        Ok(Self::new(HelpEntries::single(HelpEntry::from_nota_block(
+            block,
+        )?)))
     }
 }
 
@@ -381,16 +414,16 @@ pub struct HelpEntries {
 }
 
 impl HelpEntries {
+    fn new(entries: Vec<HelpEntry>) -> Self {
+        Self { entries }
+    }
+
     fn single(entry: HelpEntry) -> Self {
-        Self {
-            entries: vec![entry],
-        }
+        Self::new(vec![entry])
     }
 
     fn from_roots(roots: &[HelpRoot]) -> Self {
-        Self {
-            entries: roots.iter().map(HelpEntry::from_root).collect(),
-        }
+        Self::new(roots.iter().map(HelpEntry::from_root).collect())
     }
 
     pub fn entries(&self) -> &[HelpEntry] {
@@ -400,7 +433,6 @@ impl HelpEntries {
 
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct HelpEntry {
-    origin: HelpEntryOrigin,
     name: HelpName,
     body: HelpBody,
 }
@@ -408,7 +440,6 @@ pub struct HelpEntry {
 impl HelpEntry {
     fn from_root(root: &HelpRoot) -> Self {
         Self {
-            origin: HelpEntryOrigin::Root(root.plane),
             name: root.name().clone(),
             body: root.body().clone(),
         }
@@ -416,14 +447,13 @@ impl HelpEntry {
 
     fn from_node(node: &HelpNode) -> Self {
         Self {
-            origin: HelpEntryOrigin::Node,
             name: node.name().clone(),
             body: node.body().clone(),
         }
     }
 
-    pub fn origin(&self) -> HelpEntryOrigin {
-        self.origin
+    fn new(name: HelpName, body: HelpBody) -> Self {
+        Self { name, body }
     }
 
     pub fn name(&self) -> &HelpName {
@@ -441,14 +471,30 @@ impl HelpEntry {
 
 impl fmt::Display for HelpEntry {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        formatter.write_str(&self.render())
+        formatter.write_str(&self.to_nota())
     }
 }
 
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Copy, Debug, Eq, PartialEq)]
-pub enum HelpEntryOrigin {
-    Root(HelpPlane),
-    Node,
+impl NotaEncode for HelpEntry {
+    fn to_nota(&self) -> String {
+        self.render()
+    }
+}
+
+impl NotaDecode for HelpEntry {
+    fn from_nota_block(block: &Block) -> Result<Self, NotaDecodeError> {
+        let objects =
+            NotaBlock::new(block).expect_delimited(Delimiter::Parenthesis, "HelpEntry")?;
+        let Some((name, body)) = objects.split_first() else {
+            return Err(NotaDecodeError::ExpectedRootCount {
+                type_name: "HelpEntry",
+                expected: 1,
+                found: 0,
+            });
+        };
+        let name = HelpName::from_nota_block(name)?;
+        Ok(Self::new(name, HelpBody::from_entry_body_blocks(body)?))
+    }
 }
 
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -496,6 +542,26 @@ impl HelpBody {
             Self::Text(text) => format!("({name} {})", text),
         }
     }
+
+    fn from_entry_body_blocks(blocks: &[Block]) -> Result<Self, NotaDecodeError> {
+        match blocks {
+            [] => Ok(Self::Unit),
+            [block] if block.is_brace() => {
+                Ok(Self::Struct(HelpFieldTypes::from_nota_block(block)?))
+            }
+            [block] if block.is_square_bracket() => {
+                Ok(Self::Enumeration(HelpVariantTypes::from_nota_block(block)?))
+            }
+            [block] => HelpTypeExpression::from_nota_block(block)
+                .map(Self::Reference)
+                .or_else(|_| Ok(Self::Text(HelpEncodedBlock::new(block).to_nota()))),
+            _ => Err(NotaDecodeError::ExpectedRootCount {
+                type_name: "HelpBody",
+                expected: 1,
+                found: blocks.len(),
+            }),
+        }
+    }
 }
 
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -529,6 +595,17 @@ impl HelpFieldTypes {
     }
 }
 
+impl NotaDecode for HelpFieldTypes {
+    fn from_nota_block(block: &Block) -> Result<Self, NotaDecodeError> {
+        let fields = NotaBody::from_delimited(block, Delimiter::Brace, "HelpFieldTypes")?
+            .root_objects()
+            .iter()
+            .map(HelpTypeExpression::from_nota_block)
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(Self { fields })
+    }
+}
+
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct HelpVariantTypes {
     variants: Vec<HelpTypeExpression>,
@@ -557,6 +634,18 @@ impl HelpVariantTypes {
             .collect::<Vec<_>>()
             .join(" ");
         format!("[{variants}]")
+    }
+}
+
+impl NotaDecode for HelpVariantTypes {
+    fn from_nota_block(block: &Block) -> Result<Self, NotaDecodeError> {
+        let variants =
+            NotaBody::from_delimited(block, Delimiter::SquareBracket, "HelpVariantTypes")?
+                .root_objects()
+                .iter()
+                .map(HelpTypeExpression::from_nota_block)
+                .collect::<Result<Vec<_>, _>>()?;
+        Ok(Self { variants })
     }
 }
 
@@ -683,6 +772,131 @@ impl HelpTypeExpression {
             arguments: HelpTypeExpressions::new(arguments),
         })
     }
+
+    fn contains_inline(&self) -> bool {
+        match &self.expression {
+            HelpTypeExpressionKind::Inline(_) => true,
+            HelpTypeExpressionKind::Vector(reference)
+            | HelpTypeExpressionKind::Optional(reference)
+            | HelpTypeExpressionKind::ScopeOf(reference) => reference.contains_inline(),
+            HelpTypeExpressionKind::Map(key, value) => {
+                key.contains_inline() || value.contains_inline()
+            }
+            HelpTypeExpressionKind::Application { arguments, .. } => arguments.contains_inline(),
+            HelpTypeExpressionKind::Name(_) | HelpTypeExpressionKind::FixedBytes(_) => false,
+        }
+    }
+
+    fn from_application_blocks(blocks: &[Block]) -> Result<Self, NotaDecodeError> {
+        let Some((head, arguments)) = blocks.split_first() else {
+            return Err(NotaDecodeError::ExpectedRootCount {
+                type_name: "HelpTypeExpression",
+                expected: 1,
+                found: 0,
+            });
+        };
+        let head = HelpName::from_nota_block(head)?;
+        match head.as_str() {
+            "Bytes" => {
+                let [width] = arguments else {
+                    return Err(NotaDecodeError::ExpectedRootCount {
+                        type_name: "Bytes",
+                        expected: 1,
+                        found: arguments.len(),
+                    });
+                };
+                let width = NotaBlock::new(width).parse_integer()?;
+                Ok(Self::new(HelpTypeExpressionKind::FixedBytes(width)))
+            }
+            "Vector" => {
+                let [reference] = arguments else {
+                    return Err(NotaDecodeError::ExpectedRootCount {
+                        type_name: "Vector",
+                        expected: 1,
+                        found: arguments.len(),
+                    });
+                };
+                Ok(Self::new(HelpTypeExpressionKind::Vector(Box::new(
+                    Self::from_nota_block(reference)?,
+                ))))
+            }
+            "Optional" => {
+                let [reference] = arguments else {
+                    return Err(NotaDecodeError::ExpectedRootCount {
+                        type_name: "Optional",
+                        expected: 1,
+                        found: arguments.len(),
+                    });
+                };
+                Ok(Self::new(HelpTypeExpressionKind::Optional(Box::new(
+                    Self::from_nota_block(reference)?,
+                ))))
+            }
+            "ScopeOf" => {
+                let [reference] = arguments else {
+                    return Err(NotaDecodeError::ExpectedRootCount {
+                        type_name: "ScopeOf",
+                        expected: 1,
+                        found: arguments.len(),
+                    });
+                };
+                Ok(Self::new(HelpTypeExpressionKind::ScopeOf(Box::new(
+                    Self::from_nota_block(reference)?,
+                ))))
+            }
+            "Map" => {
+                let [key, value] = arguments else {
+                    return Err(NotaDecodeError::ExpectedRootCount {
+                        type_name: "Map",
+                        expected: 2,
+                        found: arguments.len(),
+                    });
+                };
+                Ok(Self::new(HelpTypeExpressionKind::Map(
+                    Box::new(Self::from_nota_block(key)?),
+                    Box::new(Self::from_nota_block(value)?),
+                )))
+            }
+            _ => {
+                let arguments = HelpTypeExpressions::from_nota_blocks(arguments)?;
+                if arguments.contains_inline() {
+                    return Err(NotaDecodeError::InvalidValue {
+                        type_name: "HelpTypeExpression",
+                        value: Delimiter::Parenthesis.wrap(
+                            blocks
+                                .iter()
+                                .map(|block| HelpEncodedBlock::new(block).to_nota()),
+                        ),
+                        reason: "inline declaration arguments belong to text fallback help bodies"
+                            .to_owned(),
+                    });
+                }
+                Ok(Self::new(HelpTypeExpressionKind::Application {
+                    head,
+                    arguments,
+                }))
+            }
+        }
+    }
+}
+
+impl NotaDecode for HelpTypeExpression {
+    fn from_nota_block(block: &Block) -> Result<Self, NotaDecodeError> {
+        if let Some(name) = block.demote_to_string() {
+            return Ok(Self::new(HelpTypeExpressionKind::Name(HelpName::new(name))));
+        }
+        if let Some(blocks) = block.as_delimited(Delimiter::Parenthesis) {
+            return Self::from_application_blocks(blocks);
+        }
+        if block.is_brace() || block.is_square_bracket() {
+            return Ok(Self::inline(HelpEncodedBlock::new(block).to_nota()));
+        }
+        Err(NotaDecodeError::InvalidValue {
+            type_name: "HelpTypeExpression",
+            value: HelpEncodedBlock::new(block).to_nota(),
+            reason: "expected atom, parenthesized application, or inline declaration".to_owned(),
+        })
+    }
 }
 
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -757,6 +971,20 @@ impl HelpTypeExpressions {
             .collect::<Vec<_>>()
             .join(" ")
     }
+
+    fn from_nota_blocks(blocks: &[Block]) -> Result<Self, NotaDecodeError> {
+        let expressions = blocks
+            .iter()
+            .map(HelpTypeExpression::from_nota_block)
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(Self::new(expressions))
+    }
+
+    fn contains_inline(&self) -> bool {
+        self.expressions
+            .iter()
+            .any(HelpTypeExpression::contains_inline)
+    }
 }
 
 #[derive(
@@ -786,6 +1014,64 @@ impl HelpName {
                 self.value.as_str(),
                 "String" | "Integer" | "Boolean" | "Path" | "Bytes"
             )
+    }
+}
+
+impl NotaDecode for HelpName {
+    fn from_nota_block(block: &Block) -> Result<Self, NotaDecodeError> {
+        block
+            .demote_to_string()
+            .map(Self::new)
+            .ok_or(NotaDecodeError::ExpectedAtom {
+                type_name: "HelpName",
+            })
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+struct HelpEncodedBlock<'block> {
+    block: &'block Block,
+}
+
+impl<'block> HelpEncodedBlock<'block> {
+    fn new(block: &'block Block) -> Self {
+        Self { block }
+    }
+
+    fn to_nota(self) -> String {
+        match self.block {
+            Block::Delimited {
+                delimiter,
+                root_objects,
+                ..
+            } if *delimiter == Delimiter::Brace => {
+                let fields = self.child_nota(root_objects);
+                if fields.is_empty() {
+                    "{}".to_owned()
+                } else {
+                    format!("{{ {fields} }}")
+                }
+            }
+            Block::Delimited {
+                delimiter,
+                root_objects,
+                ..
+            } => delimiter.wrap(root_objects.iter().map(|block| Self::new(block).to_nota())),
+            Block::PipeText(_) | Block::Atom(_) => self
+                .block
+                .demote_to_string()
+                .unwrap_or_default()
+                .to_owned()
+                .to_nota(),
+        }
+    }
+
+    fn child_nota(self, root_objects: &'block [Block]) -> String {
+        root_objects
+            .iter()
+            .map(|block| Self::new(block).to_nota())
+            .collect::<Vec<_>>()
+            .join(" ")
     }
 }
 

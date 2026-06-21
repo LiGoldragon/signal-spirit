@@ -9,7 +9,7 @@ use signal_spirit::{
 use std::collections::BTreeSet;
 
 #[cfg(feature = "nota-text")]
-use nota_next::{NotaEncode, NotaSource};
+use nota_next::{NotaDocumentEncode, NotaEncode, NotaSource};
 
 #[test]
 fn generated_input_frame_round_trips() {
@@ -242,6 +242,46 @@ fn generated_help_model_round_trips_through_rkyv() {
         "Entry",
         "help response should preserve the typed entry name before rendering"
     );
+}
+
+#[cfg(feature = "nota-text")]
+#[test]
+fn generated_help_response_round_trips_through_nota_codec() {
+    let model = signal_spirit::HelpModel::from_signal_schema_source().expect("build help model");
+    let response = model
+        .render(&signal_spirit::HelpRequest::for_name("Entry"))
+        .expect("render Entry help");
+    let encoded = response.to_nota();
+    assert_eq!(
+        encoded,
+        "(Entry { Domains Kind Description Certainty Importance Privacy Referents })"
+    );
+    let decoded = NotaSource::new(&encoded)
+        .parse::<signal_spirit::HelpResponse>()
+        .expect("decode single-entry HelpResponse");
+    assert_eq!(decoded, response);
+
+    let top_level = model
+        .render(&signal_spirit::HelpRequest::new(None))
+        .expect("render top-level help");
+    let encoded = top_level.to_nota_document_body().to_nota();
+    let decoded = NotaSource::new(&encoded)
+        .parse_document_body::<signal_spirit::HelpResponse>()
+        .expect("decode multi-entry HelpResponse document body");
+    assert_eq!(decoded, top_level);
+
+    let stream = model
+        .render(&signal_spirit::HelpRequest::for_name("IntentEventStream"))
+        .expect("render stream help");
+    let encoded = stream.to_nota();
+    assert_eq!(
+        encoded,
+        "(IntentEventStream (Stream { token SubscriptionToken opened SubscriptionStarted event IntentEvent close SubscriptionToken }))"
+    );
+    let decoded = NotaSource::new(&encoded)
+        .parse::<signal_spirit::HelpResponse>()
+        .expect("decode stream HelpResponse");
+    assert_eq!(decoded, stream);
 }
 
 #[cfg(feature = "nota-text")]
