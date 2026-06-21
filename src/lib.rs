@@ -13,9 +13,9 @@ pub mod help;
 
 use std::collections::BTreeSet;
 
-pub use schema::signal::*;
 #[cfg(feature = "nota-text")]
 pub use help::{HelpError, HelpModel, HelpRequest, HelpResponse};
+pub use schema::signal::*;
 
 pub type SpiritRequest = Input;
 pub type SpiritReply = Output;

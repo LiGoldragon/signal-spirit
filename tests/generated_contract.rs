@@ -122,8 +122,7 @@ fn generated_help_request_recognizes_top_level_and_named_forms() {
 #[cfg(feature = "nota-text")]
 #[test]
 fn generated_help_model_renders_spirit_one_level_shapes() {
-    let model =
-        signal_spirit::HelpModel::from_signal_schema_source().expect("build help model");
+    let model = signal_spirit::HelpModel::from_signal_schema_source().expect("build help model");
 
     assert!(
         model
@@ -174,8 +173,7 @@ fn generated_help_model_renders_spirit_one_level_shapes() {
 #[cfg(feature = "nota-text")]
 #[test]
 fn generated_help_model_round_trips_through_rkyv() {
-    let model =
-        signal_spirit::HelpModel::from_signal_schema_source().expect("build help model");
+    let model = signal_spirit::HelpModel::from_signal_schema_source().expect("build help model");
     let bytes = rkyv::to_bytes::<rkyv::rancor::Error>(&model).expect("archive help model");
     let decoded = rkyv::from_bytes::<signal_spirit::HelpModel, rkyv::rancor::Error>(&bytes)
         .expect("decode help model");

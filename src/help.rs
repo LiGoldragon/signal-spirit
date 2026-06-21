@@ -25,9 +25,7 @@ pub enum HelpError {
     UnknownTarget(String),
 }
 
-#[derive(
-    rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq,
-)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct HelpRequest {
     target: Option<HelpName>,
 }
@@ -78,9 +76,7 @@ impl HelpRequest {
     }
 }
 
-#[derive(
-    rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq,
-)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct HelpResponse {
     lines: Vec<String>,
 }
@@ -101,9 +97,7 @@ impl fmt::Display for HelpResponse {
     }
 }
 
-#[derive(
-    rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq,
-)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct HelpModel {
     roots: HelpRoots,
     nodes: HelpNodes,
@@ -221,7 +215,9 @@ impl HelpModelBuilder {
                 .and_then(|name| self.nodes.find(name))
                 .and_then(|target| match target.body() {
                     HelpBody::Struct(fields) => Some(HelpBody::Struct(fields.clone())),
-                    HelpBody::Enumeration(variants) => Some(HelpBody::Enumeration(variants.clone())),
+                    HelpBody::Enumeration(variants) => {
+                        Some(HelpBody::Enumeration(variants.clone()))
+                    }
                     HelpBody::Unit | HelpBody::Reference(_) | HelpBody::Text(_) => None,
                 })
                 .unwrap_or_else(|| HelpBody::Reference(reference.clone())),
@@ -260,9 +256,9 @@ impl HelpModelBuilder {
             return;
         }
         let body = match field.value() {
-            SourceFieldValue::Reference(reference) => {
-                Some(HelpBody::Reference(HelpTypeExpression::from_reference(reference)))
-            }
+            SourceFieldValue::Reference(reference) => Some(HelpBody::Reference(
+                HelpTypeExpression::from_reference(reference),
+            )),
             SourceFieldValue::Declaration(value) => {
                 self.insert_inline_declarations_from_declaration(value);
                 Some(HelpBody::from_declaration(value))
@@ -276,9 +272,7 @@ impl HelpModelBuilder {
     }
 }
 
-#[derive(
-    rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq,
-)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct HelpRoots {
     roots: Vec<HelpRoot>,
 }
@@ -301,17 +295,13 @@ impl HelpRoots {
     }
 }
 
-#[derive(
-    rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Copy, Debug, Eq, PartialEq,
-)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Copy, Debug, Eq, PartialEq)]
 pub enum HelpPlane {
     Input,
     Output,
 }
 
-#[derive(
-    rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq,
-)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct HelpRoot {
     plane: HelpPlane,
     name: HelpName,
@@ -332,9 +322,7 @@ impl HelpRoot {
     }
 }
 
-#[derive(
-    rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq,
-)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct HelpNodes {
     nodes: Vec<HelpNode>,
 }
@@ -361,9 +349,7 @@ impl HelpNodes {
     }
 }
 
-#[derive(
-    rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq,
-)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct HelpNode {
     name: HelpName,
     body: HelpBody,
@@ -387,9 +373,7 @@ impl HelpNode {
     }
 }
 
-#[derive(
-    rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq,
-)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub enum HelpBody {
     Unit,
     Reference(HelpTypeExpression),
@@ -432,9 +416,7 @@ impl HelpBody {
     }
 }
 
-#[derive(
-    rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq,
-)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct HelpFieldTypes {
     fields: Vec<HelpTypeExpression>,
 }
@@ -461,9 +443,7 @@ impl HelpFieldTypes {
     }
 }
 
-#[derive(
-    rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq,
-)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct HelpVariantTypes {
     variants: Vec<HelpTypeExpression>,
 }
@@ -490,9 +470,7 @@ impl HelpVariantTypes {
     }
 }
 
-#[derive(
-    rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq,
-)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct HelpTypeExpression {
     text: String,
     plain_name: Option<HelpName>,
@@ -533,12 +511,14 @@ impl HelpTypeExpression {
 
     fn from_variant(variant: &SourceVariantSignature) -> Self {
         match variant.payload_source() {
-            Some(SourceVariantPayload::Reference(reference)) => {
-                Self::new(format!("({} {})", variant.name(), reference.to_schema_text()), None)
-            }
-            Some(SourceVariantPayload::Declaration(value)) => {
-                Self::new(format!("({} {})", variant.name(), value.to_schema_text()), None)
-            }
+            Some(SourceVariantPayload::Reference(reference)) => Self::new(
+                format!("({} {})", variant.name(), reference.to_schema_text()),
+                None,
+            ),
+            Some(SourceVariantPayload::Declaration(value)) => Self::new(
+                format!("({} {})", variant.name(), value.to_schema_text()),
+                None,
+            ),
             None => Self::from_name(variant.name()),
         }
     }
@@ -553,15 +533,7 @@ impl HelpTypeExpression {
 }
 
 #[derive(
-    rkyv::Archive,
-    rkyv::Serialize,
-    rkyv::Deserialize,
-    Clone,
-    Debug,
-    Ord,
-    PartialOrd,
-    Eq,
-    PartialEq,
+    rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Ord, PartialOrd, Eq, PartialEq,
 )]
 pub struct HelpName {
     value: String,
