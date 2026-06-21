@@ -336,6 +336,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "schema-cc"
+version = "0.1.0"
+source = "git+https://github.com/LiGoldragon/schema-next.git?branch=schema-help#ece5c380442f90e6f6ec172525f035a4c7fd2362"
+dependencies = [
+ "nota-next",
+ "prettyplease",
+ "proc-macro2",
+ "quote",
+ "syn",
+ "thiserror",
+]
+
+[[package]]
 name = "schema-next"
 version = "0.2.0"
 source = "git+https://github.com/LiGoldragon/schema-next.git?branch=main#4b7e830a7001708737a617bd8eedac8002cc1fc6"
@@ -343,7 +356,19 @@ dependencies = [
  "blake3",
  "nota-next",
  "rkyv",
- "schema-cc",
+ "schema-cc 0.1.0 (git+https://github.com/LiGoldragon/schema-next.git?branch=main)",
+ "thiserror",
+]
+
+[[package]]
+name = "schema-next"
+version = "0.2.0"
+source = "git+https://github.com/LiGoldragon/schema-next.git?branch=schema-help#ece5c380442f90e6f6ec172525f035a4c7fd2362"
+dependencies = [
+ "blake3",
+ "nota-next",
+ "rkyv",
+ "schema-cc 0.1.0 (git+https://github.com/LiGoldragon/schema-next.git?branch=schema-help)",
  "thiserror",
 ]
 
@@ -355,7 +380,7 @@ dependencies = [
  "prettyplease",
  "proc-macro2",
  "quote",
- "schema-next",
+ "schema-next 0.2.0 (git+https://github.com/LiGoldragon/schema-next.git?branch=main)",
  "syn",
  "thiserror",
 ]
@@ -394,6 +419,7 @@ version = "0.8.0"
 dependencies = [
  "nota-next",
  "rkyv",
+ "schema-next 0.2.0 (git+https://github.com/LiGoldragon/schema-next.git?branch=schema-help)",
  "schema-rust-next",
  "signal-frame",
  "thiserror",

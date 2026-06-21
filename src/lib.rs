@@ -8,10 +8,14 @@
 #[allow(dead_code)]
 #[rustfmt::skip]
 pub mod schema;
+#[cfg(feature = "nota-text")]
+pub mod help;
 
 use std::collections::BTreeSet;
 
 pub use schema::signal::*;
+#[cfg(feature = "nota-text")]
+pub use help::{HelpError, HelpModel, HelpRequest, HelpResponse};
 
 pub type SpiritRequest = Input;
 pub type SpiritReply = Output;

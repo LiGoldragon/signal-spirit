@@ -94,6 +94,97 @@ fn generated_signal_contract_exports_domain_tree() {
 
 #[cfg(feature = "nota-text")]
 #[test]
+fn generated_help_request_recognizes_top_level_and_named_forms() {
+    assert_eq!(
+        signal_spirit::HelpRequest::from_text("(Help)")
+            .expect("parse top-level help")
+            .expect("recognize help")
+            .target(),
+        None
+    );
+    assert_eq!(
+        signal_spirit::HelpRequest::from_text("(Help Entry)")
+            .expect("parse named help")
+            .expect("recognize help")
+            .target()
+            .expect("named target")
+            .as_str(),
+        "Entry"
+    );
+    assert!(
+        signal_spirit::HelpRequest::from_text("Version")
+            .expect("parse non-help")
+            .is_none(),
+        "non-help NOTA should be left for generated Input parsing"
+    );
+}
+
+#[cfg(feature = "nota-text")]
+#[test]
+fn generated_help_model_renders_spirit_one_level_shapes() {
+    let model =
+        signal_spirit::HelpModel::from_signal_schema_source().expect("build help model");
+
+    assert!(
+        model
+            .render(&signal_spirit::HelpRequest::new(None))
+            .expect("render top-level help")
+            .lines()
+            .iter()
+            .any(|line| line == "(Record { Entry Justification })"),
+        "top-level help should include Record's one-level payload shape"
+    );
+    assert_eq!(
+        model
+            .render(&signal_spirit::HelpRequest::for_name("Record"))
+            .expect("render Record help")
+            .to_string(),
+        "(Record { Entry Justification })"
+    );
+    assert_eq!(
+        model
+            .render(&signal_spirit::HelpRequest::for_name("Entry"))
+            .expect("render Entry help")
+            .to_string(),
+        "(Entry { Domains Kind Description Certainty Importance Privacy Referents })"
+    );
+    assert_eq!(
+        model
+            .render(&signal_spirit::HelpRequest::for_name("Domains"))
+            .expect("render Domains help")
+            .to_string(),
+        "(Domains (Vec Domain))"
+    );
+    assert_eq!(
+        model
+            .render(&signal_spirit::HelpRequest::for_name("Description"))
+            .expect("render Description help")
+            .to_string(),
+        "(Description String)"
+    );
+    assert_eq!(
+        model
+            .render(&signal_spirit::HelpRequest::for_name("VerbatimQuote"))
+            .expect("render VerbatimQuote help")
+            .to_string(),
+        "(VerbatimQuote { QuoteText OptionalAntecedent })"
+    );
+}
+
+#[cfg(feature = "nota-text")]
+#[test]
+fn generated_help_model_round_trips_through_rkyv() {
+    let model =
+        signal_spirit::HelpModel::from_signal_schema_source().expect("build help model");
+    let bytes = rkyv::to_bytes::<rkyv::rancor::Error>(&model).expect("archive help model");
+    let decoded = rkyv::from_bytes::<signal_spirit::HelpModel, rkyv::rancor::Error>(&bytes)
+        .expect("decode help model");
+
+    assert_eq!(decoded, model);
+}
+
+#[cfg(feature = "nota-text")]
+#[test]
 fn terminal_value_domain_tags_round_trip_through_nota() {
     let domain = "(Technology (Software Data))"
         .parse_domain()
