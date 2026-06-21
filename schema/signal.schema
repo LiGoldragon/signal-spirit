@@ -154,7 +154,7 @@
   IntentRetired { RecordIdentifier }
   IntentEvent [(IntentRecorded IntentRecorded belongs IntentEventStream) (IntentClarified IntentClarified belongs IntentEventStream) (IntentSuperseded IntentSuperseded belongs IntentEventStream) (IntentRetired IntentRetired belongs IntentEventStream)]
   IntentEventStream (Stream { token SubscriptionToken opened SubscriptionStarted event IntentEvent close SubscriptionToken })
-  ValidationError [EmptyDomain EmptyDescription EmptyQueryDomain EmptyKeyword EmptySearchText EmptyQueryReferent StashHandleNotFound]
+  ValidationError [EmptyDomain EmptyDescription EmptyQueryDomain EmptyKeyword EmptySearchText EmptyQueryReferent StashHandleNotFound EmptyReferents]
   SpiritGuardianAgentConfiguration {
     agent_socket_path.ConfigurationPath
     (ProviderName (Optional SpiritGuardianProviderName))

@@ -705,6 +705,7 @@ pub enum ValidationError {
     EmptySearchText,
     EmptyQueryReferent,
     StashHandleNotFound,
+    EmptyReferents,
 }
 
 #[rustfmt::skip]

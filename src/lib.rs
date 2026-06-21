@@ -239,6 +239,9 @@ impl Entry {
         if self.description.trim().is_empty() {
             return Err(ValidationError::EmptyDescription);
         }
+        if self.certainty.payload() != &Magnitude::Zero && self.referents.payload().is_empty() {
+            return Err(ValidationError::EmptyReferents);
+        }
         Ok(())
     }
 
