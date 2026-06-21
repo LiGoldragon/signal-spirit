@@ -8,7 +8,7 @@ use schema_next::{
 };
 use thiserror::Error;
 
-use crate::SIGNAL_SCHEMA_SOURCE;
+use crate::{DOMAIN_SCHEMA_SOURCE, SIGNAL_SCHEMA_SOURCE};
 
 #[derive(Debug, Error)]
 pub enum HelpError {
@@ -112,8 +112,11 @@ pub struct HelpModel {
 
 impl HelpModel {
     pub fn from_signal_schema_source() -> Result<Self, HelpError> {
-        let source = SchemaSource::from_schema_text(SIGNAL_SCHEMA_SOURCE)?;
-        Ok(HelpModelBuilder::from_source(&source).into_model())
+        let signal_source = SchemaSource::from_schema_text(SIGNAL_SCHEMA_SOURCE)?;
+        let domain_source = SchemaSource::from_schema_text(DOMAIN_SCHEMA_SOURCE)?;
+        let mut builder = HelpModelBuilder::from_source(&signal_source);
+        builder.insert_namespace(domain_source.namespace());
+        Ok(builder.into_model())
     }
 
     pub fn render(&self, request: &HelpRequest) -> Result<HelpResponse, HelpError> {
@@ -618,8 +621,8 @@ impl HelpTypeExpression {
             Some(SourceVariantPayload::Reference(reference)) => {
                 Self::application(variant.name(), vec![Self::from_reference(reference)])
             }
-            Some(SourceVariantPayload::Declaration(value)) => {
-                Self::application(variant.name(), vec![Self::inline(value.to_schema_text())])
+            Some(SourceVariantPayload::Declaration(_value)) => {
+                Self::application(variant.name(), vec![Self::from_name(variant.name())])
             }
             None => Self::from_name(variant.name()),
         }
