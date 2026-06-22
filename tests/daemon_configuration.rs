@@ -1,8 +1,32 @@
 use signal_spirit::{
-    ConfigurationPath, SpiritDaemonConfiguration, SpiritGuardianAgentConfiguration,
+    AuthorizationMode, ConfigurationPath, SpiritDaemonConfiguration, SpiritGuardianAgentConfiguration,
     SpiritGuardianMaximumOutputTokens, SpiritGuardianModelName, SpiritGuardianProviderName,
     SpiritGuardianTimeoutMilliseconds,
 };
+
+#[test]
+fn daemon_configuration_defaults_to_gating_authorization_mode() {
+    let configuration = SpiritDaemonConfiguration::new(
+        ConfigurationPath::new("/run/user/1000/spirit.sock"),
+        ConfigurationPath::new("/home/li/.local/state/spirit/spirit.sema"),
+    );
+
+    assert_eq!(configuration.authorization_mode(), AuthorizationMode::Gating);
+}
+
+#[test]
+fn daemon_configuration_archives_observing_authorization_mode() {
+    let configuration = SpiritDaemonConfiguration::new(
+        ConfigurationPath::new("/run/user/1000/spirit.sock"),
+        ConfigurationPath::new("/home/li/.local/state/spirit/spirit.sema"),
+    )
+    .with_authorization_mode(AuthorizationMode::Observing);
+
+    let bytes = configuration.to_rkyv_bytes().expect("encode config");
+    let recovered = SpiritDaemonConfiguration::from_rkyv_bytes(&bytes).expect("decode config");
+
+    assert_eq!(recovered.authorization_mode(), AuthorizationMode::Observing);
+}
 
 #[test]
 fn daemon_configuration_archives_guardian_agent_configuration() {

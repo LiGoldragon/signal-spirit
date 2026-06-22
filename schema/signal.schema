@@ -162,11 +162,13 @@
     timeout_milliseconds.SpiritGuardianTimeoutMilliseconds
     (MaximumOutputTokens (Optional SpiritGuardianMaximumOutputTokens))
   }
+  AuthorizationMode [Gating Observing]
   SpiritDaemonConfiguration {
     socket_path.ConfigurationPath
     (MetaSocketPath (Optional ConfigurationPath))
     database_path.ConfigurationPath
     (TraceSocketPath (Optional ConfigurationPath))
+    AuthorizationMode
     (GuardianAgentConfiguration (Optional SpiritGuardianAgentConfiguration))
   }
 

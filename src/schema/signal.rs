@@ -736,6 +736,23 @@ pub struct SpiritGuardianAgentConfiguration {
 
 #[rustfmt::skip]
 #[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[derive(
+    rkyv::Archive,
+    rkyv::Serialize,
+    rkyv::Deserialize,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+)]
+pub enum AuthorizationMode {
+    Gating,
+    Observing,
+}
+
+#[rustfmt::skip]
+#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub(crate) struct MetaSocketPath(Option<ConfigurationPath>);
 
@@ -757,6 +774,7 @@ pub struct SpiritDaemonConfiguration {
     pub(crate) meta_socket_path: MetaSocketPath,
     pub database_path: ConfigurationPath,
     pub(crate) trace_socket_path: TraceSocketPath,
+    pub authorization_mode: AuthorizationMode,
     pub(crate) guardian_agent_configuration: GuardianAgentConfiguration,
 }
 

@@ -120,6 +120,7 @@ impl SpiritDaemonConfiguration {
             meta_socket_path: MetaSocketPath::new(None),
             database_path,
             trace_socket_path: TraceSocketPath::new(None),
+            authorization_mode: AuthorizationMode::Gating,
             guardian_agent_configuration: GuardianAgentConfiguration::new(None),
         }
     }
@@ -143,6 +144,11 @@ impl SpiritDaemonConfiguration {
         self
     }
 
+    pub fn with_authorization_mode(mut self, authorization_mode: AuthorizationMode) -> Self {
+        self.authorization_mode = authorization_mode;
+        self
+    }
+
     pub fn socket_path(&self) -> &str {
         self.socket_path.as_str()
     }
@@ -163,6 +169,10 @@ impl SpiritDaemonConfiguration {
             .payload()
             .as_ref()
             .map(ConfigurationPath::as_str)
+    }
+
+    pub fn authorization_mode(&self) -> AuthorizationMode {
+        self.authorization_mode
     }
 
     pub fn guardian_agent_configuration(&self) -> Option<&SpiritGuardianAgentConfiguration> {
