@@ -136,7 +136,7 @@
   IntentSubscription { SubscriptionToken }
   QuoteText String
   Antecedent String
-  VerbatimQuote { QuoteText (OptionalAntecedent (Optional Antecedent)) }
+  VerbatimQuote { QuoteText OptionalAntecedent.(Optional Antecedent) }
   Testimony (Vector VerbatimQuote)
   Reasoning String
   Justification { Testimony Reasoning }
@@ -153,23 +153,23 @@
   IntentSuperseded { RetiredIdentifiers Replacements RecordIdentifiers }
   IntentRetired { RecordIdentifier }
   IntentEvent [(IntentRecorded IntentRecorded belongs IntentEventStream) (IntentClarified IntentClarified belongs IntentEventStream) (IntentSuperseded IntentSuperseded belongs IntentEventStream) (IntentRetired IntentRetired belongs IntentEventStream)]
-  IntentEventStream (Stream { token SubscriptionToken opened SubscriptionStarted event IntentEvent close SubscriptionToken })
+  IntentEventStream (Stream { token.SubscriptionToken opened.SubscriptionStarted event.IntentEvent close.SubscriptionToken })
   ValidationError [EmptyDomain EmptyDescription EmptyQueryDomain EmptyKeyword EmptySearchText EmptyQueryReferent StashHandleNotFound EmptyReferents]
   SpiritGuardianAgentConfiguration {
     agent_socket_path.ConfigurationPath
-    (ProviderName (Optional SpiritGuardianProviderName))
-    (ModelName (Optional SpiritGuardianModelName))
+    ProviderName.(Optional SpiritGuardianProviderName)
+    ModelName.(Optional SpiritGuardianModelName)
     timeout_milliseconds.SpiritGuardianTimeoutMilliseconds
-    (MaximumOutputTokens (Optional SpiritGuardianMaximumOutputTokens))
+    MaximumOutputTokens.(Optional SpiritGuardianMaximumOutputTokens)
   }
   AuthorizationMode [Gating Observing]
   SpiritDaemonConfiguration {
     socket_path.ConfigurationPath
-    (MetaSocketPath (Optional ConfigurationPath))
+    MetaSocketPath.(Optional ConfigurationPath)
     database_path.ConfigurationPath
-    (TraceSocketPath (Optional ConfigurationPath))
+    TraceSocketPath.(Optional ConfigurationPath)
     AuthorizationMode
-    (GuardianAgentConfiguration (Optional SpiritGuardianAgentConfiguration))
+    GuardianAgentConfiguration.(Optional SpiritGuardianAgentConfiguration)
   }
 
   DomainMatch [Any (Partial) (Full)]

@@ -173,7 +173,7 @@ fn generated_help_model_renders_spirit_one_level_shapes() {
         // type `(Optional Antecedent)` is the schema, not a collapsed bare role
         // name. This is the schema codec's own canonical form for the source
         // declaration, identical to what instance-schema and Rust lowering read.
-        "(VerbatimQuote { QuoteText (OptionalAntecedent (Optional Antecedent)) })"
+        "(VerbatimQuote { QuoteText OptionalAntecedent.(Optional Antecedent) })"
     );
 }
 
@@ -223,7 +223,7 @@ fn generated_help_model_renders_every_decoded_schema_target() {
             .render(&signal_spirit::HelpRequest::for_name("IntentEventStream"))
             .expect("render stream help")
             .to_string(),
-        "(IntentEventStream (Stream { token SubscriptionToken opened SubscriptionStarted event IntentEvent close SubscriptionToken }))"
+        "(IntentEventStream (Stream { token.SubscriptionToken opened.SubscriptionStarted event.IntentEvent close.SubscriptionToken }))"
     );
 }
 
@@ -282,7 +282,7 @@ fn generated_help_round_trips_through_the_schema_codec() {
         ("DomainMatch", "(DomainMatch [Any (Partial) (Full)])"),
         (
             "IntentEventStream",
-            "(IntentEventStream (Stream { token SubscriptionToken opened SubscriptionStarted event IntentEvent close SubscriptionToken }))",
+            "(IntentEventStream (Stream { token.SubscriptionToken opened.SubscriptionStarted event.IntentEvent close.SubscriptionToken }))",
         ),
     ] {
         let response = model
