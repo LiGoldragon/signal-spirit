@@ -185,8 +185,8 @@ dependencies = [
 
 [[package]]
 name = "nota-next"
-version = "0.5.0"
-source = "git+https://github.com/LiGoldragon/nota-next.git?branch=main#c43d04a159e90314a0094b61ace66053371cc247"
+version = "0.5.1"
+source = "git+https://github.com/LiGoldragon/nota-next.git?branch=main#f94b5462a4456b3651a93c40dc7c19a287426213"
 dependencies = [
  "nota-next-derive",
  "rkyv",
@@ -195,7 +195,7 @@ dependencies = [
 [[package]]
 name = "nota-next-derive"
 version = "0.3.0"
-source = "git+https://github.com/LiGoldragon/nota-next.git?branch=main#c43d04a159e90314a0094b61ace66053371cc247"
+source = "git+https://github.com/LiGoldragon/nota-next.git?branch=main#f94b5462a4456b3651a93c40dc7c19a287426213"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -325,7 +325,7 @@ checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
 [[package]]
 name = "schema-cc"
 version = "0.1.0"
-source = "git+https://github.com/LiGoldragon/schema-next.git?branch=main#4b7e830a7001708737a617bd8eedac8002cc1fc6"
+source = "git+https://github.com/LiGoldragon/schema-next.git?branch=help-codec#a8fa3a6eed0aca7ed0947fc78cf57ada8df3007c"
 dependencies = [
  "nota-next",
  "prettyplease",
@@ -338,7 +338,7 @@ dependencies = [
 [[package]]
 name = "schema-cc"
 version = "0.1.0"
-source = "git+https://github.com/LiGoldragon/schema-next.git?branch=schema-help#ece5c380442f90e6f6ec172525f035a4c7fd2362"
+source = "git+https://github.com/LiGoldragon/schema-next.git?branch=main#4b7e830a7001708737a617bd8eedac8002cc1fc6"
 dependencies = [
  "nota-next",
  "prettyplease",
@@ -351,24 +351,24 @@ dependencies = [
 [[package]]
 name = "schema-next"
 version = "0.2.0"
-source = "git+https://github.com/LiGoldragon/schema-next.git?branch=main#4b7e830a7001708737a617bd8eedac8002cc1fc6"
+source = "git+https://github.com/LiGoldragon/schema-next.git?branch=help-codec#a8fa3a6eed0aca7ed0947fc78cf57ada8df3007c"
 dependencies = [
  "blake3",
  "nota-next",
  "rkyv",
- "schema-cc 0.1.0 (git+https://github.com/LiGoldragon/schema-next.git?branch=main)",
+ "schema-cc 0.1.0 (git+https://github.com/LiGoldragon/schema-next.git?branch=help-codec)",
  "thiserror",
 ]
 
 [[package]]
 name = "schema-next"
 version = "0.2.0"
-source = "git+https://github.com/LiGoldragon/schema-next.git?branch=schema-help#ece5c380442f90e6f6ec172525f035a4c7fd2362"
+source = "git+https://github.com/LiGoldragon/schema-next.git?branch=main#4b7e830a7001708737a617bd8eedac8002cc1fc6"
 dependencies = [
  "blake3",
  "nota-next",
  "rkyv",
- "schema-cc 0.1.0 (git+https://github.com/LiGoldragon/schema-next.git?branch=schema-help)",
+ "schema-cc 0.1.0 (git+https://github.com/LiGoldragon/schema-next.git?branch=main)",
  "thiserror",
 ]
 
@@ -419,7 +419,7 @@ version = "0.8.0"
 dependencies = [
  "nota-next",
  "rkyv",
- "schema-next 0.2.0 (git+https://github.com/LiGoldragon/schema-next.git?branch=schema-help)",
+ "schema-next 0.2.0 (git+https://github.com/LiGoldragon/schema-next.git?branch=help-codec)",
  "schema-rust-next",
  "signal-frame",
  "thiserror",

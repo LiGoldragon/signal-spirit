@@ -9,7 +9,7 @@ use signal_spirit::{
 use std::collections::BTreeSet;
 
 #[cfg(feature = "nota-text")]
-use nota_next::{NotaDocumentEncode, NotaEncode, NotaSource};
+use nota_next::{NotaEncode, NotaSource};
 
 #[test]
 fn generated_input_frame_round_trips() {
@@ -244,44 +244,73 @@ fn generated_help_model_round_trips_through_rkyv() {
     );
 }
 
+/// The help text codec is schema-next's declaration codec, not a hand-rolled
+/// or nota-derive one. For each representative target this asserts both the
+/// canonical rendered schema text AND a true round trip `decode(render(node))
+/// == node` through that same schema codec (`HelpResponse::to_schema_text` ->
+/// `HelpResponse::from_schema_text`). Covered shapes: a struct (`Record`), a
+/// struct of newtype roles (`Entry`), a `Vec` element-as-reference
+/// (`Domains`), a newtype (`RecordAccepted`), an enum (`DomainMatch`), and a
+/// stream (`IntentEventStream`).
 #[cfg(feature = "nota-text")]
 #[test]
-fn generated_help_response_round_trips_through_nota_codec() {
+fn generated_help_round_trips_through_the_schema_codec() {
     let model = signal_spirit::HelpModel::from_signal_schema_source().expect("build help model");
-    let response = model
-        .render(&signal_spirit::HelpRequest::for_name("Entry"))
-        .expect("render Entry help");
-    let encoded = response.to_nota();
-    assert_eq!(
-        encoded,
-        "(Entry { Domains Kind Description Certainty Importance Privacy Referents })"
-    );
-    let decoded = NotaSource::new(&encoded)
-        .parse::<signal_spirit::HelpResponse>()
-        .expect("decode single-entry HelpResponse");
-    assert_eq!(decoded, response);
 
+    for (target, expected) in [
+        ("Record", "(Record { Entry Justification })"),
+        (
+            "Entry",
+            "(Entry { Domains Kind Description Certainty Importance Privacy Referents })",
+        ),
+        ("Domains", "(Domains (Vec Domain))"),
+        ("RecordAccepted", "(RecordAccepted RecordIdentifier)"),
+        // The schema codec's canonical enum rendering drops the redundant
+        // parens around payload-less variants: the source declares
+        // `DomainMatch [Any (Partial) (Full)]`, but `(Partial)`/`(Full)` carry
+        // no payload, so they normalize to bare `Partial`/`Full`.
+        ("DomainMatch", "(DomainMatch [Any Partial Full])"),
+        (
+            "IntentEventStream",
+            "(IntentEventStream (Stream { token SubscriptionToken opened SubscriptionStarted event IntentEvent close SubscriptionToken }))",
+        ),
+    ] {
+        let response = model
+            .render(&signal_spirit::HelpRequest::for_name(target))
+            .unwrap_or_else(|error| panic!("render {target} help: {error}"));
+
+        let encoded = response
+            .to_schema_text()
+            .unwrap_or_else(|error| panic!("encode {target} help as schema text: {error}"));
+        assert_eq!(
+            encoded, expected,
+            "{target} should render its canonical schema declaration"
+        );
+        assert_eq!(
+            response.to_string(),
+            expected,
+            "{target} Display must delegate to the schema codec"
+        );
+
+        let decoded = signal_spirit::HelpResponse::from_schema_text(&encoded)
+            .unwrap_or_else(|error| panic!("decode {target} help schema text: {error}"));
+        assert_eq!(
+            decoded, response,
+            "{target} must round trip decode(render(node)) == node through the schema codec"
+        );
+    }
+
+    // The multi-declaration top-level response round trips as one schema
+    // document through the same codec.
     let top_level = model
         .render(&signal_spirit::HelpRequest::new(None))
         .expect("render top-level help");
-    let encoded = top_level.to_nota_document_body().to_nota();
-    let decoded = NotaSource::new(&encoded)
-        .parse_document_body::<signal_spirit::HelpResponse>()
-        .expect("decode multi-entry HelpResponse document body");
+    let encoded = top_level
+        .to_schema_text()
+        .expect("encode top-level help as schema text");
+    let decoded =
+        signal_spirit::HelpResponse::from_schema_text(&encoded).expect("decode top-level help");
     assert_eq!(decoded, top_level);
-
-    let stream = model
-        .render(&signal_spirit::HelpRequest::for_name("IntentEventStream"))
-        .expect("render stream help");
-    let encoded = stream.to_nota();
-    assert_eq!(
-        encoded,
-        "(IntentEventStream (Stream { token SubscriptionToken opened SubscriptionStarted event IntentEvent close SubscriptionToken }))"
-    );
-    let decoded = NotaSource::new(&encoded)
-        .parse::<signal_spirit::HelpResponse>()
-        .expect("decode stream HelpResponse");
-    assert_eq!(decoded, stream);
 }
 
 #[cfg(feature = "nota-text")]
