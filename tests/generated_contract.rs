@@ -279,6 +279,17 @@ fn generated_help_response_round_trips_through_schema_codec() {
     let decoded =
         signal_spirit::HelpResponse::from_schema_text(&encoded).expect("decode stream help");
     assert_eq!(decoded, stream);
+
+    let domain_match = model
+        .render(&signal_spirit::HelpRequest::for_name("DomainMatch"))
+        .expect("render DomainMatch help");
+    let encoded = domain_match
+        .to_schema_text()
+        .expect("encode DomainMatch help");
+    assert_eq!(encoded, "(DomainMatch [Any Partial Full])");
+    let decoded =
+        signal_spirit::HelpResponse::from_schema_text(&encoded).expect("decode DomainMatch help");
+    assert_eq!(decoded, domain_match);
 }
 
 #[cfg(feature = "nota-text")]
