@@ -133,7 +133,7 @@ fn generated_help_model_renders_spirit_one_level_shapes() {
             .entries()
             .entries()
             .iter()
-            .any(|entry| entry.to_string() == "(Record { Entry Justification })"),
+            .any(|entry| entry.to_schema_text() == "(Record { Entry Justification })"),
         "top-level help should include Record's one-level payload shape"
     );
     assert_eq!(
@@ -155,7 +155,7 @@ fn generated_help_model_renders_spirit_one_level_shapes() {
             .render(&signal_spirit::HelpRequest::for_name("Domains"))
             .expect("render Domains help")
             .to_string(),
-        "(Domains (Vec Domain))"
+        "(Domains (Vector Domain))"
     );
     assert_eq!(
         model
@@ -240,7 +240,7 @@ fn generated_help_model_round_trips_through_rkyv() {
     assert_eq!(
         decoded.entries().entries()[0].name().as_str(),
         "Entry",
-        "help response should preserve the typed entry name before rendering"
+        "help response should preserve the schema declaration name before rendering"
     );
 }
 
@@ -290,6 +290,42 @@ fn generated_help_response_round_trips_through_schema_codec() {
     let decoded =
         signal_spirit::HelpResponse::from_schema_text(&encoded).expect("decode DomainMatch help");
     assert_eq!(decoded, domain_match);
+}
+
+#[cfg(feature = "nota-text")]
+#[test]
+fn generated_help_response_is_schema_ir_not_parallel_help_ast() {
+    let model = signal_spirit::HelpModel::from_signal_schema_source().expect("build help model");
+    let response = model
+        .render(&signal_spirit::HelpRequest::for_name("Domains"))
+        .expect("render Domains help");
+    let declaration = response
+        .declarations()
+        .declarations()
+        .first()
+        .expect("single Domains declaration");
+
+    assert_eq!(declaration.name().as_str(), "Domains");
+    let Some(schema_next::SourceDeclarationValue::Reference(reference)) = declaration.value()
+    else {
+        panic!("Domains help must be a schema reference declaration");
+    };
+    assert!(
+        matches!(reference, schema_next::SourceReference::Vector(_)),
+        "Domains help must carry the schema IR vector reference, found {reference:?}"
+    );
+    assert_eq!(response.to_string(), "(Domains (Vector Domain))");
+
+    let legacy = schema_next::SourceDeclaration::from_schema_text("(Domains (Vec Domain))")
+        .expect("legacy spelling still decodes as schema data");
+    let Some(schema_next::SourceDeclarationValue::Reference(legacy_reference)) = legacy.value()
+    else {
+        panic!("legacy spelling must decode as a reference declaration");
+    };
+    assert!(
+        !matches!(legacy_reference, schema_next::SourceReference::Vector(_)),
+        "Vec must not sneak into Help as the built-in vector unless schema-next makes it canonical"
+    );
 }
 
 #[cfg(feature = "nota-text")]
