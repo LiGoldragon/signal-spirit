@@ -101,6 +101,10 @@ counts or time windows.
 - Project the **description-only discipline** — terse
   acknowledgements, daemon-stamped timestamps, and user-creatable
   topic vectors.
+- Carry daemon startup policy that must be binary-configured before the
+  daemon starts, including `AuthorizationMode`: `Gating` keeps criome
+  verdicts fail-closed for fan-out, while `Observing` emits criome
+  authorization requests and lets the local head proceed for monitoring.
 
 ## Constraints
 

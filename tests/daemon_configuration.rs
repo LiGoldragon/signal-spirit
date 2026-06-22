@@ -1,7 +1,7 @@
 use signal_spirit::{
-    AuthorizationMode, ConfigurationPath, SpiritDaemonConfiguration, SpiritGuardianAgentConfiguration,
-    SpiritGuardianMaximumOutputTokens, SpiritGuardianModelName, SpiritGuardianProviderName,
-    SpiritGuardianTimeoutMilliseconds,
+    AuthorizationMode, ConfigurationPath, SpiritDaemonConfiguration,
+    SpiritGuardianAgentConfiguration, SpiritGuardianMaximumOutputTokens, SpiritGuardianModelName,
+    SpiritGuardianProviderName, SpiritGuardianTimeoutMilliseconds,
 };
 
 #[test]
@@ -11,7 +11,10 @@ fn daemon_configuration_defaults_to_gating_authorization_mode() {
         ConfigurationPath::new("/home/li/.local/state/spirit/spirit.sema"),
     );
 
-    assert_eq!(configuration.authorization_mode(), AuthorizationMode::Gating);
+    assert_eq!(
+        configuration.authorization_mode(),
+        AuthorizationMode::Gating
+    );
 }
 
 #[test]

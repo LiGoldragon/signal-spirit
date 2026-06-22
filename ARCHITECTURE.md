@@ -68,6 +68,12 @@ The public observer event stays contract-owned:
 
 **Frame layer.** Frame mechanics come from `signal-frame`.
 
+**Daemon startup configuration.** The binary
+`SpiritDaemonConfiguration` also carries daemon startup policy that must be set
+before process launch. `AuthorizationMode` is explicit: `Gating` means criome
+verdicts release or hold fan-out, while `Observing` means spirit emits the
+criome authorization request but proceeds without waiting for the verdict.
+
 **Text projection.** The default build is binary/rkyv-only and does not pull
 `nota-next`, `nota-codec`, or `signal-core`. The `nota-text` feature enables
 NOTA derives, manual NOTA codecs, and text round-trip tests for CLI/debug/audit
