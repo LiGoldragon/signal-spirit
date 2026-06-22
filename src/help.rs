@@ -1,10 +1,29 @@
+//! Help as a thin view over the resolved schema IR.
+//!
+//! Help is not a separate language and carries no AST of its own. A Help node
+//! is a (re-headed) `schema-next` [`SourceDeclaration`]: the entry name plus
+//! the declaration's [`SourceDeclarationValue`] body — the SAME resolved IR
+//! that instance-schema rendering and Rust lowering read. There is no
+//! `HelpBody` / `HelpTypeExpression`; those duplicated `SourceDeclarationValue`
+//! / `SourceReference`, and that fork is exactly where the `Vec` / `Vector`
+//! spelling escaped. With the duplicate gone, `(Help Domains)` and the
+//! per-instance schema of an empty `Domains` both project the one
+//! `SourceReference::Vector(Plain(Domain))` and render `(Vector Domain)`
+//! through the one schema encoder.
+//!
+//! The text codec is schema-next's declaration codec end to end: encode via
+//! [`SourceDeclaration::to_schema_text`], decode via
+//! [`SourceDeclarations::from_schema_text`]. No hand `format!` printer, no
+//! parallel decoder. The rkyv codec is the rkyv derive on these wrappers over
+//! the (rkyv-derived) `SourceDeclarationValue`.
+
 use std::fmt;
 
 use nota_next::{Block, Delimiter, Document};
 use schema_next::{
     Name, SchemaError, SchemaSource, SourceDeclaration, SourceDeclarationValue, SourceDeclarations,
-    SourceEnumBody, SourceField, SourceFieldValue, SourceImport, SourceNamespace, SourceReference,
-    SourceRootEnum, SourceStructBody, SourceVariantPayload, SourceVariantSignature,
+    SourceField, SourceFieldValue, SourceImport, SourceNamespace, SourceRootEnum,
+    SourceVariantPayload, SourceVariantSignature,
 };
 use thiserror::Error;
 
@@ -23,9 +42,6 @@ pub enum HelpError {
 
     #[error("unknown Help target: {0}")]
     UnknownTarget(String),
-
-    #[error("help expression cannot be represented as a schema declaration: {0}")]
-    InvalidExpression(String),
 }
 
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -79,6 +95,8 @@ impl HelpRequest {
     }
 }
 
+/// A help response is a list of (re-headed) schema declarations — the schema IR
+/// for the requested roots/type. It round-trips through the one schema codec.
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct HelpResponse {
     entries: HelpEntries,
@@ -94,46 +112,44 @@ impl HelpResponse {
     }
 
     /// Decode a help response from its schema text — the inverse of
-    /// [`Self::to_schema_text`]. Each re-headed declaration parses back into a
-    /// typed [`HelpEntry`] through schema-next's declaration decoder, never a
-    /// hand-rolled delimiter walk.
+    /// [`Self::to_schema_text`]. Each re-headed declaration parses straight
+    /// back into the resolved IR through schema-next's declaration decoder; the
+    /// help entry is that [`SourceDeclaration`] with no intermediate AST.
     pub fn from_schema_text(source: &str) -> Result<Self, HelpError> {
         let declarations = SourceDeclarations::from_schema_text(source)?;
-        Self::from_source_declarations(&declarations)
+        Ok(Self::from_source_declarations(&declarations))
     }
 
     /// Encode the response as canonical schema text through schema-next's
     /// declaration encoder.
-    pub fn to_schema_text(&self) -> Result<String, HelpError> {
-        Ok(self.to_source_declarations()?.to_schema_text())
+    pub fn to_schema_text(&self) -> String {
+        self.to_source_declarations().to_schema_text()
     }
 
-    fn from_source_declarations(declarations: &SourceDeclarations) -> Result<Self, HelpError> {
-        declarations
-            .declarations()
-            .iter()
-            .map(HelpEntry::from_source_declaration)
-            .collect::<Result<Vec<_>, _>>()
-            .map(HelpEntries::new)
-            .map(Self::new)
+    fn from_source_declarations(declarations: &SourceDeclarations) -> Self {
+        Self::new(HelpEntries::new(
+            declarations
+                .declarations()
+                .iter()
+                .map(HelpEntry::from_source_declaration)
+                .collect(),
+        ))
     }
 
-    fn to_source_declarations(&self) -> Result<SourceDeclarations, HelpError> {
-        self.entries()
-            .entries()
-            .iter()
-            .map(HelpEntry::to_source_declaration)
-            .collect::<Result<Vec<_>, _>>()
-            .map(SourceDeclarations::new)
+    fn to_source_declarations(&self) -> SourceDeclarations {
+        SourceDeclarations::new(
+            self.entries()
+                .entries()
+                .iter()
+                .map(HelpEntry::to_source_declaration)
+                .collect(),
+        )
     }
 }
 
 impl fmt::Display for HelpResponse {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.to_schema_text() {
-            Ok(text) => formatter.write_str(&text),
-            Err(_) => Err(fmt::Error),
-        }
+        formatter.write_str(&self.to_schema_text())
     }
 }
 
@@ -201,7 +217,7 @@ impl HelpModelBuilder {
         for import in imports {
             self.nodes.insert(HelpNode::new(
                 HelpName::from(import.local_name()),
-                HelpBody::Reference(HelpTypeExpression::from_reference(import.source())),
+                Some(SourceDeclarationValue::Reference(import.source().clone())),
             ));
         }
     }
@@ -210,8 +226,7 @@ impl HelpModelBuilder {
         for entry in namespace.entries() {
             if let Some(value) = entry.value() {
                 let name = HelpName::from(entry.name());
-                let body = HelpBody::from_declaration(value);
-                self.nodes.insert(HelpNode::new(name, body));
+                self.nodes.insert(HelpNode::new(name, Some(value.clone())));
                 self.insert_inline_declarations_from_declaration(value);
             }
             if let Some(child_namespace) = entry.namespace() {
@@ -233,34 +248,41 @@ impl HelpModelBuilder {
         }
     }
 
-    fn body_for_root_variant(&self, variant: &SourceVariantSignature) -> HelpBody {
+    /// Resolve a root variant to the resolved-IR body Help shows for it. A
+    /// reference / declaration payload is shown directly; a unit variant that
+    /// names a node resolves one level to that node's declared shape (so
+    /// `Record` shows its struct, not a bare reference).
+    fn body_for_root_variant(
+        &self,
+        variant: &SourceVariantSignature,
+    ) -> Option<SourceDeclarationValue> {
         match variant.payload_source() {
             Some(SourceVariantPayload::Reference(reference)) => {
-                HelpBody::Reference(HelpTypeExpression::from_reference(reference))
+                Some(SourceDeclarationValue::Reference(reference.clone()))
             }
-            Some(SourceVariantPayload::Declaration(value)) => HelpBody::from_declaration(value),
+            Some(SourceVariantPayload::Declaration(value)) => Some(value.clone()),
             None => self
                 .nodes
                 .find(&HelpName::from(variant.name()))
-                .map(|node| self.body_for_root_node(node))
-                .unwrap_or(HelpBody::Unit),
+                .and_then(|node| self.body_for_root_node(node)),
         }
     }
 
-    fn body_for_root_node(&self, node: &HelpNode) -> HelpBody {
+    /// One level of name resolution: if a node is a bare reference to a named
+    /// type that is itself a struct or enum, show that struct/enum body
+    /// (resolved IR), else keep the node's own body.
+    fn body_for_root_node(&self, node: &HelpNode) -> Option<SourceDeclarationValue> {
         match node.body() {
-            HelpBody::Reference(reference) => reference
+            Some(SourceDeclarationValue::Reference(reference)) => reference
                 .plain_name()
-                .and_then(|name| self.nodes.find(name))
+                .and_then(|name| self.nodes.find(&HelpName::from(name)))
                 .and_then(|target| match target.body() {
-                    HelpBody::Struct(fields) => Some(HelpBody::Struct(fields.clone())),
-                    HelpBody::Enumeration(variants) => {
-                        Some(HelpBody::Enumeration(variants.clone()))
-                    }
-                    HelpBody::Unit | HelpBody::Reference(_) | HelpBody::Text(_) => None,
+                    Some(value @ SourceDeclarationValue::Struct(_))
+                    | Some(value @ SourceDeclarationValue::Enum(_)) => Some(value.clone()),
+                    _ => None,
                 })
-                .unwrap_or_else(|| HelpBody::Reference(reference.clone())),
-            body => body.clone(),
+                .or_else(|| Some(SourceDeclarationValue::Reference(reference.clone()))),
+            body => body.cloned(),
         }
     }
 
@@ -277,7 +299,7 @@ impl HelpModelBuilder {
                     {
                         self.nodes.insert(HelpNode::new(
                             HelpName::from(variant.name()),
-                            HelpBody::from_declaration(value),
+                            Some(value.clone()),
                         ));
                         self.insert_inline_declarations_from_declaration(value);
                     }
@@ -295,18 +317,18 @@ impl HelpModelBuilder {
             return;
         }
         let body = match field.value() {
-            SourceFieldValue::Reference(reference) => Some(HelpBody::Reference(
-                HelpTypeExpression::from_reference(reference),
-            )),
+            SourceFieldValue::Reference(reference) => {
+                Some(SourceDeclarationValue::Reference(reference.clone()))
+            }
             SourceFieldValue::Declaration(value) => {
                 self.insert_inline_declarations_from_declaration(value);
-                Some(HelpBody::from_declaration(value))
+                Some(value.clone())
             }
             SourceFieldValue::Derived => None,
         };
         if let Some(body) = body {
             self.nodes
-                .insert(HelpNode::new(HelpName::from(field.name()), body));
+                .insert(HelpNode::new(HelpName::from(field.name()), Some(body)));
         }
     }
 }
@@ -341,23 +363,39 @@ pub enum HelpPlane {
 }
 
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
+#[rkyv(
+    bytecheck(bounds(
+        __C: rkyv::validation::ArchiveContext,
+        __C::Error: rkyv::rancor::Source
+    )),
+    serialize_bounds(
+        __S: rkyv::ser::Writer + rkyv::ser::Allocator,
+        __S::Error: rkyv::rancor::Source
+    ),
+    deserialize_bounds(__D::Error: rkyv::rancor::Source)
+)]
 pub struct HelpRoot {
     plane: HelpPlane,
     name: HelpName,
-    body: HelpBody,
+    #[rkyv(omit_bounds)]
+    body: Option<SourceDeclarationValue>,
 }
 
 impl HelpRoot {
-    fn new(plane: HelpPlane, name: HelpName, body: HelpBody) -> Self {
+    fn new(plane: HelpPlane, name: HelpName, body: Option<SourceDeclarationValue>) -> Self {
         Self { plane, name, body }
+    }
+
+    pub fn plane(&self) -> HelpPlane {
+        self.plane
     }
 
     fn name(&self) -> &HelpName {
         &self.name
     }
 
-    fn body(&self) -> &HelpBody {
-        &self.body
+    fn body(&self) -> Option<&SourceDeclarationValue> {
+        self.body.as_ref()
     }
 }
 
@@ -389,13 +427,25 @@ impl HelpNodes {
 }
 
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
+#[rkyv(
+    bytecheck(bounds(
+        __C: rkyv::validation::ArchiveContext,
+        __C::Error: rkyv::rancor::Source
+    )),
+    serialize_bounds(
+        __S: rkyv::ser::Writer + rkyv::ser::Allocator,
+        __S::Error: rkyv::rancor::Source
+    ),
+    deserialize_bounds(__D::Error: rkyv::rancor::Source)
+)]
 pub struct HelpNode {
     name: HelpName,
-    body: HelpBody,
+    #[rkyv(omit_bounds)]
+    body: Option<SourceDeclarationValue>,
 }
 
 impl HelpNode {
-    fn new(name: HelpName, body: HelpBody) -> Self {
+    fn new(name: HelpName, body: Option<SourceDeclarationValue>) -> Self {
         Self { name, body }
     }
 
@@ -403,8 +453,8 @@ impl HelpNode {
         &self.name
     }
 
-    fn body(&self) -> &HelpBody {
-        &self.body
+    fn body(&self) -> Option<&SourceDeclarationValue> {
+        self.body.as_ref()
     }
 }
 
@@ -431,425 +481,73 @@ impl HelpEntries {
     }
 }
 
+/// A single help entry: a re-headed schema declaration. The body is the
+/// resolved-IR [`SourceDeclarationValue`] verbatim — the same value
+/// instance-schema and Rust lowering consume.
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
+#[rkyv(
+    bytecheck(bounds(
+        __C: rkyv::validation::ArchiveContext,
+        __C::Error: rkyv::rancor::Source
+    )),
+    serialize_bounds(
+        __S: rkyv::ser::Writer + rkyv::ser::Allocator,
+        __S::Error: rkyv::rancor::Source
+    ),
+    deserialize_bounds(__D::Error: rkyv::rancor::Source)
+)]
 pub struct HelpEntry {
     name: HelpName,
-    body: HelpBody,
+    #[rkyv(omit_bounds)]
+    body: Option<SourceDeclarationValue>,
 }
 
 impl HelpEntry {
+    fn new(name: HelpName, body: Option<SourceDeclarationValue>) -> Self {
+        Self { name, body }
+    }
+
     fn from_root(root: &HelpRoot) -> Self {
-        Self {
-            name: root.name().clone(),
-            body: root.body().clone(),
-        }
+        Self::new(root.name().clone(), root.body().cloned())
     }
 
     fn from_node(node: &HelpNode) -> Self {
-        Self {
-            name: node.name().clone(),
-            body: node.body().clone(),
-        }
+        Self::new(node.name().clone(), node.body().cloned())
     }
 
-    fn new(name: HelpName, body: HelpBody) -> Self {
-        Self { name, body }
+    fn from_source_declaration(declaration: &SourceDeclaration) -> Self {
+        Self::new(
+            HelpName::from(declaration.name()),
+            declaration.value().cloned(),
+        )
     }
 
     pub fn name(&self) -> &HelpName {
         &self.name
     }
 
-    pub fn body(&self) -> &HelpBody {
-        &self.body
+    /// The resolved-IR body of this entry — the same `SourceDeclarationValue`
+    /// instance-schema and Rust lowering read.
+    pub fn body(&self) -> Option<&SourceDeclarationValue> {
+        self.body.as_ref()
     }
 
-    /// Decode a single help entry from a (re-headed) source declaration — the
-    /// `Head` is the entry name, the body is the schema declaration value the
-    /// schema decoder already parsed.
-    fn from_source_declaration(declaration: &SourceDeclaration) -> Result<Self, HelpError> {
-        let body = match declaration.value() {
-            Some(value) => HelpBody::from_declaration(value),
-            None => HelpBody::Unit,
-        };
-        Ok(Self::new(HelpName::from(declaration.name()), body))
-    }
-
-    /// Re-head the typed body over the entry name as a source declaration so
-    /// the schema encoder produces `(Head <body-schema-text>)`.
-    fn to_source_declaration(&self) -> Result<SourceDeclaration, HelpError> {
-        Ok(SourceDeclaration::new(
-            Name::new(self.name.as_str()),
-            self.body.to_source_declaration_value()?,
-        ))
+    /// Re-head the resolved-IR body over the entry name as a source declaration
+    /// so the schema encoder produces `(Head <body-schema-text>)`.
+    fn to_source_declaration(&self) -> SourceDeclaration {
+        SourceDeclaration::new(Name::new(self.name.as_str()), self.body.clone())
     }
 
     /// Encode this entry as canonical schema text through schema-next's
     /// declaration encoder.
-    pub fn to_schema_text(&self) -> Result<String, HelpError> {
-        Ok(self.to_source_declaration()?.to_schema_text())
+    pub fn to_schema_text(&self) -> String {
+        self.to_source_declaration().to_schema_text()
     }
 }
 
 impl fmt::Display for HelpEntry {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.to_schema_text() {
-            Ok(text) => formatter.write_str(&text),
-            Err(_) => Err(fmt::Error),
-        }
-    }
-}
-
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
-pub enum HelpBody {
-    Unit,
-    Reference(HelpTypeExpression),
-    Struct(HelpFieldTypes),
-    Enumeration(HelpVariantTypes),
-    Text(String),
-}
-
-impl HelpBody {
-    fn from_declaration(value: &SourceDeclarationValue) -> Self {
-        match value {
-            SourceDeclarationValue::Reference(reference) => {
-                Self::Reference(HelpTypeExpression::from_reference(reference))
-            }
-            SourceDeclarationValue::Struct(body) => Self::from_struct_body(body),
-            SourceDeclarationValue::Enum(body) => Self::from_enum_body(body),
-            SourceDeclarationValue::Text(text) => Self::Text(text.clone()),
-            SourceDeclarationValue::Stream(_) | SourceDeclarationValue::Family(_) => {
-                Self::Text(value.to_schema_text())
-            }
-        }
-    }
-
-    fn from_struct_body(body: &SourceStructBody) -> Self {
-        Self::Struct(HelpFieldTypes::from_struct_body(body))
-    }
-
-    fn from_enum_body(body: &SourceEnumBody) -> Self {
-        Self::Enumeration(HelpVariantTypes::from_enum_body(body))
-    }
-
-    /// Project the typed body back onto a [`SourceDeclarationValue`] so the
-    /// schema encoder owns the text form. `Unit` has no body; the `Text`
-    /// fallback (Stream/Family, etc.) re-parses through the schema decoder so
-    /// even the escape hatch round-trips at the schema layer.
-    fn to_source_declaration_value(&self) -> Result<Option<SourceDeclarationValue>, HelpError> {
-        match self {
-            Self::Unit => Ok(None),
-            Self::Reference(reference) => Ok(Some(SourceDeclarationValue::Reference(
-                reference.to_source_reference()?,
-            ))),
-            Self::Struct(fields) => Ok(Some(SourceDeclarationValue::Struct(
-                fields.to_source_struct_body()?,
-            ))),
-            Self::Enumeration(variants) => Ok(Some(SourceDeclarationValue::Enum(
-                variants.to_source_enum_body()?,
-            ))),
-            Self::Text(text) => SourceDeclarationValue::from_schema_text(text)
-                .map(Some)
-                .map_err(HelpError::from),
-        }
-    }
-}
-
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct HelpFieldTypes {
-    fields: Vec<HelpTypeExpression>,
-}
-
-impl HelpFieldTypes {
-    fn from_struct_body(body: &SourceStructBody) -> Self {
-        Self {
-            fields: body
-                .fields()
-                .iter()
-                .map(HelpTypeExpression::from_field)
-                .collect(),
-        }
-    }
-
-    pub fn fields(&self) -> &[HelpTypeExpression] {
-        &self.fields
-    }
-
-    fn to_source_struct_body(&self) -> Result<SourceStructBody, HelpError> {
-        self.fields
-            .iter()
-            .map(HelpTypeExpression::to_source_field)
-            .collect::<Result<Vec<_>, _>>()
-            .map(SourceStructBody::new)
-    }
-}
-
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct HelpVariantTypes {
-    variants: Vec<HelpTypeExpression>,
-}
-
-impl HelpVariantTypes {
-    fn from_enum_body(body: &SourceEnumBody) -> Self {
-        Self {
-            variants: body
-                .variants()
-                .iter()
-                .map(HelpTypeExpression::from_variant)
-                .collect(),
-        }
-    }
-
-    pub fn variants(&self) -> &[HelpTypeExpression] {
-        &self.variants
-    }
-
-    fn to_source_enum_body(&self) -> Result<SourceEnumBody, HelpError> {
-        self.variants
-            .iter()
-            .map(HelpTypeExpression::to_source_variant_signature)
-            .collect::<Result<Vec<_>, _>>()
-            .map(SourceEnumBody::new)
-    }
-}
-
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct HelpTypeExpression {
-    expression: HelpTypeExpressionKind,
-}
-
-impl HelpTypeExpression {
-    fn new(expression: HelpTypeExpressionKind) -> Self {
-        Self { expression }
-    }
-
-    fn from_name(name: &Name) -> Self {
-        Self::new(HelpTypeExpressionKind::Name(HelpName::from(name)))
-    }
-
-    fn from_reference(reference: &SourceReference) -> Self {
-        match reference {
-            SourceReference::Plain(name) => Self::from_name(name),
-            SourceReference::FixedBytes(width) => {
-                Self::new(HelpTypeExpressionKind::FixedBytes(*width))
-            }
-            SourceReference::Vector(reference) => Self::new(HelpTypeExpressionKind::Vector(
-                Box::new(Self::from_reference(reference)),
-            )),
-            SourceReference::Optional(reference) => Self::new(HelpTypeExpressionKind::Optional(
-                Box::new(Self::from_reference(reference)),
-            )),
-            SourceReference::ScopeOf(reference) => Self::new(HelpTypeExpressionKind::ScopeOf(
-                Box::new(Self::from_reference(reference)),
-            )),
-            SourceReference::Map(key, value) => Self::new(HelpTypeExpressionKind::Map(
-                Box::new(Self::from_reference(key)),
-                Box::new(Self::from_reference(value)),
-            )),
-            SourceReference::Application { head, arguments } => {
-                Self::new(HelpTypeExpressionKind::Application {
-                    head: HelpName::from(head),
-                    arguments: HelpTypeExpressions::from_references(arguments),
-                })
-            }
-        }
-    }
-
-    fn from_field(field: &SourceField) -> Self {
-        match field.value() {
-            SourceFieldValue::Derived => Self::from_name(field.name()),
-            SourceFieldValue::Reference(_) if HelpName::from(field.name()).is_type_name() => {
-                Self::from_name(field.name())
-            }
-            SourceFieldValue::Reference(reference) => Self::from_reference(reference),
-            SourceFieldValue::Declaration(_) if HelpName::from(field.name()).is_type_name() => {
-                Self::from_name(field.name())
-            }
-            SourceFieldValue::Declaration(value) => Self::inline(value.to_schema_text()),
-        }
-    }
-
-    fn from_variant(variant: &SourceVariantSignature) -> Self {
-        match variant.payload_source() {
-            Some(SourceVariantPayload::Reference(reference)) => {
-                Self::application(variant.name(), vec![Self::from_reference(reference)])
-            }
-            Some(SourceVariantPayload::Declaration(_value)) => {
-                Self::application(variant.name(), vec![Self::from_name(variant.name())])
-            }
-            None => Self::from_name(variant.name()),
-        }
-    }
-
-    pub fn kind(&self) -> &HelpTypeExpressionKind {
-        &self.expression
-    }
-
-    fn plain_name(&self) -> Option<&HelpName> {
-        match &self.expression {
-            HelpTypeExpressionKind::Name(name) => Some(name),
-            HelpTypeExpressionKind::FixedBytes(_)
-            | HelpTypeExpressionKind::Vector(_)
-            | HelpTypeExpressionKind::Optional(_)
-            | HelpTypeExpressionKind::ScopeOf(_)
-            | HelpTypeExpressionKind::Map(..)
-            | HelpTypeExpressionKind::Application { .. }
-            | HelpTypeExpressionKind::Inline(_) => None,
-        }
-    }
-
-    /// Project a type expression back onto a [`SourceReference`] so the schema
-    /// encoder renders it. An inline declaration has no reference form.
-    fn to_source_reference(&self) -> Result<SourceReference, HelpError> {
-        match &self.expression {
-            HelpTypeExpressionKind::Name(name) => {
-                Ok(SourceReference::Plain(Name::new(name.as_str())))
-            }
-            HelpTypeExpressionKind::FixedBytes(width) => Ok(SourceReference::FixedBytes(*width)),
-            HelpTypeExpressionKind::Vector(reference) => Ok(SourceReference::Vector(Box::new(
-                reference.to_source_reference()?,
-            ))),
-            HelpTypeExpressionKind::Optional(reference) => Ok(SourceReference::Optional(Box::new(
-                reference.to_source_reference()?,
-            ))),
-            HelpTypeExpressionKind::ScopeOf(reference) => Ok(SourceReference::ScopeOf(Box::new(
-                reference.to_source_reference()?,
-            ))),
-            HelpTypeExpressionKind::Map(key, value) => Ok(SourceReference::Map(
-                Box::new(key.to_source_reference()?),
-                Box::new(value.to_source_reference()?),
-            )),
-            HelpTypeExpressionKind::Application { head, arguments } => {
-                Ok(SourceReference::Application {
-                    head: Name::new(head.as_str()),
-                    arguments: arguments.to_source_references()?,
-                })
-            }
-            HelpTypeExpressionKind::Inline(text) => {
-                Err(HelpError::InvalidExpression(text.clone()))
-            }
-        }
-    }
-
-    /// A struct field in help is a bare schema role name; the field's declared
-    /// type is the node with that name.
-    fn to_source_field(&self) -> Result<SourceField, HelpError> {
-        match &self.expression {
-            HelpTypeExpressionKind::Name(name) => {
-                Ok(SourceField::derived(Name::new(name.as_str())))
-            }
-            other => Err(HelpError::InvalidExpression(format!(
-                "struct field help must be a schema role name, found {other:?}"
-            ))),
-        }
-    }
-
-    fn to_source_variant_signature(&self) -> Result<SourceVariantSignature, HelpError> {
-        match &self.expression {
-            HelpTypeExpressionKind::Name(name) => {
-                Ok(SourceVariantSignature::from_name(Name::new(name.as_str())))
-            }
-            HelpTypeExpressionKind::Application { head, arguments } => {
-                match arguments.expressions() {
-                    [] => Ok(SourceVariantSignature::from_name(Name::new(head.as_str()))),
-                    [payload] => Ok(SourceVariantSignature::from_payload(
-                        Name::new(head.as_str()),
-                        SourceVariantPayload::Reference(payload.to_source_reference()?),
-                    )),
-                    arguments => Err(HelpError::InvalidExpression(format!(
-                        "enum variant help accepts zero or one payload reference, found {}",
-                        arguments.len()
-                    ))),
-                }
-            }
-            other => Err(HelpError::InvalidExpression(format!(
-                "enum variant help must be a schema variant signature, found {other:?}"
-            ))),
-        }
-    }
-
-    fn inline(text: impl Into<String>) -> Self {
-        Self::new(HelpTypeExpressionKind::Inline(text.into()))
-    }
-
-    fn application(name: &Name, arguments: Vec<Self>) -> Self {
-        Self::new(HelpTypeExpressionKind::Application {
-            head: HelpName::from(name),
-            arguments: HelpTypeExpressions::new(arguments),
-        })
-    }
-}
-
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
-#[rkyv(
-    bytecheck(bounds(
-        __C: rkyv::validation::ArchiveContext,
-        __C::Error: rkyv::rancor::Source
-    )),
-    serialize_bounds(
-        __S: rkyv::ser::Writer + rkyv::ser::Allocator,
-        __S::Error: rkyv::rancor::Source
-    ),
-    deserialize_bounds(__D::Error: rkyv::rancor::Source)
-)]
-pub enum HelpTypeExpressionKind {
-    Name(HelpName),
-    FixedBytes(u64),
-    Vector(#[rkyv(omit_bounds)] Box<HelpTypeExpression>),
-    Optional(#[rkyv(omit_bounds)] Box<HelpTypeExpression>),
-    ScopeOf(#[rkyv(omit_bounds)] Box<HelpTypeExpression>),
-    Map(
-        #[rkyv(omit_bounds)] Box<HelpTypeExpression>,
-        #[rkyv(omit_bounds)] Box<HelpTypeExpression>,
-    ),
-    Application {
-        head: HelpName,
-        #[rkyv(omit_bounds)]
-        arguments: HelpTypeExpressions,
-    },
-    Inline(String),
-}
-
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
-#[rkyv(
-    bytecheck(bounds(
-        __C: rkyv::validation::ArchiveContext,
-        __C::Error: rkyv::rancor::Source
-    )),
-    serialize_bounds(
-        __S: rkyv::ser::Writer + rkyv::ser::Allocator,
-        __S::Error: rkyv::rancor::Source
-    ),
-    deserialize_bounds(__D::Error: rkyv::rancor::Source)
-)]
-pub struct HelpTypeExpressions {
-    #[rkyv(omit_bounds)]
-    expressions: Vec<HelpTypeExpression>,
-}
-
-impl HelpTypeExpressions {
-    fn new(expressions: Vec<HelpTypeExpression>) -> Self {
-        Self { expressions }
-    }
-
-    fn from_references(references: &[SourceReference]) -> Self {
-        Self {
-            expressions: references
-                .iter()
-                .map(HelpTypeExpression::from_reference)
-                .collect(),
-        }
-    }
-
-    pub fn expressions(&self) -> &[HelpTypeExpression] {
-        &self.expressions
-    }
-
-    fn to_source_references(&self) -> Result<Vec<SourceReference>, HelpError> {
-        self.expressions
-            .iter()
-            .map(HelpTypeExpression::to_source_reference)
-            .collect()
+        formatter.write_str(&self.to_schema_text())
     }
 }
 

@@ -59,8 +59,8 @@
   SurfacesLeaf [Visualization CommandLineInterfaces]
   EngineeringLeaf [Architecture Design ApplicationProgrammingInterfaces Documentation VersionControl DevelopmentProcess Management Modularity]
   DomainScope (ScopeOf Domain)
-  DomainScopes (Vec DomainScope)
-  ScopeSet (Vec DomainScope)
+  DomainScopes (Vector DomainScope)
+  ScopeSet (Vector DomainScope)
 }
 [
   (Equivalence [(Information Database) (Technology Software Data)])

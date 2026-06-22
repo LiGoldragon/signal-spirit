@@ -155,7 +155,7 @@ fn generated_help_model_renders_spirit_one_level_shapes() {
             .render(&signal_spirit::HelpRequest::for_name("Domains"))
             .expect("render Domains help")
             .to_string(),
-        "(Domains (Vec Domain))"
+        "(Domains (Vector Domain))"
     );
     assert_eq!(
         model
@@ -169,7 +169,11 @@ fn generated_help_model_renders_spirit_one_level_shapes() {
             .render(&signal_spirit::HelpRequest::for_name("VerbatimQuote"))
             .expect("render VerbatimQuote help")
             .to_string(),
-        "(VerbatimQuote { QuoteText OptionalAntecedent })"
+        // Help now projects the resolved IR verbatim: the field's declared
+        // type `(Optional Antecedent)` is the schema, not a collapsed bare role
+        // name. This is the schema codec's own canonical form for the source
+        // declaration, identical to what instance-schema and Rust lowering read.
+        "(VerbatimQuote { QuoteText (OptionalAntecedent (Optional Antecedent)) })"
     );
 }
 
@@ -208,7 +212,11 @@ fn generated_help_model_renders_every_decoded_schema_target() {
             .render(&signal_spirit::HelpRequest::for_name("Domain"))
             .expect("render imported Domain help")
             .to_string(),
-        "(Domain [(Health Health) (Food Food) (Home Home) (Finance Finance) (Work Work) (Craft Craft) (Knowledge Knowledge) (Education Education) (Language Language) (Art Art) (Kinship Kinship) (Selfhood Selfhood) (Spirituality Spirituality) (Governance Governance) (Law Law) (Community Community) (Nature Nature) (Travel Travel) (Commerce Commerce) (Leisure Leisure) (Appearance Appearance) (Safety Safety) (Information Information) Technology])"
+        // Help projects the resolved IR for the imported `Domain` enum: each
+        // variant carries its declared payload type (the nested leaf enum),
+        // rendered through the one schema codec — the same expansion the schema
+        // decoder produced from `domain.schema`, not a name-collapsed mirror.
+        "(Domain [(Health [Body Mind Nutrition Exercise Sleep Medicine Disease Medication Therapy Reproduction Sexuality Aging Disability Addiction Dentistry Senses Pain Prevention FirstAid Rehabilitation]) (Food [Cooking Diet Recipe Baking Preservation Fermentation Beverage Entertaining Foraging Fasting Dining]) (Home [Housing Maintenance Renovation Furnishing Cleaning Tidying Relocation Realty Property Utilities Locksmithing Appliances]) (Finance [Budgeting Saving Spending Debt Credit Investing Retirement Tax Insurance Income Banking Charity Planning Accounting]) (Work [Career JobSearch Workplace Vocation Leadership Entrepreneurship Employment Compensation Scheduling Unemployment Freelancing Teamwork Productivity Project]) (Craft [Electronics Construction Carpentry Metalworking Sewing Manufacturing Repair Engineering Handicraft Invention]) (Knowledge [Mathematics Logic Physics Chemistry Biology Astronomy Geology Computing Physiology Statistics Research History Linguistics Philosophy Economics Cognition Taxonomy]) (Education [Studying Teaching Schooling Skill Reading Memorization Pedagogy Mentoring Autodidacticism Credential]) (Language [Writing Rhetoric Translation Grammar Conversation Correspondence Listening Oratory Editing Terminology Notation]) (Art [Fiction Poetry Music Painting Photography Film Theater Dance Design Sculpture Creativity Storytelling Publishing]) (Kinship [Friendship Romance Marriage Family Parenting Relatives Reconciliation Boundaries Intimacy Rapport Caregiving Grief Belonging]) (Selfhood [Growth Introspection Discipline Emotion Virtue Motivation Confidence Identity Purpose Decision Temperament Wellbeing Composure]) (Spirituality [Worship Prayer Meditation Ritual Faith Theology Contemplation Pilgrimage Scripture Ethics Mortality Transcendence Asceticism Wisdom]) (Governance [Politics Government Administration Citizenship Elections Activism Policy Diplomacy Movements Organizing Services Naturalization War]) (Law [Rights Contract Title Crime Litigation Compliance Custody Liability Procedure Justice Policing Arbitration]) (Community [Neighborliness Volunteering Solidarity Membership Gatherings Reputation Service Hospitality Institutions]) (Nature [Agriculture Gardening Horticulture Husbandry Pets Forestry Fishing Hunting Conservation Weather Wilderness Sustainability Resources Stewardship]) (Travel [Itinerary Destination Transportation Driving Navigation Commuting Logistics Migration Tourism Transit Cycling]) (Commerce [Selling Buying Marketing Retail Sourcing Trade Support Pricing Negotiation Assets Market]) (Leisure [Recreation Sport Games Hobby Entertainment Collecting Outdoors Play Relaxation Celebration Fandom]) (Appearance [Clothing Grooming Style Cosmetics Etiquette Comportment]) (Safety [Protection Preparedness Risk Cybersecurity Privacy Disaster Military Deterrence]) (Information [Curation RecordKeeping Documentation News Broadcasting Archives Database Retrieval Classification]) (Technology)])"
     );
     assert_eq!(
         model
@@ -249,9 +257,10 @@ fn generated_help_model_round_trips_through_rkyv() {
 /// canonical rendered schema text AND a true round trip `decode(render(node))
 /// == node` through that same schema codec (`HelpResponse::to_schema_text` ->
 /// `HelpResponse::from_schema_text`). Covered shapes: a struct (`Record`), a
-/// struct of newtype roles (`Entry`), a `Vec` element-as-reference
-/// (`Domains`), a newtype (`RecordAccepted`), an enum (`DomainMatch`), and a
-/// stream (`IntentEventStream`).
+/// struct of newtype roles (`Entry`), a vector reference rendered through the
+/// resolved IR as the canonical `(Vector Domain)` (`Domains`), a newtype
+/// (`RecordAccepted`), an enum (`DomainMatch`), and a stream
+/// (`IntentEventStream`).
 #[cfg(feature = "nota-text")]
 #[test]
 fn generated_help_round_trips_through_the_schema_codec() {
@@ -263,13 +272,14 @@ fn generated_help_round_trips_through_the_schema_codec() {
             "Entry",
             "(Entry { Domains Kind Description Certainty Importance Privacy Referents })",
         ),
-        ("Domains", "(Domains (Vec Domain))"),
+        ("Domains", "(Domains (Vector Domain))"),
         ("RecordAccepted", "(RecordAccepted RecordIdentifier)"),
-        // The schema codec's canonical enum rendering drops the redundant
-        // parens around payload-less variants: the source declares
-        // `DomainMatch [Any (Partial) (Full)]`, but `(Partial)`/`(Full)` carry
-        // no payload, so they normalize to bare `Partial`/`Full`.
-        ("DomainMatch", "(DomainMatch [Any Partial Full])"),
+        // Help projects the resolved IR verbatim through the schema codec: the
+        // source declares `DomainMatch [Any (Partial) (Full)]` and that is the
+        // canonical round-tripping form, parens preserved. (The deleted
+        // duplicate AST used to normalize these to bare atoms; the resolved IR
+        // does not, so Help and the schema codec now agree exactly.)
+        ("DomainMatch", "(DomainMatch [Any (Partial) (Full)])"),
         (
             "IntentEventStream",
             "(IntentEventStream (Stream { token SubscriptionToken opened SubscriptionStarted event IntentEvent close SubscriptionToken }))",
@@ -279,9 +289,7 @@ fn generated_help_round_trips_through_the_schema_codec() {
             .render(&signal_spirit::HelpRequest::for_name(target))
             .unwrap_or_else(|error| panic!("render {target} help: {error}"));
 
-        let encoded = response
-            .to_schema_text()
-            .unwrap_or_else(|error| panic!("encode {target} help as schema text: {error}"));
+        let encoded = response.to_schema_text();
         assert_eq!(
             encoded, expected,
             "{target} should render its canonical schema declaration"
@@ -305,9 +313,7 @@ fn generated_help_round_trips_through_the_schema_codec() {
     let top_level = model
         .render(&signal_spirit::HelpRequest::new(None))
         .expect("render top-level help");
-    let encoded = top_level
-        .to_schema_text()
-        .expect("encode top-level help as schema text");
+    let encoded = top_level.to_schema_text();
     let decoded =
         signal_spirit::HelpResponse::from_schema_text(&encoded).expect("decode top-level help");
     assert_eq!(decoded, top_level);
