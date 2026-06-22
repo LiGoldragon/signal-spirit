@@ -10,11 +10,18 @@
 pub mod schema;
 #[cfg(feature = "nota-text")]
 pub mod help;
+#[cfg(feature = "nota-text")]
+pub mod instance_schema;
 
 use std::collections::BTreeSet;
 
 #[cfg(feature = "nota-text")]
 pub use help::{HelpError, HelpModel, HelpRequest, HelpResponse};
+#[cfg(feature = "nota-text")]
+pub use instance_schema::{
+    InstanceSchema, InstanceSchemaElement, InstanceSchemaElements, InstanceSchemaError,
+    InstanceSchemaModel, InstanceSchemaName,
+};
 pub use schema::signal::*;
 
 pub type SpiritRequest = Input;

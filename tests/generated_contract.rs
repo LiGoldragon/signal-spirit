@@ -293,6 +293,111 @@ fn generated_help_response_round_trips_through_schema_codec() {
 }
 
 #[cfg(feature = "nota-text")]
+#[test]
+fn generated_instance_schema_for_record_input_is_positional() {
+    let input: Input = "(Record (([(Technology (Software (Programming CodeGeneration)))] Decision [a description] Medium Medium Zero [spirit]) ([([a quote] None)] reasoning)))"
+        .parse()
+        .expect("generated Input decoder parses Record command");
+
+    let schema =
+        signal_spirit::InstanceSchema::from_decoded_input(&input).expect("project instance schema");
+    let root = parenthesized(schema.root());
+    assert_eq!(root.len(), 2, "Record input has root tag plus one payload");
+    assert_name(&root[0], "Input");
+
+    let payload = parenthesized(&root[1]);
+    assert_eq!(
+        payload.len(),
+        2,
+        "RecordRequest payload has Entry and Justification positions only"
+    );
+    assert_names(
+        braced(&payload[0]),
+        &[
+            "Domains",
+            "Kind",
+            "Description",
+            "Certainty",
+            "Importance",
+            "Privacy",
+            "Referents",
+        ],
+    );
+    assert_names(braced(&payload[1]), &["Testimony", "Reasoning"]);
+    assert!(
+        root.iter().all(|element| element
+            .as_name()
+            .is_none_or(|name| { name.as_str() != "Record" && name.as_str() != "RecordRequest" })),
+        "variant and alias names must not be inserted into the root schema"
+    );
+}
+
+#[cfg(feature = "nota-text")]
+#[test]
+fn generated_instance_schema_for_unit_input_collapses_to_input_name() {
+    let input: Input = "Version"
+        .parse()
+        .expect("generated Input decoder parses unit command");
+
+    let schema =
+        signal_spirit::InstanceSchema::from_decoded_input(&input).expect("project instance schema");
+
+    assert_name(schema.root(), "Input");
+}
+
+#[cfg(feature = "nota-text")]
+#[test]
+fn generated_instance_schema_round_trips_through_rkyv() {
+    let input: Input = "(Record (([] Decision description Medium Medium Zero []) ([] reasoning)))"
+        .parse()
+        .expect("generated Input decoder parses compact Record command");
+    let schema =
+        signal_spirit::InstanceSchema::from_decoded_input(&input).expect("project instance schema");
+    let bytes = rkyv::to_bytes::<rkyv::rancor::Error>(&schema).expect("archive instance schema");
+    let decoded = rkyv::from_bytes::<signal_spirit::InstanceSchema, rkyv::rancor::Error>(&bytes)
+        .expect("decode instance schema");
+
+    assert_eq!(decoded, schema);
+}
+
+#[cfg(feature = "nota-text")]
+fn parenthesized(
+    element: &signal_spirit::InstanceSchemaElement,
+) -> &[signal_spirit::InstanceSchemaElement] {
+    element
+        .as_parenthesized()
+        .expect("parenthesized schema element")
+        .elements()
+}
+
+#[cfg(feature = "nota-text")]
+fn braced(
+    element: &signal_spirit::InstanceSchemaElement,
+) -> &[signal_spirit::InstanceSchemaElement] {
+    element
+        .as_braced()
+        .expect("braced schema element")
+        .elements()
+}
+
+#[cfg(feature = "nota-text")]
+fn assert_name(element: &signal_spirit::InstanceSchemaElement, expected: &str) {
+    assert_eq!(
+        element.as_name().expect("schema name element").as_str(),
+        expected
+    );
+}
+
+#[cfg(feature = "nota-text")]
+fn assert_names(elements: &[signal_spirit::InstanceSchemaElement], expected: &[&str]) {
+    let names = elements
+        .iter()
+        .map(|element| element.as_name().expect("schema name element").as_str())
+        .collect::<Vec<_>>();
+    assert_eq!(names, expected);
+}
+
+#[cfg(feature = "nota-text")]
 struct DecodedHelpTargets {
     root_names: BTreeSet<String>,
     declaration_names: BTreeSet<String>,
