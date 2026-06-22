@@ -1,13 +1,10 @@
 use std::fmt;
 
-use nota_next::{
-    Block, Delimiter, Document, NotaBlock, NotaBody, NotaBodyEncoding, NotaDecode, NotaDecodeError,
-    NotaDocumentBody, NotaDocumentDecode, NotaDocumentEncode, NotaDocumentEncoding, NotaEncode,
-};
+use nota_next::{Block, Delimiter, Document};
 use schema_next::{
-    Name, SchemaError, SchemaSource, SourceDeclarationValue, SourceEnumBody, SourceField,
-    SourceFieldValue, SourceImport, SourceNamespace, SourceReference, SourceRootEnum,
-    SourceStructBody, SourceVariantPayload, SourceVariantSignature,
+    Name, SchemaError, SchemaSource, SourceDeclaration, SourceDeclarationValue, SourceDeclarations,
+    SourceEnumBody, SourceField, SourceFieldValue, SourceImport, SourceNamespace, SourceReference,
+    SourceRootEnum, SourceStructBody, SourceVariantPayload, SourceVariantSignature,
 };
 use thiserror::Error;
 
@@ -26,6 +23,9 @@ pub enum HelpError {
 
     #[error("unknown Help target: {0}")]
     UnknownTarget(String),
+
+    #[error("help expression cannot be represented as a schema declaration: {0}")]
+    InvalidExpression(String),
 }
 
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
@@ -92,48 +92,42 @@ impl HelpResponse {
     pub fn entries(&self) -> &HelpEntries {
         &self.entries
     }
+
+    pub fn from_schema_text(source: &str) -> Result<Self, HelpError> {
+        let declarations = SourceDeclarations::from_schema_text(source)?;
+        Self::from_source_declarations(&declarations)
+    }
+
+    pub fn to_schema_text(&self) -> Result<String, HelpError> {
+        Ok(self.to_source_declarations()?.to_schema_text())
+    }
+
+    fn from_source_declarations(declarations: &SourceDeclarations) -> Result<Self, HelpError> {
+        declarations
+            .declarations()
+            .iter()
+            .map(HelpEntry::from_source_declaration)
+            .collect::<Result<Vec<_>, _>>()
+            .map(HelpEntries::new)
+            .map(Self::new)
+    }
+
+    fn to_source_declarations(&self) -> Result<SourceDeclarations, HelpError> {
+        self.entries()
+            .entries()
+            .iter()
+            .map(HelpEntry::to_source_declaration)
+            .collect::<Result<Vec<_>, _>>()
+            .map(SourceDeclarations::new)
+    }
 }
 
 impl fmt::Display for HelpResponse {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        formatter.write_str(&self.to_nota_document_body().to_nota())
-    }
-}
-
-impl NotaDocumentEncode for HelpResponse {
-    fn to_nota_document_body(&self) -> NotaDocumentEncoding {
-        NotaBodyEncoding::new(
-            self.entries()
-                .entries()
-                .iter()
-                .map(HelpEntry::to_nota)
-                .collect(),
-        )
-    }
-}
-
-impl NotaDocumentDecode for HelpResponse {
-    fn from_nota_document_body(body: &NotaDocumentBody<'_>) -> Result<Self, NotaDecodeError> {
-        let entries = body
-            .root_objects()
-            .iter()
-            .map(HelpEntry::from_nota_block)
-            .collect::<Result<Vec<_>, _>>()?;
-        Ok(Self::new(HelpEntries::new(entries)))
-    }
-}
-
-impl NotaEncode for HelpResponse {
-    fn to_nota(&self) -> String {
-        self.to_nota_document_body().to_nota()
-    }
-}
-
-impl NotaDecode for HelpResponse {
-    fn from_nota_block(block: &Block) -> Result<Self, NotaDecodeError> {
-        Ok(Self::new(HelpEntries::single(HelpEntry::from_nota_block(
-            block,
-        )?)))
+        match self.to_schema_text() {
+            Ok(text) => formatter.write_str(&text),
+            Err(_) => Err(fmt::Error),
+        }
     }
 }
 
@@ -464,36 +458,32 @@ impl HelpEntry {
         &self.body
     }
 
-    fn render(&self) -> String {
-        self.body.render_with_name(&self.name)
+    fn from_source_declaration(declaration: &SourceDeclaration) -> Result<Self, HelpError> {
+        let body = match declaration.value() {
+            Some(value) => HelpBody::from_declaration(value),
+            None => HelpBody::Unit,
+        };
+        Ok(Self::new(HelpName::from(declaration.name()), body))
+    }
+
+    fn to_source_declaration(&self) -> Result<SourceDeclaration, HelpError> {
+        Ok(SourceDeclaration::new(
+            Name::new(self.name.as_str()),
+            self.body.to_source_declaration_value()?,
+        ))
+    }
+
+    pub fn to_schema_text(&self) -> Result<String, HelpError> {
+        Ok(self.to_source_declaration()?.to_schema_text())
     }
 }
 
 impl fmt::Display for HelpEntry {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        formatter.write_str(&self.to_nota())
-    }
-}
-
-impl NotaEncode for HelpEntry {
-    fn to_nota(&self) -> String {
-        self.render()
-    }
-}
-
-impl NotaDecode for HelpEntry {
-    fn from_nota_block(block: &Block) -> Result<Self, NotaDecodeError> {
-        let objects =
-            NotaBlock::new(block).expect_delimited(Delimiter::Parenthesis, "HelpEntry")?;
-        let Some((name, body)) = objects.split_first() else {
-            return Err(NotaDecodeError::ExpectedRootCount {
-                type_name: "HelpEntry",
-                expected: 1,
-                found: 0,
-            });
-        };
-        let name = HelpName::from_nota_block(name)?;
-        Ok(Self::new(name, HelpBody::from_entry_body_blocks(body)?))
+        match self.to_schema_text() {
+            Ok(text) => formatter.write_str(&text),
+            Err(_) => Err(fmt::Error),
+        }
     }
 }
 
@@ -529,37 +519,21 @@ impl HelpBody {
         Self::Enumeration(HelpVariantTypes::from_enum_body(body))
     }
 
-    pub fn render_with_help_name(&self, name: &HelpName) -> String {
-        self.render_with_name(name)
-    }
-
-    fn render_with_name(&self, name: &HelpName) -> String {
+    fn to_source_declaration_value(&self) -> Result<Option<SourceDeclarationValue>, HelpError> {
         match self {
-            Self::Unit => format!("({name})"),
-            Self::Reference(reference) => format!("({name} {})", reference.render()),
-            Self::Struct(fields) => format!("({name} {})", fields.render()),
-            Self::Enumeration(variants) => format!("({name} {})", variants.render()),
-            Self::Text(text) => format!("({name} {})", text),
-        }
-    }
-
-    fn from_entry_body_blocks(blocks: &[Block]) -> Result<Self, NotaDecodeError> {
-        match blocks {
-            [] => Ok(Self::Unit),
-            [block] if block.is_brace() => {
-                Ok(Self::Struct(HelpFieldTypes::from_nota_block(block)?))
-            }
-            [block] if block.is_square_bracket() => {
-                Ok(Self::Enumeration(HelpVariantTypes::from_nota_block(block)?))
-            }
-            [block] => HelpTypeExpression::from_nota_block(block)
-                .map(Self::Reference)
-                .or_else(|_| Ok(Self::Text(HelpEncodedBlock::new(block).to_nota()))),
-            _ => Err(NotaDecodeError::ExpectedRootCount {
-                type_name: "HelpBody",
-                expected: 1,
-                found: blocks.len(),
-            }),
+            Self::Unit => Ok(None),
+            Self::Reference(reference) => Ok(Some(SourceDeclarationValue::Reference(
+                reference.to_source_reference()?,
+            ))),
+            Self::Struct(fields) => Ok(Some(SourceDeclarationValue::Struct(
+                fields.to_source_struct_body()?,
+            ))),
+            Self::Enumeration(variants) => Ok(Some(SourceDeclarationValue::Enum(
+                variants.to_source_enum_body()?,
+            ))),
+            Self::Text(text) => SourceDeclarationValue::from_schema_text(text)
+                .map(Some)
+                .map_err(HelpError::from),
         }
     }
 }
@@ -584,25 +558,12 @@ impl HelpFieldTypes {
         &self.fields
     }
 
-    fn render(&self) -> String {
-        let fields = self
-            .fields
+    fn to_source_struct_body(&self) -> Result<SourceStructBody, HelpError> {
+        self.fields
             .iter()
-            .map(HelpTypeExpression::render)
-            .collect::<Vec<_>>()
-            .join(" ");
-        format!("{{ {fields} }}")
-    }
-}
-
-impl NotaDecode for HelpFieldTypes {
-    fn from_nota_block(block: &Block) -> Result<Self, NotaDecodeError> {
-        let fields = NotaBody::from_delimited(block, Delimiter::Brace, "HelpFieldTypes")?
-            .root_objects()
-            .iter()
-            .map(HelpTypeExpression::from_nota_block)
-            .collect::<Result<Vec<_>, _>>()?;
-        Ok(Self { fields })
+            .map(HelpTypeExpression::to_source_field)
+            .collect::<Result<Vec<_>, _>>()
+            .map(SourceStructBody::new)
     }
 }
 
@@ -626,26 +587,12 @@ impl HelpVariantTypes {
         &self.variants
     }
 
-    fn render(&self) -> String {
-        let variants = self
-            .variants
+    fn to_source_enum_body(&self) -> Result<SourceEnumBody, HelpError> {
+        self.variants
             .iter()
-            .map(HelpTypeExpression::render)
-            .collect::<Vec<_>>()
-            .join(" ");
-        format!("[{variants}]")
-    }
-}
-
-impl NotaDecode for HelpVariantTypes {
-    fn from_nota_block(block: &Block) -> Result<Self, NotaDecodeError> {
-        let variants =
-            NotaBody::from_delimited(block, Delimiter::SquareBracket, "HelpVariantTypes")?
-                .root_objects()
-                .iter()
-                .map(HelpTypeExpression::from_nota_block)
-                .collect::<Result<Vec<_>, _>>()?;
-        Ok(Self { variants })
+            .map(HelpTypeExpression::to_source_variant_signature)
+            .collect::<Result<Vec<_>, _>>()
+            .map(SourceEnumBody::new)
     }
 }
 
@@ -734,31 +681,68 @@ impl HelpTypeExpression {
         }
     }
 
-    fn render(&self) -> String {
+    fn to_source_reference(&self) -> Result<SourceReference, HelpError> {
         match &self.expression {
-            HelpTypeExpressionKind::Name(name) => name.to_string(),
-            HelpTypeExpressionKind::FixedBytes(width) => format!("(Bytes {width})"),
-            HelpTypeExpressionKind::Vector(reference) => {
-                format!("(Vector {})", reference.render())
+            HelpTypeExpressionKind::Name(name) => {
+                Ok(SourceReference::Plain(Name::new(name.as_str())))
             }
-            HelpTypeExpressionKind::Optional(reference) => {
-                format!("(Optional {})", reference.render())
+            HelpTypeExpressionKind::FixedBytes(width) => Ok(SourceReference::FixedBytes(*width)),
+            HelpTypeExpressionKind::Vector(reference) => Ok(SourceReference::Vector(Box::new(
+                reference.to_source_reference()?,
+            ))),
+            HelpTypeExpressionKind::Optional(reference) => Ok(SourceReference::Optional(Box::new(
+                reference.to_source_reference()?,
+            ))),
+            HelpTypeExpressionKind::ScopeOf(reference) => Ok(SourceReference::ScopeOf(Box::new(
+                reference.to_source_reference()?,
+            ))),
+            HelpTypeExpressionKind::Map(key, value) => Ok(SourceReference::Map(
+                Box::new(key.to_source_reference()?),
+                Box::new(value.to_source_reference()?),
+            )),
+            HelpTypeExpressionKind::Application { head, arguments } => {
+                Ok(SourceReference::Application {
+                    head: Name::new(head.as_str()),
+                    arguments: arguments.to_source_references()?,
+                })
             }
-            HelpTypeExpressionKind::ScopeOf(reference) => {
-                format!("(ScopeOf {})", reference.render())
+            HelpTypeExpressionKind::Inline(text) => Err(HelpError::InvalidExpression(text.clone())),
+        }
+    }
+
+    fn to_source_field(&self) -> Result<SourceField, HelpError> {
+        match &self.expression {
+            HelpTypeExpressionKind::Name(name) => {
+                Ok(SourceField::derived(Name::new(name.as_str())))
             }
-            HelpTypeExpressionKind::Map(key, value) => {
-                format!("(Map {} {})", key.render(), value.render())
+            other => Err(HelpError::InvalidExpression(format!(
+                "struct field help must be a schema role name, found {other:?}"
+            ))),
+        }
+    }
+
+    fn to_source_variant_signature(&self) -> Result<SourceVariantSignature, HelpError> {
+        match &self.expression {
+            HelpTypeExpressionKind::Name(name) => {
+                Ok(SourceVariantSignature::from_name(Name::new(name.as_str())))
             }
             HelpTypeExpressionKind::Application { head, arguments } => {
-                let arguments = arguments.render();
-                if arguments.is_empty() {
-                    format!("({head})")
-                } else {
-                    format!("({head} {arguments})")
+                let arguments = arguments.expressions();
+                match arguments {
+                    [] => Ok(SourceVariantSignature::from_name(Name::new(head.as_str()))),
+                    [payload] => Ok(SourceVariantSignature::from_payload(
+                        Name::new(head.as_str()),
+                        SourceVariantPayload::Reference(payload.to_source_reference()?),
+                    )),
+                    _ => Err(HelpError::InvalidExpression(format!(
+                        "enum variant help accepts zero or one payload reference, found {}",
+                        arguments.len()
+                    ))),
                 }
             }
-            HelpTypeExpressionKind::Inline(text) => text.clone(),
+            other => Err(HelpError::InvalidExpression(format!(
+                "enum variant help must be a schema variant signature, found {other:?}"
+            ))),
         }
     }
 
@@ -770,131 +754,6 @@ impl HelpTypeExpression {
         Self::new(HelpTypeExpressionKind::Application {
             head: HelpName::from(name),
             arguments: HelpTypeExpressions::new(arguments),
-        })
-    }
-
-    fn contains_inline(&self) -> bool {
-        match &self.expression {
-            HelpTypeExpressionKind::Inline(_) => true,
-            HelpTypeExpressionKind::Vector(reference)
-            | HelpTypeExpressionKind::Optional(reference)
-            | HelpTypeExpressionKind::ScopeOf(reference) => reference.contains_inline(),
-            HelpTypeExpressionKind::Map(key, value) => {
-                key.contains_inline() || value.contains_inline()
-            }
-            HelpTypeExpressionKind::Application { arguments, .. } => arguments.contains_inline(),
-            HelpTypeExpressionKind::Name(_) | HelpTypeExpressionKind::FixedBytes(_) => false,
-        }
-    }
-
-    fn from_application_blocks(blocks: &[Block]) -> Result<Self, NotaDecodeError> {
-        let Some((head, arguments)) = blocks.split_first() else {
-            return Err(NotaDecodeError::ExpectedRootCount {
-                type_name: "HelpTypeExpression",
-                expected: 1,
-                found: 0,
-            });
-        };
-        let head = HelpName::from_nota_block(head)?;
-        match head.as_str() {
-            "Bytes" => {
-                let [width] = arguments else {
-                    return Err(NotaDecodeError::ExpectedRootCount {
-                        type_name: "Bytes",
-                        expected: 1,
-                        found: arguments.len(),
-                    });
-                };
-                let width = NotaBlock::new(width).parse_integer()?;
-                Ok(Self::new(HelpTypeExpressionKind::FixedBytes(width)))
-            }
-            "Vector" => {
-                let [reference] = arguments else {
-                    return Err(NotaDecodeError::ExpectedRootCount {
-                        type_name: "Vector",
-                        expected: 1,
-                        found: arguments.len(),
-                    });
-                };
-                Ok(Self::new(HelpTypeExpressionKind::Vector(Box::new(
-                    Self::from_nota_block(reference)?,
-                ))))
-            }
-            "Optional" => {
-                let [reference] = arguments else {
-                    return Err(NotaDecodeError::ExpectedRootCount {
-                        type_name: "Optional",
-                        expected: 1,
-                        found: arguments.len(),
-                    });
-                };
-                Ok(Self::new(HelpTypeExpressionKind::Optional(Box::new(
-                    Self::from_nota_block(reference)?,
-                ))))
-            }
-            "ScopeOf" => {
-                let [reference] = arguments else {
-                    return Err(NotaDecodeError::ExpectedRootCount {
-                        type_name: "ScopeOf",
-                        expected: 1,
-                        found: arguments.len(),
-                    });
-                };
-                Ok(Self::new(HelpTypeExpressionKind::ScopeOf(Box::new(
-                    Self::from_nota_block(reference)?,
-                ))))
-            }
-            "Map" => {
-                let [key, value] = arguments else {
-                    return Err(NotaDecodeError::ExpectedRootCount {
-                        type_name: "Map",
-                        expected: 2,
-                        found: arguments.len(),
-                    });
-                };
-                Ok(Self::new(HelpTypeExpressionKind::Map(
-                    Box::new(Self::from_nota_block(key)?),
-                    Box::new(Self::from_nota_block(value)?),
-                )))
-            }
-            _ => {
-                let arguments = HelpTypeExpressions::from_nota_blocks(arguments)?;
-                if arguments.contains_inline() {
-                    return Err(NotaDecodeError::InvalidValue {
-                        type_name: "HelpTypeExpression",
-                        value: Delimiter::Parenthesis.wrap(
-                            blocks
-                                .iter()
-                                .map(|block| HelpEncodedBlock::new(block).to_nota()),
-                        ),
-                        reason: "inline declaration arguments belong to text fallback help bodies"
-                            .to_owned(),
-                    });
-                }
-                Ok(Self::new(HelpTypeExpressionKind::Application {
-                    head,
-                    arguments,
-                }))
-            }
-        }
-    }
-}
-
-impl NotaDecode for HelpTypeExpression {
-    fn from_nota_block(block: &Block) -> Result<Self, NotaDecodeError> {
-        if let Some(name) = block.demote_to_string() {
-            return Ok(Self::new(HelpTypeExpressionKind::Name(HelpName::new(name))));
-        }
-        if let Some(blocks) = block.as_delimited(Delimiter::Parenthesis) {
-            return Self::from_application_blocks(blocks);
-        }
-        if block.is_brace() || block.is_square_bracket() {
-            return Ok(Self::inline(HelpEncodedBlock::new(block).to_nota()));
-        }
-        Err(NotaDecodeError::InvalidValue {
-            type_name: "HelpTypeExpression",
-            value: HelpEncodedBlock::new(block).to_nota(),
-            reason: "expected atom, parenthesized application, or inline declaration".to_owned(),
         })
     }
 }
@@ -964,26 +823,11 @@ impl HelpTypeExpressions {
         &self.expressions
     }
 
-    fn render(&self) -> String {
+    fn to_source_references(&self) -> Result<Vec<SourceReference>, HelpError> {
         self.expressions
             .iter()
-            .map(HelpTypeExpression::render)
-            .collect::<Vec<_>>()
-            .join(" ")
-    }
-
-    fn from_nota_blocks(blocks: &[Block]) -> Result<Self, NotaDecodeError> {
-        let expressions = blocks
-            .iter()
-            .map(HelpTypeExpression::from_nota_block)
-            .collect::<Result<Vec<_>, _>>()?;
-        Ok(Self::new(expressions))
-    }
-
-    fn contains_inline(&self) -> bool {
-        self.expressions
-            .iter()
-            .any(HelpTypeExpression::contains_inline)
+            .map(HelpTypeExpression::to_source_reference)
+            .collect()
     }
 }
 
@@ -1014,64 +858,6 @@ impl HelpName {
                 self.value.as_str(),
                 "String" | "Integer" | "Boolean" | "Path" | "Bytes"
             )
-    }
-}
-
-impl NotaDecode for HelpName {
-    fn from_nota_block(block: &Block) -> Result<Self, NotaDecodeError> {
-        block
-            .demote_to_string()
-            .map(Self::new)
-            .ok_or(NotaDecodeError::ExpectedAtom {
-                type_name: "HelpName",
-            })
-    }
-}
-
-#[derive(Clone, Copy, Debug)]
-struct HelpEncodedBlock<'block> {
-    block: &'block Block,
-}
-
-impl<'block> HelpEncodedBlock<'block> {
-    fn new(block: &'block Block) -> Self {
-        Self { block }
-    }
-
-    fn to_nota(self) -> String {
-        match self.block {
-            Block::Delimited {
-                delimiter,
-                root_objects,
-                ..
-            } if *delimiter == Delimiter::Brace => {
-                let fields = self.child_nota(root_objects);
-                if fields.is_empty() {
-                    "{}".to_owned()
-                } else {
-                    format!("{{ {fields} }}")
-                }
-            }
-            Block::Delimited {
-                delimiter,
-                root_objects,
-                ..
-            } => delimiter.wrap(root_objects.iter().map(|block| Self::new(block).to_nota())),
-            Block::PipeText(_) | Block::Atom(_) => self
-                .block
-                .demote_to_string()
-                .unwrap_or_default()
-                .to_owned()
-                .to_nota(),
-        }
-    }
-
-    fn child_nota(self, root_objects: &'block [Block]) -> String {
-        root_objects
-            .iter()
-            .map(|block| Self::new(block).to_nota())
-            .collect::<Vec<_>>()
-            .join(" ")
     }
 }
 
