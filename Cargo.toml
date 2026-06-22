@@ -24,18 +24,36 @@ nota-text = [
 
 [dependencies]
 signal-frame = { git = "https://github.com/LiGoldragon/signal-frame.git", branch = "main", default-features = false }
-nota-next    = { git = "https://github.com/LiGoldragon/nota-next.git", branch = "main", optional = true }
+nota-next    = { git = "https://github.com/LiGoldragon/nota-next.git", branch = "instance-schema", optional = true }
 rkyv         = { version = "0.8", default-features = false, features = ["std", "bytecheck", "little_endian", "pointer_width_32", "unaligned"] }
 thiserror    = "2"
 version-projection = { git = "https://github.com/LiGoldragon/version-projection.git", branch = "main", default-features = false }
 
 [build-dependencies]
-schema-rust-next = { git = "https://github.com/LiGoldragon/schema-rust-next.git", branch = "main" }
+schema-rust-next = { git = "https://github.com/LiGoldragon/schema-rust-next.git", branch = "instance-schema" }
 
 [dev-dependencies]
-nota-next = { git = "https://github.com/LiGoldragon/nota-next.git", branch = "main" }
+nota-next = { git = "https://github.com/LiGoldragon/nota-next.git", branch = "instance-schema" }
+schema-next = { git = "https://github.com/LiGoldragon/schema-next.git", branch = "instance-schema" }
 
 [lints.rust]
 unsafe_code = "forbid"
 unused      = { level = "warn", priority = -1 }
 dead_code   = "warn"
+
+# Per-instance-schema integration: redirect the whole dependency tree
+# (signal-frame, version-projection, and their transitives) onto the
+# instance-schema worktrees so one nota-next / schema-next / schema-rust-next
+# version carries the NotaDecodeTraced trait + derive end to end. Path
+# patches resolve to a different source than the git deps, which a
+# branch-only patch cannot. These local paths are for the integration
+# build of this designer branch; an operator integration replaces them
+# with the merged main.
+[patch."https://github.com/LiGoldragon/nota-next.git"]
+nota-next = { path = "../../nota-next/instance-schema" }
+
+[patch."https://github.com/LiGoldragon/schema-next.git"]
+schema-next = { path = "../../schema-next/instance-schema" }
+
+[patch."https://github.com/LiGoldragon/schema-rust-next.git"]
+schema-rust-next = { path = "../../schema-rust-next/instance-schema" }

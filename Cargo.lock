@@ -188,8 +188,25 @@ name = "nota-next"
 version = "0.5.0"
 source = "git+https://github.com/LiGoldragon/nota-next.git?branch=main#c43d04a159e90314a0094b61ace66053371cc247"
 dependencies = [
- "nota-next-derive",
+ "nota-next-derive 0.3.0 (git+https://github.com/LiGoldragon/nota-next.git?branch=main)",
  "rkyv",
+]
+
+[[package]]
+name = "nota-next"
+version = "0.5.1"
+dependencies = [
+ "nota-next-derive 0.3.0",
+ "rkyv",
+]
+
+[[package]]
+name = "nota-next-derive"
+version = "0.3.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -325,9 +342,8 @@ checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
 [[package]]
 name = "schema-cc"
 version = "0.1.0"
-source = "git+https://github.com/LiGoldragon/schema-next.git?branch=main#4b7e830a7001708737a617bd8eedac8002cc1fc6"
 dependencies = [
- "nota-next",
+ "nota-next 0.5.1",
  "prettyplease",
  "proc-macro2",
  "quote",
@@ -338,10 +354,9 @@ dependencies = [
 [[package]]
 name = "schema-next"
 version = "0.2.0"
-source = "git+https://github.com/LiGoldragon/schema-next.git?branch=main#4b7e830a7001708737a617bd8eedac8002cc1fc6"
 dependencies = [
  "blake3",
- "nota-next",
+ "nota-next 0.5.1",
  "rkyv",
  "schema-cc",
  "thiserror",
@@ -350,7 +365,6 @@ dependencies = [
 [[package]]
 name = "schema-rust-next"
 version = "0.5.3"
-source = "git+https://github.com/LiGoldragon/schema-rust-next.git?branch=main#90d853c33ade57cfafca5942dd0790a3302a605f"
 dependencies = [
  "prettyplease",
  "proc-macro2",
@@ -371,7 +385,7 @@ name = "signal-frame"
 version = "0.2.1"
 source = "git+https://github.com/LiGoldragon/signal-frame.git?branch=main#e2eae5c28dac47eea6c4c641b60c4fd27bb547d8"
 dependencies = [
- "nota-next",
+ "nota-next 0.5.0",
  "paste",
  "rkyv",
  "signal-frame-macros",
@@ -392,8 +406,9 @@ dependencies = [
 name = "signal-spirit"
 version = "0.8.0"
 dependencies = [
- "nota-next",
+ "nota-next 0.5.1",
  "rkyv",
+ "schema-next",
  "schema-rust-next",
  "signal-frame",
  "thiserror",
@@ -479,7 +494,7 @@ name = "version-projection"
 version = "0.1.0"
 source = "git+https://github.com/LiGoldragon/version-projection.git?branch=main#1a1eeab4adf2c53e3bb8ba6de46303c256f39e23"
 dependencies = [
- "nota-next",
+ "nota-next 0.5.0",
  "rkyv",
  "thiserror",
 ]
