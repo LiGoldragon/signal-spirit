@@ -100,12 +100,12 @@
   Error ErrorReport
   Rejected SignalRejection
 
-  Domains (Vec Domain)
+  Domains (Vector Domain)
   Referent String
-  Referents (Vec Referent)
+  Referents (Vector Referent)
   Description String
   Keyword String
-  Keywords (Vec Keyword)
+  Keywords (Vector Keyword)
   SearchText String
   StatementText String
   ErrorMessage String
@@ -137,7 +137,7 @@
   QuoteText String
   Antecedent String
   VerbatimQuote { QuoteText (OptionalAntecedent (Optional Antecedent)) }
-  Testimony (Vec VerbatimQuote)
+  Testimony (Vector VerbatimQuote)
   Reasoning String
   Justification { Testimony Reasoning }
   RecordRequest { Entry Justification }
@@ -145,7 +145,7 @@
   ReferentRegistration { Referent aliases.Referents Justification }
   ReferentRegistrationReceipt { Referent }
   RegisteredReferent { Referent aliases.Referents }
-  RegisteredReferents (Vec RegisteredReferent)
+  RegisteredReferents (Vector RegisteredReferent)
   VersionReported VersionReport
   VersionReport { VersionText }
   IntentRecorded { Entry RecordIdentifier }
@@ -203,12 +203,12 @@
   RemovalCandidateCollection { RecordQuery Justification }
   RecordQuery Query
   RemovalArchiveRecord { RecordIdentifier Entry }
-  RemovalArchiveRecords (Vec RemovalArchiveRecord)
+  RemovalArchiveRecords (Vector RemovalArchiveRecord)
   RemovedIdentifier RecordIdentifier
-  RemovedIdentifiers (Vec RemovedIdentifier)
+  RemovedIdentifiers (Vector RemovedIdentifier)
   RemovalCandidateSkipReason [ArchiveFailed RecordChanged RecordAlreadyRemoved NoLongerCandidate]
   SkippedRemovalCandidate { RecordIdentifier RemovalCandidateSkipReason }
-  SkippedRemovalCandidates (Vec SkippedRemovalCandidate)
+  SkippedRemovalCandidates (Vector SkippedRemovalCandidate)
   RemovalCandidatesCollection { RemovalArchiveRecords RemovedIdentifiers SkippedRemovalCandidates }
 
   ObserverFilter [All OperationsOnly EffectsOnly]
@@ -216,7 +216,7 @@
   ObserverRetraction { SubscriptionToken ObservedOperations }
   OperationKind [State Record Propose Clarify Supersede Retire ResolveClarification Observe PublicTextSearch PublicRecords PrivateRecords Lookup Count Remove ChangeCertainty BumpImportance ChangeRecord RegisterReferent LookupStash CollectRemovalCandidates Tap Untap SubscribeIntent Version Marker]
   ObservedOperation { OperationKind }
-  ObservedOperations (Vec ObservedOperation)
+  ObservedOperations (Vector ObservedOperation)
 
   Entry { Domains Kind Description Certainty Importance Privacy Referents }
   Statement { StatementText }
@@ -230,17 +230,17 @@
   ClarificationReceipt { RecordIdentifier }
   ClarificationRecordIdentifier RecordIdentifier
   TargetClarification { RecordIdentifier Description }
-  TargetClarifications (Vec TargetClarification)
+  TargetClarifications (Vector TargetClarification)
   ClarificationResolution { ClarificationRecordIdentifier TargetClarifications Justification }
   ClarificationResolutionReceipt { ClarificationRecordIdentifier RecordIdentifiers }
-  Replacements (Vec Entry)
-  RecordIdentifiers (Vec RecordIdentifier)
+  Replacements (Vector Entry)
+  RecordIdentifiers (Vector RecordIdentifier)
   Supersession { RetiredIdentifiers Replacements Justification }
   SupersessionReceipt { RetiredIdentifiers RecordIdentifiers }
   Retirement { RecordIdentifier Justification }
   RetirementReceipt { RecordIdentifier }
   RetiredIdentifier RecordIdentifier
-  RetiredIdentifiers (Vec RetiredIdentifier)
+  RetiredIdentifiers (Vector RetiredIdentifier)
   GuardianRejectionReason [Duplicate Contradiction Compound NonIntent NegativeGuideline UnclearPrivacy UnclearDomain ClarifyTramples ClarifyLosesMeaning SupersedeTargetMissing RetrievalInsufficient MissingTestimony TestimonyFabricated InsufficientWarrant Overstated ImportanceUnsupported HarnessUnavailable HarnessMalformed HarnessTimedOut]
   GuardianRejection { GuardianRejectionReason RecordSet Explanation }
   ReferentGuardianRejectionReason [Duplicate Ambiguous TooVague AliasCollision NonReferent UnclearJustification HarnessUnavailable HarnessMalformed HarnessTimedOut]
@@ -248,8 +248,8 @@
   SelectedKind (Optional Kind)
   RecordSelection { DomainMatch SelectedKind }
   Query { DomainMatch KeywordMatch TextMatch ReferentSelection SelectedKind PrivacySelection CertaintySelection ImportanceSelection }
-  Records (Vec ObservedRecord)
-  RecordSet (Vec ObservedRecord)
+  Records (Vector ObservedRecord)
+  RecordSet (Vector ObservedRecord)
   Kind [Decision Principle Correction Clarification Constraint]
   Magnitude [Zero Minimum VeryLow Low Medium High VeryHigh Maximum]
 

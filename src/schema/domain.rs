@@ -14,7 +14,10 @@ pub type Path = std::string::String;
 pub use nota_next::{NotaDecodeError, NotaEncode, NotaSource};
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -49,7 +52,10 @@ pub enum Health {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -75,7 +81,10 @@ pub enum Food {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -102,7 +111,10 @@ pub enum Home {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -131,7 +143,10 @@ pub enum Finance {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -160,7 +175,10 @@ pub enum Work {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -185,7 +203,10 @@ pub enum Craft {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -217,7 +238,10 @@ pub enum Knowledge {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -242,7 +266,10 @@ pub enum Education {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -268,7 +295,10 @@ pub enum Language {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -296,7 +326,10 @@ pub enum Art {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -324,7 +357,10 @@ pub enum Kinship {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -352,7 +388,10 @@ pub enum Selfhood {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -381,7 +420,10 @@ pub enum Spirituality {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -409,7 +451,10 @@ pub enum Governance {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -436,7 +481,10 @@ pub enum Law {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -460,7 +508,10 @@ pub enum Community {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -489,7 +540,10 @@ pub enum Nature {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -515,7 +569,10 @@ pub enum Travel {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -541,7 +598,10 @@ pub enum Commerce {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -567,7 +627,10 @@ pub enum Leisure {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -588,7 +651,10 @@ pub enum Appearance {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -611,7 +677,10 @@ pub enum Safety {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -635,7 +704,10 @@ pub enum Information {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum Domain {
     Health(Health),
@@ -774,9 +846,116 @@ impl nota_next::NotaEncode for Technology {
         }
     }
 }
+#[rustfmt::skip]
+#[cfg(feature = "nota-text")]
+impl nota_next::NotaDecodeTraced for Technology {
+    fn instance_reference() -> nota_next::TypeReference {
+        nota_next::TypeReference::named("Technology")
+    }
+    fn from_nota_block_traced(
+        block: &nota_next::Block,
+    ) -> Result<nota_next::DecodedWithSchema<Self>, nota_next::NotaDecodeError> {
+        if let Some(variant) = block.demote_to_string() {
+            match variant {
+                "Hardware" => {
+                    return Ok(
+                        nota_next::DecodedWithSchema::new(
+                            Self::Hardware(None),
+                            nota_next::InstanceSchema::new(
+                                <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                                nota_next::InstanceSchemaBody::EnumPayload(
+                                    Some(
+                                        Box::new(
+                                            nota_next::InstanceSchema::new(
+                                                nota_next::TypeReference::optional(
+                                                    nota_next::TypeReference::named("HardwareLeaf"),
+                                                ),
+                                                nota_next::InstanceSchemaBody::Optional(None),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    );
+                }
+                other => {
+                    return Err(nota_next::NotaDecodeError::UnknownVariant {
+                        enum_name: "Technology",
+                        variant: other.to_owned(),
+                    });
+                }
+            }
+        }
+        let body = nota_next::NotaBlock::new(block)
+            .expect_body(nota_next::Delimiter::Parenthesis, "Technology")?;
+        let children = body.expect_fields("Technology", 2)?;
+        let variant = children[0]
+            .demote_to_string()
+            .ok_or(nota_next::NotaDecodeError::ExpectedAtom {
+                type_name: "enum variant",
+            })?;
+        match variant {
+            "Hardware" => {
+                let leaf = <HardwareLeaf as nota_next::NotaDecodeTraced>::from_nota_block_traced(
+                    &children[1],
+                )?;
+                let (leaf_value, leaf_schema) = leaf.into_parts();
+                Ok(
+                    nota_next::DecodedWithSchema::new(
+                        Self::Hardware(Some(leaf_value)),
+                        nota_next::InstanceSchema::new(
+                            <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                            nota_next::InstanceSchemaBody::EnumPayload(
+                                Some(
+                                    Box::new(
+                                        nota_next::InstanceSchema::new(
+                                            nota_next::TypeReference::optional(
+                                                nota_next::TypeReference::named("HardwareLeaf"),
+                                            ),
+                                            nota_next::InstanceSchemaBody::Optional(
+                                                Some(Box::new(leaf_schema)),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                )
+            }
+            "Software" => {
+                let decoded = <Software as nota_next::NotaDecodeTraced>::from_nota_block_traced(
+                    &children[1],
+                )?;
+                let (payload_value, payload_schema) = decoded.into_parts();
+                Ok(
+                    nota_next::DecodedWithSchema::new(
+                        Self::Software(payload_value),
+                        nota_next::InstanceSchema::new(
+                            <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                            nota_next::InstanceSchemaBody::EnumPayload(
+                                Some(Box::new(payload_schema)),
+                            ),
+                        ),
+                    ),
+                )
+            }
+            other => {
+                Err(nota_next::NotaDecodeError::UnknownVariant {
+                    enum_name: "Technology",
+                    variant: other.to_owned(),
+                })
+            }
+        }
+    }
+}
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -1089,9 +1268,610 @@ impl nota_next::NotaEncode for Software {
         }
     }
 }
+#[rustfmt::skip]
+#[cfg(feature = "nota-text")]
+impl nota_next::NotaDecodeTraced for Software {
+    fn instance_reference() -> nota_next::TypeReference {
+        nota_next::TypeReference::named("Software")
+    }
+    fn from_nota_block_traced(
+        block: &nota_next::Block,
+    ) -> Result<nota_next::DecodedWithSchema<Self>, nota_next::NotaDecodeError> {
+        if let Some(variant) = block.demote_to_string() {
+            match variant {
+                "Theory" => {
+                    return Ok(
+                        nota_next::DecodedWithSchema::new(
+                            Self::Theory,
+                            nota_next::InstanceSchema::new(
+                                <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                                nota_next::InstanceSchemaBody::EnumPayload(None),
+                            ),
+                        ),
+                    );
+                }
+                "Programming" => {
+                    return Ok(
+                        nota_next::DecodedWithSchema::new(
+                            Self::Programming(None),
+                            nota_next::InstanceSchema::new(
+                                <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                                nota_next::InstanceSchemaBody::EnumPayload(
+                                    Some(
+                                        Box::new(
+                                            nota_next::InstanceSchema::new(
+                                                nota_next::TypeReference::optional(
+                                                    nota_next::TypeReference::named("ProgrammingLeaf"),
+                                                ),
+                                                nota_next::InstanceSchemaBody::Optional(None),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    );
+                }
+                "Systems" => {
+                    return Ok(
+                        nota_next::DecodedWithSchema::new(
+                            Self::Systems(None),
+                            nota_next::InstanceSchema::new(
+                                <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                                nota_next::InstanceSchemaBody::EnumPayload(
+                                    Some(
+                                        Box::new(
+                                            nota_next::InstanceSchema::new(
+                                                nota_next::TypeReference::optional(
+                                                    nota_next::TypeReference::named("SystemsLeaf"),
+                                                ),
+                                                nota_next::InstanceSchemaBody::Optional(None),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    );
+                }
+                "Distributed" => {
+                    return Ok(
+                        nota_next::DecodedWithSchema::new(
+                            Self::Distributed(None),
+                            nota_next::InstanceSchema::new(
+                                <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                                nota_next::InstanceSchemaBody::EnumPayload(
+                                    Some(
+                                        Box::new(
+                                            nota_next::InstanceSchema::new(
+                                                nota_next::TypeReference::optional(
+                                                    nota_next::TypeReference::named("DistributedLeaf"),
+                                                ),
+                                                nota_next::InstanceSchemaBody::Optional(None),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    );
+                }
+                "Data" => {
+                    return Ok(
+                        nota_next::DecodedWithSchema::new(
+                            Self::Data(None),
+                            nota_next::InstanceSchema::new(
+                                <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                                nota_next::InstanceSchemaBody::EnumPayload(
+                                    Some(
+                                        Box::new(
+                                            nota_next::InstanceSchema::new(
+                                                nota_next::TypeReference::optional(
+                                                    nota_next::TypeReference::named("DataLeaf"),
+                                                ),
+                                                nota_next::InstanceSchemaBody::Optional(None),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    );
+                }
+                "Intelligence" => {
+                    return Ok(
+                        nota_next::DecodedWithSchema::new(
+                            Self::Intelligence(None),
+                            nota_next::InstanceSchema::new(
+                                <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                                nota_next::InstanceSchemaBody::EnumPayload(
+                                    Some(
+                                        Box::new(
+                                            nota_next::InstanceSchema::new(
+                                                nota_next::TypeReference::optional(
+                                                    nota_next::TypeReference::named("IntelligenceLeaf"),
+                                                ),
+                                                nota_next::InstanceSchemaBody::Optional(None),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    );
+                }
+                "Security" => {
+                    return Ok(
+                        nota_next::DecodedWithSchema::new(
+                            Self::Security(None),
+                            nota_next::InstanceSchema::new(
+                                <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                                nota_next::InstanceSchemaBody::EnumPayload(
+                                    Some(
+                                        Box::new(
+                                            nota_next::InstanceSchema::new(
+                                                nota_next::TypeReference::optional(
+                                                    nota_next::TypeReference::named("SecurityLeaf"),
+                                                ),
+                                                nota_next::InstanceSchemaBody::Optional(None),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    );
+                }
+                "Quality" => {
+                    return Ok(
+                        nota_next::DecodedWithSchema::new(
+                            Self::Quality(None),
+                            nota_next::InstanceSchema::new(
+                                <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                                nota_next::InstanceSchemaBody::EnumPayload(
+                                    Some(
+                                        Box::new(
+                                            nota_next::InstanceSchema::new(
+                                                nota_next::TypeReference::optional(
+                                                    nota_next::TypeReference::named("QualityLeaf"),
+                                                ),
+                                                nota_next::InstanceSchemaBody::Optional(None),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    );
+                }
+                "Operations" => {
+                    return Ok(
+                        nota_next::DecodedWithSchema::new(
+                            Self::Operations(None),
+                            nota_next::InstanceSchema::new(
+                                <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                                nota_next::InstanceSchemaBody::EnumPayload(
+                                    Some(
+                                        Box::new(
+                                            nota_next::InstanceSchema::new(
+                                                nota_next::TypeReference::optional(
+                                                    nota_next::TypeReference::named("OperationsLeaf"),
+                                                ),
+                                                nota_next::InstanceSchemaBody::Optional(None),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    );
+                }
+                "Observability" => {
+                    return Ok(
+                        nota_next::DecodedWithSchema::new(
+                            Self::Observability(None),
+                            nota_next::InstanceSchema::new(
+                                <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                                nota_next::InstanceSchemaBody::EnumPayload(
+                                    Some(
+                                        Box::new(
+                                            nota_next::InstanceSchema::new(
+                                                nota_next::TypeReference::optional(
+                                                    nota_next::TypeReference::named("ObservabilityLeaf"),
+                                                ),
+                                                nota_next::InstanceSchemaBody::Optional(None),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    );
+                }
+                "Surfaces" => {
+                    return Ok(
+                        nota_next::DecodedWithSchema::new(
+                            Self::Surfaces(None),
+                            nota_next::InstanceSchema::new(
+                                <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                                nota_next::InstanceSchemaBody::EnumPayload(
+                                    Some(
+                                        Box::new(
+                                            nota_next::InstanceSchema::new(
+                                                nota_next::TypeReference::optional(
+                                                    nota_next::TypeReference::named("SurfacesLeaf"),
+                                                ),
+                                                nota_next::InstanceSchemaBody::Optional(None),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    );
+                }
+                "Engineering" => {
+                    return Ok(
+                        nota_next::DecodedWithSchema::new(
+                            Self::Engineering(None),
+                            nota_next::InstanceSchema::new(
+                                <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                                nota_next::InstanceSchemaBody::EnumPayload(
+                                    Some(
+                                        Box::new(
+                                            nota_next::InstanceSchema::new(
+                                                nota_next::TypeReference::optional(
+                                                    nota_next::TypeReference::named("EngineeringLeaf"),
+                                                ),
+                                                nota_next::InstanceSchemaBody::Optional(None),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    );
+                }
+                other => {
+                    return Err(nota_next::NotaDecodeError::UnknownVariant {
+                        enum_name: "Software",
+                        variant: other.to_owned(),
+                    });
+                }
+            }
+        }
+        let body = nota_next::NotaBlock::new(block)
+            .expect_body(nota_next::Delimiter::Parenthesis, "Software")?;
+        let children = body.expect_fields("Software", 2)?;
+        let variant = children[0]
+            .demote_to_string()
+            .ok_or(nota_next::NotaDecodeError::ExpectedAtom {
+                type_name: "enum variant",
+            })?;
+        match variant {
+            "Programming" => {
+                let leaf = <ProgrammingLeaf as nota_next::NotaDecodeTraced>::from_nota_block_traced(
+                    &children[1],
+                )?;
+                let (leaf_value, leaf_schema) = leaf.into_parts();
+                Ok(
+                    nota_next::DecodedWithSchema::new(
+                        Self::Programming(Some(leaf_value)),
+                        nota_next::InstanceSchema::new(
+                            <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                            nota_next::InstanceSchemaBody::EnumPayload(
+                                Some(
+                                    Box::new(
+                                        nota_next::InstanceSchema::new(
+                                            nota_next::TypeReference::optional(
+                                                nota_next::TypeReference::named("ProgrammingLeaf"),
+                                            ),
+                                            nota_next::InstanceSchemaBody::Optional(
+                                                Some(Box::new(leaf_schema)),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                )
+            }
+            "Systems" => {
+                let leaf = <SystemsLeaf as nota_next::NotaDecodeTraced>::from_nota_block_traced(
+                    &children[1],
+                )?;
+                let (leaf_value, leaf_schema) = leaf.into_parts();
+                Ok(
+                    nota_next::DecodedWithSchema::new(
+                        Self::Systems(Some(leaf_value)),
+                        nota_next::InstanceSchema::new(
+                            <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                            nota_next::InstanceSchemaBody::EnumPayload(
+                                Some(
+                                    Box::new(
+                                        nota_next::InstanceSchema::new(
+                                            nota_next::TypeReference::optional(
+                                                nota_next::TypeReference::named("SystemsLeaf"),
+                                            ),
+                                            nota_next::InstanceSchemaBody::Optional(
+                                                Some(Box::new(leaf_schema)),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                )
+            }
+            "Distributed" => {
+                let leaf = <DistributedLeaf as nota_next::NotaDecodeTraced>::from_nota_block_traced(
+                    &children[1],
+                )?;
+                let (leaf_value, leaf_schema) = leaf.into_parts();
+                Ok(
+                    nota_next::DecodedWithSchema::new(
+                        Self::Distributed(Some(leaf_value)),
+                        nota_next::InstanceSchema::new(
+                            <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                            nota_next::InstanceSchemaBody::EnumPayload(
+                                Some(
+                                    Box::new(
+                                        nota_next::InstanceSchema::new(
+                                            nota_next::TypeReference::optional(
+                                                nota_next::TypeReference::named("DistributedLeaf"),
+                                            ),
+                                            nota_next::InstanceSchemaBody::Optional(
+                                                Some(Box::new(leaf_schema)),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                )
+            }
+            "Data" => {
+                let leaf = <DataLeaf as nota_next::NotaDecodeTraced>::from_nota_block_traced(
+                    &children[1],
+                )?;
+                let (leaf_value, leaf_schema) = leaf.into_parts();
+                Ok(
+                    nota_next::DecodedWithSchema::new(
+                        Self::Data(Some(leaf_value)),
+                        nota_next::InstanceSchema::new(
+                            <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                            nota_next::InstanceSchemaBody::EnumPayload(
+                                Some(
+                                    Box::new(
+                                        nota_next::InstanceSchema::new(
+                                            nota_next::TypeReference::optional(
+                                                nota_next::TypeReference::named("DataLeaf"),
+                                            ),
+                                            nota_next::InstanceSchemaBody::Optional(
+                                                Some(Box::new(leaf_schema)),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                )
+            }
+            "Intelligence" => {
+                let leaf = <IntelligenceLeaf as nota_next::NotaDecodeTraced>::from_nota_block_traced(
+                    &children[1],
+                )?;
+                let (leaf_value, leaf_schema) = leaf.into_parts();
+                Ok(
+                    nota_next::DecodedWithSchema::new(
+                        Self::Intelligence(Some(leaf_value)),
+                        nota_next::InstanceSchema::new(
+                            <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                            nota_next::InstanceSchemaBody::EnumPayload(
+                                Some(
+                                    Box::new(
+                                        nota_next::InstanceSchema::new(
+                                            nota_next::TypeReference::optional(
+                                                nota_next::TypeReference::named("IntelligenceLeaf"),
+                                            ),
+                                            nota_next::InstanceSchemaBody::Optional(
+                                                Some(Box::new(leaf_schema)),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                )
+            }
+            "Security" => {
+                let leaf = <SecurityLeaf as nota_next::NotaDecodeTraced>::from_nota_block_traced(
+                    &children[1],
+                )?;
+                let (leaf_value, leaf_schema) = leaf.into_parts();
+                Ok(
+                    nota_next::DecodedWithSchema::new(
+                        Self::Security(Some(leaf_value)),
+                        nota_next::InstanceSchema::new(
+                            <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                            nota_next::InstanceSchemaBody::EnumPayload(
+                                Some(
+                                    Box::new(
+                                        nota_next::InstanceSchema::new(
+                                            nota_next::TypeReference::optional(
+                                                nota_next::TypeReference::named("SecurityLeaf"),
+                                            ),
+                                            nota_next::InstanceSchemaBody::Optional(
+                                                Some(Box::new(leaf_schema)),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                )
+            }
+            "Quality" => {
+                let leaf = <QualityLeaf as nota_next::NotaDecodeTraced>::from_nota_block_traced(
+                    &children[1],
+                )?;
+                let (leaf_value, leaf_schema) = leaf.into_parts();
+                Ok(
+                    nota_next::DecodedWithSchema::new(
+                        Self::Quality(Some(leaf_value)),
+                        nota_next::InstanceSchema::new(
+                            <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                            nota_next::InstanceSchemaBody::EnumPayload(
+                                Some(
+                                    Box::new(
+                                        nota_next::InstanceSchema::new(
+                                            nota_next::TypeReference::optional(
+                                                nota_next::TypeReference::named("QualityLeaf"),
+                                            ),
+                                            nota_next::InstanceSchemaBody::Optional(
+                                                Some(Box::new(leaf_schema)),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                )
+            }
+            "Operations" => {
+                let leaf = <OperationsLeaf as nota_next::NotaDecodeTraced>::from_nota_block_traced(
+                    &children[1],
+                )?;
+                let (leaf_value, leaf_schema) = leaf.into_parts();
+                Ok(
+                    nota_next::DecodedWithSchema::new(
+                        Self::Operations(Some(leaf_value)),
+                        nota_next::InstanceSchema::new(
+                            <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                            nota_next::InstanceSchemaBody::EnumPayload(
+                                Some(
+                                    Box::new(
+                                        nota_next::InstanceSchema::new(
+                                            nota_next::TypeReference::optional(
+                                                nota_next::TypeReference::named("OperationsLeaf"),
+                                            ),
+                                            nota_next::InstanceSchemaBody::Optional(
+                                                Some(Box::new(leaf_schema)),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                )
+            }
+            "Observability" => {
+                let leaf = <ObservabilityLeaf as nota_next::NotaDecodeTraced>::from_nota_block_traced(
+                    &children[1],
+                )?;
+                let (leaf_value, leaf_schema) = leaf.into_parts();
+                Ok(
+                    nota_next::DecodedWithSchema::new(
+                        Self::Observability(Some(leaf_value)),
+                        nota_next::InstanceSchema::new(
+                            <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                            nota_next::InstanceSchemaBody::EnumPayload(
+                                Some(
+                                    Box::new(
+                                        nota_next::InstanceSchema::new(
+                                            nota_next::TypeReference::optional(
+                                                nota_next::TypeReference::named("ObservabilityLeaf"),
+                                            ),
+                                            nota_next::InstanceSchemaBody::Optional(
+                                                Some(Box::new(leaf_schema)),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                )
+            }
+            "Surfaces" => {
+                let leaf = <SurfacesLeaf as nota_next::NotaDecodeTraced>::from_nota_block_traced(
+                    &children[1],
+                )?;
+                let (leaf_value, leaf_schema) = leaf.into_parts();
+                Ok(
+                    nota_next::DecodedWithSchema::new(
+                        Self::Surfaces(Some(leaf_value)),
+                        nota_next::InstanceSchema::new(
+                            <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                            nota_next::InstanceSchemaBody::EnumPayload(
+                                Some(
+                                    Box::new(
+                                        nota_next::InstanceSchema::new(
+                                            nota_next::TypeReference::optional(
+                                                nota_next::TypeReference::named("SurfacesLeaf"),
+                                            ),
+                                            nota_next::InstanceSchemaBody::Optional(
+                                                Some(Box::new(leaf_schema)),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                )
+            }
+            "Engineering" => {
+                let leaf = <EngineeringLeaf as nota_next::NotaDecodeTraced>::from_nota_block_traced(
+                    &children[1],
+                )?;
+                let (leaf_value, leaf_schema) = leaf.into_parts();
+                Ok(
+                    nota_next::DecodedWithSchema::new(
+                        Self::Engineering(Some(leaf_value)),
+                        nota_next::InstanceSchema::new(
+                            <Self as nota_next::NotaDecodeTraced>::instance_reference(),
+                            nota_next::InstanceSchemaBody::EnumPayload(
+                                Some(
+                                    Box::new(
+                                        nota_next::InstanceSchema::new(
+                                            nota_next::TypeReference::optional(
+                                                nota_next::TypeReference::named("EngineeringLeaf"),
+                                            ),
+                                            nota_next::InstanceSchemaBody::Optional(
+                                                Some(Box::new(leaf_schema)),
+                                            ),
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                )
+            }
+            other => {
+                Err(nota_next::NotaDecodeError::UnknownVariant {
+                    enum_name: "Software",
+                    variant: other.to_owned(),
+                })
+            }
+        }
+    }
+}
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -1114,7 +1894,10 @@ pub enum ProgrammingLeaf {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -1131,7 +1914,10 @@ pub enum SystemsLeaf {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -1148,7 +1934,10 @@ pub enum DistributedLeaf {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -1169,7 +1958,10 @@ pub enum DataLeaf {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -1185,7 +1977,10 @@ pub enum IntelligenceLeaf {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -1205,7 +2000,10 @@ pub enum SecurityLeaf {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -1221,7 +2019,10 @@ pub enum QualityLeaf {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -1241,7 +2042,10 @@ pub enum OperationsLeaf {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -1257,7 +2061,10 @@ pub enum ObservabilityLeaf {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -1274,7 +2081,10 @@ pub enum SurfacesLeaf {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(
     rkyv::Archive,
     rkyv::Serialize,
@@ -1297,7 +2107,10 @@ pub enum EngineeringLeaf {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum DomainScope {
     Health(HealthScope),
@@ -1326,7 +2139,10 @@ pub enum DomainScope {
     Technology(TechnologyScope),
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum TechnologyScope {
     All,
@@ -1334,7 +2150,10 @@ pub enum TechnologyScope {
     Software(SoftwareScope),
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum SoftwareScope {
     All,
@@ -1352,7 +2171,10 @@ pub enum SoftwareScope {
     Engineering(EngineeringLeafScope),
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum EngineeringLeafScope {
     All,
@@ -1366,7 +2188,10 @@ pub enum EngineeringLeafScope {
     Modularity,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum SurfacesLeafScope {
     All,
@@ -1374,14 +2199,20 @@ pub enum SurfacesLeafScope {
     CommandLineInterfaces,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum ObservabilityLeafScope {
     All,
     Tracing,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum OperationsLeafScope {
     All,
@@ -1392,14 +2223,20 @@ pub enum OperationsLeafScope {
     ConfigurationManagement,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum QualityLeafScope {
     All,
     Testing,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum SecurityLeafScope {
     All,
@@ -1410,14 +2247,20 @@ pub enum SecurityLeafScope {
     Privacy,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum IntelligenceLeafScope {
     All,
     AgentSystems,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum DataLeafScope {
     All,
@@ -1429,7 +2272,10 @@ pub enum DataLeafScope {
     Migration,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum DistributedLeafScope {
     All,
@@ -1437,7 +2283,10 @@ pub enum DistributedLeafScope {
     EventDrivenArchitecture,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum SystemsLeafScope {
     All,
@@ -1445,7 +2294,10 @@ pub enum SystemsLeafScope {
     Concurrency,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum ProgrammingLeafScope {
     All,
@@ -1459,14 +2311,20 @@ pub enum ProgrammingLeafScope {
     DomainSpecificLanguages,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum HardwareLeafScope {
     All,
     Networking,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum InformationScope {
     All,
@@ -1481,7 +2339,10 @@ pub enum InformationScope {
     Classification,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum SafetyScope {
     All,
@@ -1495,7 +2356,10 @@ pub enum SafetyScope {
     Deterrence,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum AppearanceScope {
     All,
@@ -1507,7 +2371,10 @@ pub enum AppearanceScope {
     Comportment,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum LeisureScope {
     All,
@@ -1524,7 +2391,10 @@ pub enum LeisureScope {
     Fandom,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum CommerceScope {
     All,
@@ -1541,7 +2411,10 @@ pub enum CommerceScope {
     Market,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum TravelScope {
     All,
@@ -1558,7 +2431,10 @@ pub enum TravelScope {
     Cycling,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum NatureScope {
     All,
@@ -1578,7 +2454,10 @@ pub enum NatureScope {
     Stewardship,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum CommunityScope {
     All,
@@ -1593,7 +2472,10 @@ pub enum CommunityScope {
     Institutions,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum LawScope {
     All,
@@ -1611,7 +2493,10 @@ pub enum LawScope {
     Arbitration,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum GovernanceScope {
     All,
@@ -1630,7 +2515,10 @@ pub enum GovernanceScope {
     War,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum SpiritualityScope {
     All,
@@ -1650,7 +2538,10 @@ pub enum SpiritualityScope {
     Wisdom,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum SelfhoodScope {
     All,
@@ -1669,7 +2560,10 @@ pub enum SelfhoodScope {
     Composure,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum KinshipScope {
     All,
@@ -1688,7 +2582,10 @@ pub enum KinshipScope {
     Belonging,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum ArtScope {
     All,
@@ -1707,7 +2604,10 @@ pub enum ArtScope {
     Publishing,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum LanguageScope {
     All,
@@ -1724,7 +2624,10 @@ pub enum LanguageScope {
     Notation,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum EducationScope {
     All,
@@ -1740,7 +2643,10 @@ pub enum EducationScope {
     Credential,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum KnowledgeScope {
     All,
@@ -1763,7 +2669,10 @@ pub enum KnowledgeScope {
     Taxonomy,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum CraftScope {
     All,
@@ -1779,7 +2688,10 @@ pub enum CraftScope {
     Invention,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum WorkScope {
     All,
@@ -1799,7 +2711,10 @@ pub enum WorkScope {
     Project,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum FinanceScope {
     All,
@@ -1819,7 +2734,10 @@ pub enum FinanceScope {
     Accounting,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum HomeScope {
     All,
@@ -1837,7 +2755,10 @@ pub enum HomeScope {
     Appliances,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum FoodScope {
     All,
@@ -1854,7 +2775,10 @@ pub enum FoodScope {
     Dining,
 }
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum HealthScope {
     All,
@@ -3106,12 +4030,18 @@ impl std::fmt::Display for DomainScope {
 }
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct DomainScopes(Vec<DomainScope>);
 
 #[rustfmt::skip]
-#[cfg_attr(feature = "nota-text", derive(nota_next::NotaDecode, nota_next::NotaEncode))]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota_next::NotaDecode, nota_next::NotaDecodeTraced, nota_next::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct ScopeSet(Vec<DomainScope>);
 

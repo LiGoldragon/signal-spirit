@@ -8,9 +8,13 @@
 #[allow(dead_code)]
 #[rustfmt::skip]
 pub mod schema;
+#[cfg(feature = "nota-text")]
+pub mod help;
 
 use std::collections::BTreeSet;
 
+#[cfg(feature = "nota-text")]
+pub use help::{HelpError, HelpModel, HelpRequest, HelpResponse};
 pub use schema::signal::*;
 
 pub type SpiritRequest = Input;

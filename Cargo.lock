@@ -10,9 +10,9 @@ checksum = "76a2e8124351fda1ef8aaaa3bbd7ebbcb486bbcd4225aca0aa0d84bb2db8fecb"
 
 [[package]]
 name = "arrayvec"
-version = "0.7.6"
+version = "0.7.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
+checksum = "f02882884d3e1bc524fb12c79f107f6ad0e1cfd498c536ffb494301740995dfe"
 
 [[package]]
 name = "blake3"
@@ -59,15 +59,15 @@ dependencies = [
 
 [[package]]
 name = "bytes"
-version = "1.11.1"
+version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e748733b7cbc798e1434b6ac524f0c1ff2ab456fe201501e6497c8417a4fc33"
+checksum = "8ae3f5d315924270530207e2a68396c3cc547f6dca3fbdca317cfb1a51edb593"
 
 [[package]]
 name = "cc"
-version = "1.2.64"
+version = "1.2.65"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dad887fd958be91b5098c0248def011f4523ab786cd411be668777e55063501f"
+checksum = "e228eec9be7c17ccb640b59b36a5cd805ea2a564a4c5e162c2f659fea30d3b96"
 dependencies = [
  "find-msvc-tools",
  "shlex",
@@ -185,8 +185,8 @@ dependencies = [
 
 [[package]]
 name = "nota-next"
-version = "0.5.0"
-source = "git+https://github.com/LiGoldragon/nota-next.git?branch=main#c43d04a159e90314a0094b61ace66053371cc247"
+version = "0.5.1"
+source = "git+https://github.com/LiGoldragon/nota-next.git?branch=main#4642807e40306a382acbcdcb7c61b5802c7e22f5"
 dependencies = [
  "nota-next-derive",
  "rkyv",
@@ -195,7 +195,7 @@ dependencies = [
 [[package]]
 name = "nota-next-derive"
 version = "0.3.0"
-source = "git+https://github.com/LiGoldragon/nota-next.git?branch=main#c43d04a159e90314a0094b61ace66053371cc247"
+source = "git+https://github.com/LiGoldragon/nota-next.git?branch=main#4642807e40306a382acbcdcb7c61b5802c7e22f5"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -261,9 +261,9 @@ dependencies = [
 
 [[package]]
 name = "quote"
-version = "1.0.45"
+version = "1.0.46"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "41f2619966050689382d2b44f664f4bc593e129785a36d6ee376ddf37259b924"
+checksum = "dfbc457d0c7a0759a614551b11a6409e5951f6c7537be1f1b7682b9ae9230368"
 dependencies = [
  "proc-macro2",
 ]
@@ -325,7 +325,7 @@ checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
 [[package]]
 name = "schema-cc"
 version = "0.1.0"
-source = "git+https://github.com/LiGoldragon/schema-next.git?branch=main#4b7e830a7001708737a617bd8eedac8002cc1fc6"
+source = "git+https://github.com/LiGoldragon/schema-next.git?branch=main#9219e32995bc63bb5261493feb9c12ffe7a45642"
 dependencies = [
  "nota-next",
  "prettyplease",
@@ -338,7 +338,7 @@ dependencies = [
 [[package]]
 name = "schema-next"
 version = "0.2.0"
-source = "git+https://github.com/LiGoldragon/schema-next.git?branch=main#4b7e830a7001708737a617bd8eedac8002cc1fc6"
+source = "git+https://github.com/LiGoldragon/schema-next.git?branch=main#9219e32995bc63bb5261493feb9c12ffe7a45642"
 dependencies = [
  "blake3",
  "nota-next",
@@ -350,7 +350,7 @@ dependencies = [
 [[package]]
 name = "schema-rust-next"
 version = "0.5.3"
-source = "git+https://github.com/LiGoldragon/schema-rust-next.git?branch=main#90d853c33ade57cfafca5942dd0790a3302a605f"
+source = "git+https://github.com/LiGoldragon/schema-rust-next.git?branch=main#e4ac3baf37121b8d7516bc5cdc6bdf026aa5b282"
 dependencies = [
  "prettyplease",
  "proc-macro2",
@@ -369,7 +369,7 @@ checksum = "f8fadd59c855ef2080decdef8ff161eb6661b86933c9d82e5ba29dc602a55aba"
 [[package]]
 name = "signal-frame"
 version = "0.2.1"
-source = "git+https://github.com/LiGoldragon/signal-frame.git?branch=main#e2eae5c28dac47eea6c4c641b60c4fd27bb547d8"
+source = "git+https://github.com/LiGoldragon/signal-frame.git?branch=main#c75053210b1b1e0d22833f0cfc461363213cf860"
 dependencies = [
  "nota-next",
  "paste",
@@ -381,7 +381,7 @@ dependencies = [
 [[package]]
 name = "signal-frame-macros"
 version = "0.1.1"
-source = "git+https://github.com/LiGoldragon/signal-frame.git?branch=main#e2eae5c28dac47eea6c4c641b60c4fd27bb547d8"
+source = "git+https://github.com/LiGoldragon/signal-frame.git?branch=main#c75053210b1b1e0d22833f0cfc461363213cf860"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -394,6 +394,7 @@ version = "0.8.0"
 dependencies = [
  "nota-next",
  "rkyv",
+ "schema-next",
  "schema-rust-next",
  "signal-frame",
  "thiserror",
@@ -414,9 +415,9 @@ checksum = "0c790de23124f9ab44544d7ac05d60440adc586479ce501c1d6d7da3cd8c9cf5"
 
 [[package]]
 name = "syn"
-version = "2.0.117"
+version = "2.0.118"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e665b8803e7b1d2a727f4023456bbbbe74da67099c585258af0ad9c5013b9b99"
+checksum = "1b9ae57f904213ebb649ce6895b8a66c66f0203b9319718f69a5612a065b1422"
 dependencies = [
  "proc-macro2",
  "quote",

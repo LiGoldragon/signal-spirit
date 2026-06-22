@@ -18,6 +18,7 @@ path = "src/lib.rs"
 default = []
 nota-text = [
     "dep:nota-next",
+    "dep:schema-next",
     "signal-frame/nota-text",
     "version-projection/nota-text",
 ]
@@ -25,6 +26,7 @@ nota-text = [
 [dependencies]
 signal-frame = { git = "https://github.com/LiGoldragon/signal-frame.git", branch = "main", default-features = false }
 nota-next    = { git = "https://github.com/LiGoldragon/nota-next.git", branch = "main", optional = true }
+schema-next  = { git = "https://github.com/LiGoldragon/schema-next.git", branch = "main", optional = true }
 rkyv         = { version = "0.8", default-features = false, features = ["std", "bytecheck", "little_endian", "pointer_width_32", "unaligned"] }
 thiserror    = "2"
 version-projection = { git = "https://github.com/LiGoldragon/version-projection.git", branch = "main", default-features = false }
@@ -34,6 +36,7 @@ schema-rust-next = { git = "https://github.com/LiGoldragon/schema-rust-next.git"
 
 [dev-dependencies]
 nota-next = { git = "https://github.com/LiGoldragon/nota-next.git", branch = "main" }
+schema-next = { git = "https://github.com/LiGoldragon/schema-next.git", branch = "main" }
 
 [lints.rust]
 unsafe_code = "forbid"

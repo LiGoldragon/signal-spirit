@@ -35,6 +35,13 @@ contract.** Daemons may hold multiple internal plane schemas;
 contract crates like this stay single-channel because the crate
 boundary already enforces the channel boundary.
 
+Schema help is a text-client reflection surface over this contract, not
+an ordinary daemon operation. The `nota-text` feature may expose a
+rkyv-serializable help data tree projected from the embedded schema
+source for CLIs and text clients, but `Input` and `Output` stay the
+peer-callable domain signal contract and do not gain `Help` /
+`HelpReported` roots for this feature.
+
 ## Description-only discipline
 
 The record shape carries one agent-clarified `Description`, a
@@ -98,6 +105,8 @@ counts or time windows.
 - Keep the default dependency graph binary-first: rkyv frame types are
   always available, while the NOTA projection is an explicit
   `nota-text` feature for CLI/debug/audit edges.
+- Under `nota-text`, provide schema-derived help as typed contract
+  metadata for clients to render locally before daemon transport.
 - Project the **description-only discipline** — terse
   acknowledgements, daemon-stamped timestamps, and user-creatable
   topic vectors.
