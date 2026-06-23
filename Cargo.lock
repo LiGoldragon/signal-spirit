@@ -325,7 +325,7 @@ checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
 [[package]]
 name = "schema-cc"
 version = "0.1.0"
-source = "git+https://github.com/LiGoldragon/schema-next.git?branch=main#d4ea7992d3e8a2d2600e076ba8a722a0e3f5e8e4"
+source = "git+https://github.com/LiGoldragon/schema-next.git?branch=main#c5644ee49f2b1de130094e150ef1abfad2019d3a"
 dependencies = [
  "nota-next",
  "prettyplease",
@@ -338,7 +338,7 @@ dependencies = [
 [[package]]
 name = "schema-next"
 version = "0.2.0"
-source = "git+https://github.com/LiGoldragon/schema-next.git?branch=main#d4ea7992d3e8a2d2600e076ba8a722a0e3f5e8e4"
+source = "git+https://github.com/LiGoldragon/schema-next.git?branch=main#c5644ee49f2b1de130094e150ef1abfad2019d3a"
 dependencies = [
  "blake3",
  "nota-next",
@@ -350,7 +350,7 @@ dependencies = [
 [[package]]
 name = "schema-rust-next"
 version = "0.5.3"
-source = "git+https://github.com/LiGoldragon/schema-rust-next.git?branch=main#e4ac3baf37121b8d7516bc5cdc6bdf026aa5b282"
+source = "git+https://github.com/LiGoldragon/schema-rust-next.git?branch=main#9456912a6acde8120a6a22ae9d80d232c2072d25"
 dependencies = [
  "prettyplease",
  "proc-macro2",
