@@ -1,29 +1,23 @@
-//! Help as a thin view over the resolved schema IR.
+//! Help as a thin view over `schema-next`'s fully specified schema IR.
 //!
-//! Help is not a separate language and carries no AST of its own. A Help node
-//! is a (re-headed) `schema-next` [`SourceDeclaration`]: the entry name plus
-//! the declaration's [`SourceDeclarationValue`] body — the SAME resolved IR
-//! that instance-schema rendering and Rust lowering read. There is no
-//! `HelpBody` / `HelpTypeExpression`; those duplicated `SourceDeclarationValue`
-//! / `SourceReference`, and that fork is exactly where the `Vec` / `Vector`
-//! spelling escaped. With the duplicate gone, `(Help Domains)` and the
-//! per-instance schema of an empty `Domains` both project the one
-//! `SourceReference::Vector(Plain(Domain))` and render `(Vector Domain)`
-//! through the one schema encoder.
+//! Help is not a separate language and carries no AST of its own. The model
+//! stores `SpecifiedSchema` values — authored `.schema` sugar decoded into the
+//! explicit semantic data tree. Rendering is a projection from that data into
+//! re-headed schema declarations, encoded by schema-next's declaration codec.
 //!
 //! The text codec is schema-next's declaration codec end to end: encode via
 //! [`SourceDeclaration::to_schema_text`], decode via
 //! [`SourceDeclarations::from_schema_text`]. No hand `format!` printer, no
-//! parallel decoder. The rkyv codec is the rkyv derive on these wrappers over
-//! the (rkyv-derived) `SourceDeclarationValue`.
+//! parallel decoder. The rkyv codec is the rkyv derive on the Help wrappers and
+//! on the stored `SpecifiedSchema` values.
 
 use std::fmt;
 
 use nota_next::{Block, Delimiter, Document};
 use schema_next::{
-    Name, SchemaError, SchemaSource, SourceDeclaration, SourceDeclarationValue, SourceDeclarations,
-    SourceField, SourceFieldValue, SourceImport, SourceNamespace, SourceRootEnum,
-    SourceVariantPayload, SourceVariantSignature,
+    ImportResolver, Name, SchemaEngine, SchemaError, SchemaIdentity, SchemaSource,
+    SourceDeclaration, SourceDeclarationValue, SourceDeclarations, SpecifiedDeclaration,
+    SpecifiedRoot, SpecifiedRootEnum, SpecifiedSchema,
 };
 use thiserror::Error;
 
@@ -113,8 +107,9 @@ impl HelpResponse {
 
     /// Decode a help response from its schema text — the inverse of
     /// [`Self::to_schema_text`]. Each re-headed declaration parses straight
-    /// back into the resolved IR through schema-next's declaration decoder; the
-    /// help entry is that [`SourceDeclaration`] with no intermediate AST.
+    /// back into schema declaration data through schema-next's declaration
+    /// decoder; the help entry is that [`SourceDeclaration`] with no
+    /// intermediate Help AST.
     pub fn from_schema_text(source: &str) -> Result<Self, HelpError> {
         let declarations = SourceDeclarations::from_schema_text(source)?;
         Ok(Self::from_source_declarations(&declarations))
@@ -155,20 +150,95 @@ impl fmt::Display for HelpResponse {
 
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct HelpModel {
-    roots: HelpRoots,
-    nodes: HelpNodes,
+    schemas: HelpSchemas,
 }
 
 impl HelpModel {
     pub fn from_signal_schema_source() -> Result<Self, HelpError> {
+        let engine = SchemaEngine::default();
+        let resolver = ImportResolver::new().with_module_source(
+            "signal-spirit",
+            "domain",
+            env!("CARGO_PKG_VERSION"),
+            DOMAIN_SCHEMA_SOURCE,
+        );
         let signal_source = SchemaSource::from_schema_text(SIGNAL_SCHEMA_SOURCE)?;
+        let signal_schema = engine.lower_schema_source_with_resolver(
+            &signal_source,
+            SchemaIdentity::new("signal-spirit:signal", env!("CARGO_PKG_VERSION")),
+            &resolver,
+        )?;
         let domain_source = SchemaSource::from_schema_text(DOMAIN_SCHEMA_SOURCE)?;
-        let mut builder = HelpModelBuilder::from_source(&signal_source);
-        builder.insert_namespace(domain_source.namespace());
-        Ok(builder.into_model())
+        let domain_schema = engine.lower_schema_source(
+            &domain_source,
+            SchemaIdentity::new("signal-spirit:domain", env!("CARGO_PKG_VERSION")),
+        )?;
+        let signal_schema = SpecifiedSchema::from(&signal_schema);
+        let domain_schema = SpecifiedSchema::from(&domain_schema);
+        Ok(Self::from_specified_schemas(vec![
+            signal_schema,
+            domain_schema,
+        ]))
+    }
+
+    pub fn from_specified_schemas(schemas: Vec<SpecifiedSchema>) -> Self {
+        Self {
+            schemas: HelpSchemas::new(schemas),
+        }
+    }
+
+    pub fn schemas(&self) -> &HelpSchemas {
+        &self.schemas
     }
 
     pub fn render(&self, request: &HelpRequest) -> Result<HelpResponse, HelpError> {
+        HelpCatalog::from_schemas(self.schemas.schemas()).render(request)
+    }
+}
+
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
+#[rkyv(
+    bytecheck(bounds(
+        __C: rkyv::validation::ArchiveContext,
+        __C::Error: rkyv::rancor::Source
+    )),
+    serialize_bounds(
+        __S: rkyv::ser::Writer + rkyv::ser::Allocator,
+        __S::Error: rkyv::rancor::Source
+    ),
+    deserialize_bounds(__D::Error: rkyv::rancor::Source)
+)]
+pub struct HelpSchemas {
+    #[rkyv(omit_bounds)]
+    schemas: Vec<SpecifiedSchema>,
+}
+
+impl HelpSchemas {
+    pub fn new(schemas: Vec<SpecifiedSchema>) -> Self {
+        Self { schemas }
+    }
+
+    pub fn schemas(&self) -> &[SpecifiedSchema] {
+        &self.schemas
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct HelpCatalog {
+    roots: HelpRoots,
+    nodes: HelpNodes,
+}
+
+impl HelpCatalog {
+    fn from_schemas(schemas: &[SpecifiedSchema]) -> Self {
+        let mut builder = HelpCatalogBuilder::empty();
+        for schema in schemas {
+            builder.insert_schema(schema);
+        }
+        builder.into_catalog()
+    }
+
+    fn render(&self, request: &HelpRequest) -> Result<HelpResponse, HelpError> {
         match request.target() {
             None => Ok(HelpResponse::new(HelpEntries::from_roots(
                 self.roots.roots(),
@@ -188,147 +258,69 @@ impl HelpModel {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-struct HelpModelBuilder {
+struct HelpCatalogBuilder {
     roots: HelpRoots,
     nodes: HelpNodes,
 }
 
-impl HelpModelBuilder {
-    fn from_source(source: &SchemaSource) -> Self {
-        let mut builder = Self {
+impl HelpCatalogBuilder {
+    fn empty() -> Self {
+        Self {
             roots: HelpRoots::empty(),
             nodes: HelpNodes::empty(),
-        };
-        builder.insert_imports(source.imports().entries());
-        builder.insert_namespace(source.namespace());
-        builder.insert_root(HelpPlane::Input, source.input());
-        builder.insert_root(HelpPlane::Output, source.output());
-        builder
+        }
     }
 
-    fn into_model(self) -> HelpModel {
-        HelpModel {
+    fn into_catalog(self) -> HelpCatalog {
+        HelpCatalog {
             roots: self.roots,
             nodes: self.nodes,
         }
     }
 
-    fn insert_imports(&mut self, imports: &[SourceImport]) {
-        for import in imports {
+    fn insert_schema(&mut self, schema: &SpecifiedSchema) {
+        self.insert_root(HelpPlane::Input, schema.input());
+        self.insert_root(HelpPlane::Output, schema.output());
+        for declaration in schema.declarations() {
+            self.insert_declaration(declaration);
+        }
+        for stream in schema.streams() {
             self.nodes.insert(HelpNode::new(
-                HelpName::from(import.local_name()),
-                Some(SourceDeclarationValue::Reference(import.source().clone())),
+                HelpName::from(&stream.name),
+                Some(SourceDeclarationValue::from(stream)),
+            ));
+        }
+        for family in schema.families() {
+            self.nodes.insert(HelpNode::new(
+                HelpName::from(&family.name),
+                Some(SourceDeclarationValue::from(family)),
             ));
         }
     }
 
-    fn insert_namespace(&mut self, namespace: &SourceNamespace) {
-        for entry in namespace.entries() {
-            if let Some(value) = entry.value() {
-                let name = HelpName::from(entry.name());
-                self.nodes.insert(HelpNode::new(name, Some(value.clone())));
-                self.insert_inline_declarations_from_declaration(value);
-            }
-            if let Some(child_namespace) = entry.namespace() {
-                self.insert_namespace(child_namespace);
-            }
+    fn insert_declaration(&mut self, declaration: &SpecifiedDeclaration) {
+        self.nodes.insert(HelpNode::new(
+            HelpName::from(declaration.name()),
+            Some(declaration.body().to_source_declaration_value()),
+        ));
+    }
+
+    fn insert_root(&mut self, plane: HelpPlane, root: &SpecifiedRoot) {
+        if let Some(root) = root.as_enum() {
+            self.insert_root_enum(plane, root);
         }
     }
 
-    fn insert_root(&mut self, plane: HelpPlane, root: &SourceRootEnum) {
-        if let Some(body) = root.body().as_enum() {
-            for variant in body.variants() {
-                let root = HelpRoot::new(
-                    plane,
-                    HelpName::from(variant.name()),
-                    self.body_for_root_variant(variant),
-                );
-                self.roots.push(root);
-            }
-        }
-    }
-
-    /// Resolve a root variant to the resolved-IR body Help shows for it. A
-    /// reference / declaration payload is shown directly; a unit variant that
-    /// names a node resolves one level to that node's declared shape (so
-    /// `Record` shows its struct, not a bare reference).
-    fn body_for_root_variant(
-        &self,
-        variant: &SourceVariantSignature,
-    ) -> Option<SourceDeclarationValue> {
-        match variant.payload_source() {
-            Some(SourceVariantPayload::Reference(reference)) => {
-                Some(SourceDeclarationValue::Reference(reference.clone()))
-            }
-            Some(SourceVariantPayload::Declaration(value)) => Some(value.clone()),
-            None => self
-                .nodes
-                .find(&HelpName::from(variant.name()))
-                .and_then(|node| self.body_for_root_node(node)),
-        }
-    }
-
-    /// One level of name resolution: if a node is a bare reference to a named
-    /// type that is itself a struct or enum, show that struct/enum body
-    /// (resolved IR), else keep the node's own body.
-    fn body_for_root_node(&self, node: &HelpNode) -> Option<SourceDeclarationValue> {
-        match node.body() {
-            Some(SourceDeclarationValue::Reference(reference)) => reference
-                .plain_name()
-                .and_then(|name| self.nodes.find(&HelpName::from(name)))
-                .and_then(|target| match target.body() {
-                    Some(value @ SourceDeclarationValue::Struct(_))
-                    | Some(value @ SourceDeclarationValue::Enum(_)) => Some(value.clone()),
-                    _ => None,
-                })
-                .or_else(|| Some(SourceDeclarationValue::Reference(reference.clone()))),
-            body => body.cloned(),
-        }
-    }
-
-    fn insert_inline_declarations_from_declaration(&mut self, value: &SourceDeclarationValue) {
-        match value {
-            SourceDeclarationValue::Struct(body) => {
-                for field in body.fields() {
-                    self.insert_inline_declaration_from_field(field);
-                }
-            }
-            SourceDeclarationValue::Enum(body) => {
-                for variant in body.variants() {
-                    if let Some(SourceVariantPayload::Declaration(value)) = variant.payload_source()
-                    {
-                        self.nodes.insert(HelpNode::new(
-                            HelpName::from(variant.name()),
-                            Some(value.clone()),
-                        ));
-                        self.insert_inline_declarations_from_declaration(value);
-                    }
-                }
-            }
-            SourceDeclarationValue::Reference(_)
-            | SourceDeclarationValue::Text(_)
-            | SourceDeclarationValue::Stream(_)
-            | SourceDeclarationValue::Family(_) => {}
-        }
-    }
-
-    fn insert_inline_declaration_from_field(&mut self, field: &SourceField) {
-        if !HelpName::from(field.name()).is_type_name() {
-            return;
-        }
-        let body = match field.value() {
-            SourceFieldValue::Reference(reference) => {
-                Some(SourceDeclarationValue::Reference(reference.clone()))
-            }
-            SourceFieldValue::Declaration(value) => {
-                self.insert_inline_declarations_from_declaration(value);
-                Some(value.clone())
-            }
-            SourceFieldValue::Derived => None,
-        };
-        if let Some(body) = body {
-            self.nodes
-                .insert(HelpNode::new(HelpName::from(field.name()), Some(body)));
+    fn insert_root_enum(&mut self, plane: HelpPlane, root: &SpecifiedRootEnum) {
+        for variant in root.variants() {
+            let root = HelpRoot::new(
+                plane,
+                HelpName::from(variant.name()),
+                variant
+                    .payload()
+                    .map(|payload| payload.to_help_source_declaration_value()),
+            );
+            self.roots.push(root);
         }
     }
 }
@@ -481,9 +473,8 @@ impl HelpEntries {
     }
 }
 
-/// A single help entry: a re-headed schema declaration. The body is the
-/// resolved-IR [`SourceDeclarationValue`] verbatim — the same value
-/// instance-schema and Rust lowering consume.
+/// A single help entry: a re-headed schema declaration projected from
+/// `SpecifiedSchema` for schema text encoding and decoding.
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
 #[rkyv(
     bytecheck(bounds(
@@ -526,13 +517,12 @@ impl HelpEntry {
         &self.name
     }
 
-    /// The resolved-IR body of this entry — the same `SourceDeclarationValue`
-    /// instance-schema and Rust lowering read.
+    /// The schema declaration body projected from the stored `SpecifiedSchema`.
     pub fn body(&self) -> Option<&SourceDeclarationValue> {
         self.body.as_ref()
     }
 
-    /// Re-head the resolved-IR body over the entry name as a source declaration
+    /// Re-head the projected body over the entry name as a source declaration
     /// so the schema encoder produces `(Head <body-schema-text>)`.
     fn to_source_declaration(&self) -> SourceDeclaration {
         SourceDeclaration::new(Name::new(self.name.as_str()), self.body.clone())
@@ -567,17 +557,6 @@ impl HelpName {
 
     pub fn as_str(&self) -> &str {
         &self.value
-    }
-
-    fn is_type_name(&self) -> bool {
-        self.value
-            .chars()
-            .next()
-            .is_some_and(|character| character.is_ascii_uppercase())
-            && !matches!(
-                self.value.as_str(),
-                "String" | "Integer" | "Boolean" | "Path" | "Bytes"
-            )
     }
 }
 

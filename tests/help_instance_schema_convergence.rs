@@ -1,14 +1,10 @@
-//! Convergence proof: Help and per-instance schema project the SAME resolved
-//! reference IR and render identical schema text.
+//! Convergence proof: Help and per-instance schema project through the same
+//! canonical schema reference spine and render identical schema text.
 //!
-//! The vision is one "what a type is" object — schema-next's resolved
-//! `SourceReference` — with Help, instance-schema, and Rust lowering as
-//! projections of it. Before the collapse, Help carried its own duplicate AST
-//! (`HelpTypeExpression`) built from the raw source, so `(Vec Domain)` survived
-//! as an opaque application in Help while instance-schema (reading the resolved
-//! type) emitted the canonical `(Vector Domain)`. With the duplicate gone, both
-//! read the one `SourceReference::Vector(Plain(Domain))` and render it through
-//! the one schema encoder.
+//! Help stores `SpecifiedSchema`. A rendered Help response projects that value
+//! into schema declarations; per-instance schema records the decoder's expected
+//! reference. Both paths meet at `SourceReference::Vector(Plain(Domain))` for
+//! the `Domains` newtype and render it through the one schema encoder.
 //!
 //! Gated behind `nota-text` like the rest of the text surface.
 
@@ -32,9 +28,10 @@ where
     schema
 }
 
-/// The resolved reference Help projects for a named target. Help's entry body is
-/// the resolved-IR `SourceDeclarationValue`; for a vector-typed root like
-/// `Domains` that body is a `Reference(SourceReference::Vector(..))`.
+/// The reference Help projects for a named target. Help stores
+/// `SpecifiedSchema`; the rendered entry body is the schema declaration
+/// projection. For a vector-typed target like `Domains` that body is a
+/// `Reference(SourceReference::Vector(..))`.
 fn help_reference(target: &str) -> SourceReference {
     let model = HelpModel::from_signal_schema_source().expect("build help model");
     let response = model
@@ -71,14 +68,14 @@ fn help_domains_renders_the_canonical_vector_reference() {
         .render(&HelpRequest::for_name("Domains"))
         .expect("render Domains help")
         .to_string();
-    // The dropped `(Vec Domain)` alias is gone; Help projects the resolved IR's
-    // canonical `(Vector Domain)` through the one schema encoder.
+    // The dropped `(Vec Domain)` alias is gone; Help projects the canonical
+    // `(Vector Domain)` through the one schema encoder.
     assert_eq!(rendered, "(Domains (Vector Domain))");
 }
 
 #[test]
 fn help_and_instance_schema_render_the_same_domains_reference() {
-    // Help side: the resolved reference for the `Domains` type.
+    // Help side: the schema-projected reference for the `Domains` type.
     let help_inner = help_reference("Domains");
 
     // Instance side: the resolved reference the decoder captured for a real
@@ -86,13 +83,13 @@ fn help_and_instance_schema_render_the_same_domains_reference() {
     let schema = instance_schema_of::<Domains>("[]");
     let instance_inner = instance_vector_reference(&schema);
 
-    // Same IR object (a vector of the plain `Domain` type).
+    // Same canonical reference object (a vector of the plain `Domain` type).
     assert_eq!(
         help_inner, instance_inner,
-        "Help and instance-schema must project the same resolved SourceReference for Domains"
+        "Help and instance-schema must project the same SourceReference for Domains"
     );
 
-    // Same rendered text, through the one schema encoder — neither path
+    // Same rendered text through the one schema encoder; neither path
     // hand-prints a spelling.
     let help_text = help_inner.rendered_schema_text();
     let instance_text = instance_inner.rendered_schema_text();
