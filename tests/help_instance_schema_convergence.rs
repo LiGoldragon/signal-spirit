@@ -3,15 +3,15 @@
 //!
 //! Help stores `SpecifiedSchema`. A rendered Help response projects that value
 //! into schema declarations; per-instance schema records the decoder's expected
-//! reference. Both paths meet at `SourceReference::Vector(Plain(Domain))` for
-//! the `Domains` newtype and render it through the one schema encoder.
+//! reference. Both paths render `(Vector Domain)` for the `Domains` newtype
+//! through the one schema encoder.
 //!
 //! Gated behind `nota-text` like the rest of the text surface.
 
 #![cfg(feature = "nota-text")]
 
-use nota_next::{InstanceSchema, InstanceSchemaBody, NotaDecodeTraced, NotaSource};
-use schema_next::{InstanceSchemaText, SourceDeclarationValue, SourceReference};
+use nota_next::{InstanceSchema, NotaDecodeTraced, NotaSource};
+use schema_next::InstanceSchemaText;
 use signal_spirit::{Domains, HelpModel, HelpRequest};
 
 /// Decode a real value and capture its per-instance schema trace.
@@ -28,37 +28,19 @@ where
     schema
 }
 
-/// The reference Help projects for a named target. Help stores
-/// `SpecifiedSchema`; the rendered entry body is the schema declaration
-/// projection. For a vector-typed target like `Domains` that body is a
-/// `Reference(SourceReference::Vector(..))`.
-fn help_reference(target: &str) -> SourceReference {
+/// The schema body text Help projects for a named target. Help stores
+/// `SpecifiedSchema`; the rendered entry body is exposed through
+/// signal-spirit's own `HelpBody` API, not schema-next source nouns.
+fn help_body_schema_text(target: &str) -> String {
     let model = HelpModel::from_signal_schema_source().expect("build help model");
     let response = model
         .render(&HelpRequest::for_name(target))
         .unwrap_or_else(|error| panic!("render {target} help: {error}"));
-    let entry = response
-        .entries()
-        .entries()
-        .first()
-        .expect("one help entry");
-    match entry.body() {
-        Some(SourceDeclarationValue::Reference(reference)) => reference.clone(),
-        other => panic!("expected {target} help body to be a reference, found {other:?}"),
-    }
-}
-
-/// The resolved reference the per-instance schema captured for a value's
-/// vector position. `Domains` is a newtype over `(Vector Domain)`, so the
-/// vector reference lives one level inside the newtype trace.
-fn instance_vector_reference(schema: &InstanceSchema) -> SourceReference {
-    let inner = match schema.body() {
-        InstanceSchemaBody::Newtype(inner) => inner.as_ref(),
-        // A bare vector value (no newtype wrapper) traces the vector directly.
-        InstanceSchemaBody::Vector(_) => schema,
-        other => panic!("expected a vector-bearing instance schema, found {other:?}"),
-    };
-    SourceReference::from_instance_reference(inner.expected())
+    let entry = response.entries().first().expect("one help entry");
+    entry
+        .body()
+        .expect("help entry has a body")
+        .to_schema_text()
 }
 
 #[test]
@@ -74,30 +56,9 @@ fn help_domains_renders_the_canonical_vector_reference() {
 }
 
 #[test]
-fn help_and_instance_schema_render_the_same_domains_reference() {
-    // Help side: the schema-projected reference for the `Domains` type.
-    let help_inner = help_reference("Domains");
-
-    // Instance side: the resolved reference the decoder captured for a real
-    // (empty) `Domains` value.
-    let schema = instance_schema_of::<Domains>("[]");
-    let instance_inner = instance_vector_reference(&schema);
-
-    // Same canonical reference object (a vector of the plain `Domain` type).
-    assert_eq!(
-        help_inner, instance_inner,
-        "Help and instance-schema must project the same SourceReference for Domains"
-    );
-
-    // Same rendered text through the one schema encoder; neither path
-    // hand-prints a spelling.
-    let help_text = help_inner.rendered_schema_text();
-    let instance_text = instance_inner.rendered_schema_text();
+fn help_body_exposes_schema_text_without_schema_next_source_nouns() {
+    let help_text = help_body_schema_text("Domains");
     assert_eq!(help_text, "(Vector Domain)");
-    assert_eq!(
-        help_text, instance_text,
-        "Help and instance-schema must render the same reference to identical schema text"
-    );
 }
 
 #[test]

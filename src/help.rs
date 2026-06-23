@@ -40,16 +40,16 @@ pub enum HelpError {
 
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct HelpRequest {
-    target: Option<HelpName>,
+    target: Option<Name>,
 }
 
 impl HelpRequest {
-    pub fn new(target: Option<HelpName>) -> Self {
+    pub fn new(target: Option<Name>) -> Self {
         Self { target }
     }
 
     pub fn for_name(name: impl Into<String>) -> Self {
-        Self::new(Some(HelpName::new(name)))
+        Self::new(Some(Name::new(name)))
     }
 
     pub fn from_text(source: &str) -> Result<Option<Self>, HelpError> {
@@ -84,7 +84,7 @@ impl HelpRequest {
         }
     }
 
-    pub fn target(&self) -> Option<&HelpName> {
+    pub fn target(&self) -> Option<&Name> {
         self.target.as_ref()
     }
 }
@@ -93,15 +93,15 @@ impl HelpRequest {
 /// for the requested roots/type. It round-trips through the one schema codec.
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct HelpResponse {
-    entries: HelpEntries,
+    entries: Vec<HelpEntry>,
 }
 
 impl HelpResponse {
-    pub fn new(entries: HelpEntries) -> Self {
+    pub fn new(entries: Vec<HelpEntry>) -> Self {
         Self { entries }
     }
 
-    pub fn entries(&self) -> &HelpEntries {
+    pub fn entries(&self) -> &[HelpEntry] {
         &self.entries
     }
 
@@ -122,19 +122,18 @@ impl HelpResponse {
     }
 
     fn from_source_declarations(declarations: &SourceDeclarations) -> Self {
-        Self::new(HelpEntries::new(
+        Self::new(
             declarations
                 .declarations()
                 .iter()
                 .map(HelpEntry::from_source_declaration)
                 .collect(),
-        ))
+        )
     }
 
     fn to_source_declarations(&self) -> SourceDeclarations {
         SourceDeclarations::new(
             self.entries()
-                .entries()
                 .iter()
                 .map(HelpEntry::to_source_declaration)
                 .collect(),
@@ -149,8 +148,20 @@ impl fmt::Display for HelpResponse {
 }
 
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
+#[rkyv(
+    bytecheck(bounds(
+        __C: rkyv::validation::ArchiveContext,
+        __C::Error: rkyv::rancor::Source
+    )),
+    serialize_bounds(
+        __S: rkyv::ser::Writer + rkyv::ser::Allocator,
+        __S::Error: rkyv::rancor::Source
+    ),
+    deserialize_bounds(__D::Error: rkyv::rancor::Source)
+)]
 pub struct HelpModel {
-    schemas: HelpSchemas,
+    #[rkyv(omit_bounds)]
+    schemas: Vec<SpecifiedSchema>,
 }
 
 impl HelpModel {
@@ -182,51 +193,22 @@ impl HelpModel {
     }
 
     pub fn from_specified_schemas(schemas: Vec<SpecifiedSchema>) -> Self {
-        Self {
-            schemas: HelpSchemas::new(schemas),
-        }
-    }
-
-    pub fn schemas(&self) -> &HelpSchemas {
-        &self.schemas
-    }
-
-    pub fn render(&self, request: &HelpRequest) -> Result<HelpResponse, HelpError> {
-        HelpCatalog::from_schemas(self.schemas.schemas()).render(request)
-    }
-}
-
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
-#[rkyv(
-    bytecheck(bounds(
-        __C: rkyv::validation::ArchiveContext,
-        __C::Error: rkyv::rancor::Source
-    )),
-    serialize_bounds(
-        __S: rkyv::ser::Writer + rkyv::ser::Allocator,
-        __S::Error: rkyv::rancor::Source
-    ),
-    deserialize_bounds(__D::Error: rkyv::rancor::Source)
-)]
-pub struct HelpSchemas {
-    #[rkyv(omit_bounds)]
-    schemas: Vec<SpecifiedSchema>,
-}
-
-impl HelpSchemas {
-    pub fn new(schemas: Vec<SpecifiedSchema>) -> Self {
         Self { schemas }
     }
 
     pub fn schemas(&self) -> &[SpecifiedSchema] {
         &self.schemas
     }
+
+    pub fn render(&self, request: &HelpRequest) -> Result<HelpResponse, HelpError> {
+        HelpCatalog::from_schemas(self.schemas()).render(request)
+    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct HelpCatalog {
-    roots: HelpRoots,
-    nodes: HelpNodes,
+    roots: Vec<HelpEntry>,
+    nodes: Vec<HelpEntry>,
 }
 
 impl HelpCatalog {
@@ -240,18 +222,14 @@ impl HelpCatalog {
 
     fn render(&self, request: &HelpRequest) -> Result<HelpResponse, HelpError> {
         match request.target() {
-            None => Ok(HelpResponse::new(HelpEntries::from_roots(
-                self.roots.roots(),
-            ))),
+            None => Ok(HelpResponse::new(self.roots.clone())),
             Some(target) => self
                 .roots
-                .find(target)
-                .map(|root| HelpResponse::new(HelpEntries::single(HelpEntry::from_root(root))))
-                .or_else(|| {
-                    self.nodes.find(target).map(|node| {
-                        HelpResponse::new(HelpEntries::single(HelpEntry::from_node(node)))
-                    })
-                })
+                .iter()
+                .find(|entry| entry.name() == target)
+                .or_else(|| self.nodes.iter().find(|entry| entry.name() == target))
+                .cloned()
+                .map(|entry| HelpResponse::new(vec![entry]))
                 .ok_or_else(|| HelpError::UnknownTarget(target.as_str().to_owned())),
         }
     }
@@ -259,15 +237,15 @@ impl HelpCatalog {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct HelpCatalogBuilder {
-    roots: HelpRoots,
-    nodes: HelpNodes,
+    roots: Vec<HelpEntry>,
+    nodes: Vec<HelpEntry>,
 }
 
 impl HelpCatalogBuilder {
     fn empty() -> Self {
         Self {
-            roots: HelpRoots::empty(),
-            nodes: HelpNodes::empty(),
+            roots: Vec::new(),
+            nodes: Vec::new(),
         }
     }
 
@@ -279,129 +257,59 @@ impl HelpCatalogBuilder {
     }
 
     fn insert_schema(&mut self, schema: &SpecifiedSchema) {
-        self.insert_root(HelpPlane::Input, schema.input());
-        self.insert_root(HelpPlane::Output, schema.output());
+        self.insert_root(schema.input(), schema);
+        self.insert_root(schema.output(), schema);
         for declaration in schema.declarations() {
             self.insert_declaration(declaration);
         }
         for stream in schema.streams() {
-            self.nodes.insert(HelpNode::new(
-                HelpName::from(&stream.name),
-                Some(SourceDeclarationValue::from(stream)),
+            self.insert_node(HelpEntry::new(
+                stream.name.clone(),
+                Some(HelpBody::from_source_declaration_value(
+                    SourceDeclarationValue::from(stream),
+                )),
             ));
         }
         for family in schema.families() {
-            self.nodes.insert(HelpNode::new(
-                HelpName::from(&family.name),
-                Some(SourceDeclarationValue::from(family)),
+            self.insert_node(HelpEntry::new(
+                family.name.clone(),
+                Some(HelpBody::from_source_declaration_value(
+                    SourceDeclarationValue::from(family),
+                )),
             ));
         }
     }
 
     fn insert_declaration(&mut self, declaration: &SpecifiedDeclaration) {
-        self.nodes.insert(HelpNode::new(
-            HelpName::from(declaration.name()),
-            Some(declaration.body().to_source_declaration_value()),
+        self.insert_node(HelpEntry::new(
+            declaration.name().clone(),
+            Some(HelpBody::from_source_declaration_value(
+                declaration.body().to_source_declaration_value(),
+            )),
         ));
     }
 
-    fn insert_root(&mut self, plane: HelpPlane, root: &SpecifiedRoot) {
+    fn insert_root(&mut self, root: &SpecifiedRoot, schema: &SpecifiedSchema) {
         if let Some(root) = root.as_enum() {
-            self.insert_root_enum(plane, root);
+            self.insert_root_enum(root, schema);
         }
     }
 
-    fn insert_root_enum(&mut self, plane: HelpPlane, root: &SpecifiedRootEnum) {
+    fn insert_root_enum(&mut self, root: &SpecifiedRootEnum, schema: &SpecifiedSchema) {
         for variant in root.variants() {
-            let root = HelpRoot::new(
-                plane,
-                HelpName::from(variant.name()),
-                variant
-                    .payload()
-                    .map(|payload| payload.to_help_source_declaration_value()),
+            let root = HelpEntry::new(
+                variant.name().clone(),
+                variant.payload().map(|payload| {
+                    HelpBody::from_source_declaration_value(
+                        payload.to_help_source_declaration_value(schema),
+                    )
+                }),
             );
             self.roots.push(root);
         }
     }
-}
 
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct HelpRoots {
-    roots: Vec<HelpRoot>,
-}
-
-impl HelpRoots {
-    fn empty() -> Self {
-        Self { roots: Vec::new() }
-    }
-
-    fn push(&mut self, root: HelpRoot) {
-        self.roots.push(root);
-    }
-
-    fn roots(&self) -> &[HelpRoot] {
-        &self.roots
-    }
-
-    fn find(&self, name: &HelpName) -> Option<&HelpRoot> {
-        self.roots.iter().find(|root| root.name() == name)
-    }
-}
-
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Copy, Debug, Eq, PartialEq)]
-pub enum HelpPlane {
-    Input,
-    Output,
-}
-
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
-#[rkyv(
-    bytecheck(bounds(
-        __C: rkyv::validation::ArchiveContext,
-        __C::Error: rkyv::rancor::Source
-    )),
-    serialize_bounds(
-        __S: rkyv::ser::Writer + rkyv::ser::Allocator,
-        __S::Error: rkyv::rancor::Source
-    ),
-    deserialize_bounds(__D::Error: rkyv::rancor::Source)
-)]
-pub struct HelpRoot {
-    plane: HelpPlane,
-    name: HelpName,
-    #[rkyv(omit_bounds)]
-    body: Option<SourceDeclarationValue>,
-}
-
-impl HelpRoot {
-    fn new(plane: HelpPlane, name: HelpName, body: Option<SourceDeclarationValue>) -> Self {
-        Self { plane, name, body }
-    }
-
-    pub fn plane(&self) -> HelpPlane {
-        self.plane
-    }
-
-    fn name(&self) -> &HelpName {
-        &self.name
-    }
-
-    fn body(&self) -> Option<&SourceDeclarationValue> {
-        self.body.as_ref()
-    }
-}
-
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct HelpNodes {
-    nodes: Vec<HelpNode>,
-}
-
-impl HelpNodes {
-    fn empty() -> Self {
-        Self { nodes: Vec::new() }
-    }
-
-    fn insert(&mut self, node: HelpNode) {
+    fn insert_node(&mut self, node: HelpEntry) {
         if let Some(existing) = self
             .nodes
             .iter_mut()
@@ -411,65 +319,6 @@ impl HelpNodes {
         } else {
             self.nodes.push(node);
         }
-    }
-
-    fn find(&self, name: &HelpName) -> Option<&HelpNode> {
-        self.nodes.iter().find(|node| node.name() == name)
-    }
-}
-
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
-#[rkyv(
-    bytecheck(bounds(
-        __C: rkyv::validation::ArchiveContext,
-        __C::Error: rkyv::rancor::Source
-    )),
-    serialize_bounds(
-        __S: rkyv::ser::Writer + rkyv::ser::Allocator,
-        __S::Error: rkyv::rancor::Source
-    ),
-    deserialize_bounds(__D::Error: rkyv::rancor::Source)
-)]
-pub struct HelpNode {
-    name: HelpName,
-    #[rkyv(omit_bounds)]
-    body: Option<SourceDeclarationValue>,
-}
-
-impl HelpNode {
-    fn new(name: HelpName, body: Option<SourceDeclarationValue>) -> Self {
-        Self { name, body }
-    }
-
-    fn name(&self) -> &HelpName {
-        &self.name
-    }
-
-    fn body(&self) -> Option<&SourceDeclarationValue> {
-        self.body.as_ref()
-    }
-}
-
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
-pub struct HelpEntries {
-    entries: Vec<HelpEntry>,
-}
-
-impl HelpEntries {
-    fn new(entries: Vec<HelpEntry>) -> Self {
-        Self { entries }
-    }
-
-    fn single(entry: HelpEntry) -> Self {
-        Self::new(vec![entry])
-    }
-
-    fn from_roots(roots: &[HelpRoot]) -> Self {
-        Self::new(roots.iter().map(HelpEntry::from_root).collect())
-    }
-
-    pub fn entries(&self) -> &[HelpEntry] {
-        &self.entries
     }
 }
 
@@ -488,44 +337,43 @@ impl HelpEntries {
     deserialize_bounds(__D::Error: rkyv::rancor::Source)
 )]
 pub struct HelpEntry {
-    name: HelpName,
-    #[rkyv(omit_bounds)]
-    body: Option<SourceDeclarationValue>,
+    name: Name,
+    body: Option<HelpBody>,
 }
 
 impl HelpEntry {
-    fn new(name: HelpName, body: Option<SourceDeclarationValue>) -> Self {
+    fn new(name: Name, body: Option<HelpBody>) -> Self {
         Self { name, body }
-    }
-
-    fn from_root(root: &HelpRoot) -> Self {
-        Self::new(root.name().clone(), root.body().cloned())
-    }
-
-    fn from_node(node: &HelpNode) -> Self {
-        Self::new(node.name().clone(), node.body().cloned())
     }
 
     fn from_source_declaration(declaration: &SourceDeclaration) -> Self {
         Self::new(
-            HelpName::from(declaration.name()),
-            declaration.value().cloned(),
+            declaration.name().clone(),
+            declaration
+                .value()
+                .cloned()
+                .map(HelpBody::from_source_declaration_value),
         )
     }
 
-    pub fn name(&self) -> &HelpName {
+    pub fn name(&self) -> &Name {
         &self.name
     }
 
     /// The schema declaration body projected from the stored `SpecifiedSchema`.
-    pub fn body(&self) -> Option<&SourceDeclarationValue> {
+    pub fn body(&self) -> Option<&HelpBody> {
         self.body.as_ref()
     }
 
     /// Re-head the projected body over the entry name as a source declaration
     /// so the schema encoder produces `(Head <body-schema-text>)`.
     fn to_source_declaration(&self) -> SourceDeclaration {
-        SourceDeclaration::new(Name::new(self.name.as_str()), self.body.clone())
+        SourceDeclaration::new(
+            self.name.clone(),
+            self.body
+                .as_ref()
+                .map(HelpBody::to_source_declaration_value),
+        )
     }
 
     /// Encode this entry as canonical schema text through schema-next's
@@ -541,33 +389,37 @@ impl fmt::Display for HelpEntry {
     }
 }
 
-#[derive(
-    rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Ord, PartialOrd, Eq, PartialEq,
+/// A Help response body owned by `signal-spirit`.
+///
+/// The schema-codec value is kept private so clients do not consume
+/// schema-next source nouns as the public Help API.
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
+#[rkyv(
+    bytecheck(bounds(
+        __C: rkyv::validation::ArchiveContext,
+        __C::Error: rkyv::rancor::Source
+    )),
+    serialize_bounds(
+        __S: rkyv::ser::Writer + rkyv::ser::Allocator,
+        __S::Error: rkyv::rancor::Source
+    ),
+    deserialize_bounds(__D::Error: rkyv::rancor::Source)
 )]
-pub struct HelpName {
-    value: String,
+pub struct HelpBody {
+    #[rkyv(omit_bounds)]
+    value: SourceDeclarationValue,
 }
 
-impl HelpName {
-    pub fn new(value: impl Into<String>) -> Self {
-        Self {
-            value: value.into(),
-        }
+impl HelpBody {
+    fn from_source_declaration_value(value: SourceDeclarationValue) -> Self {
+        Self { value }
     }
 
-    pub fn as_str(&self) -> &str {
-        &self.value
+    fn to_source_declaration_value(&self) -> SourceDeclarationValue {
+        self.value.clone()
     }
-}
 
-impl From<&Name> for HelpName {
-    fn from(value: &Name) -> Self {
-        Self::new(value.as_str())
-    }
-}
-
-impl fmt::Display for HelpName {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        formatter.write_str(self.as_str())
+    pub fn to_schema_text(&self) -> String {
+        self.value.to_schema_text()
     }
 }

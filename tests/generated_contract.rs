@@ -131,7 +131,6 @@ fn generated_help_model_renders_spirit_one_level_shapes() {
             .render(&signal_spirit::HelpRequest::new(None))
             .expect("render top-level help")
             .entries()
-            .entries()
             .iter()
             .any(|entry| entry.to_string() == "(Record { Entry Justification })"),
         "top-level help should include Record's one-level payload shape"
@@ -185,7 +184,6 @@ fn generated_help_model_renders_every_decoded_schema_target() {
     let rendered_roots = model
         .render(&signal_spirit::HelpRequest::new(None))
         .expect("render top-level help")
-        .entries()
         .entries()
         .iter()
         .map(|entry| entry.name().as_str().to_owned())
@@ -244,7 +242,7 @@ fn generated_help_model_round_trips_through_rkyv() {
 
     assert_eq!(decoded, response);
     assert_eq!(
-        decoded.entries().entries()[0].name().as_str(),
+        decoded.entries()[0].name().as_str(),
         "Entry",
         "help response should preserve the typed entry name before rendering"
     );
