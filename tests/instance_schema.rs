@@ -3,7 +3,7 @@
 //! Each test decodes a real signal-spirit value with the generated
 //! decoder-driven `NotaDecodeTraced` (the emitter put it on every type,
 //! including the hand-emitted optional-leaf `Domain` taxonomy), then renders
-//! the captured trace through schema-next's encoder and asserts the endorsed
+//! the captured trace through schema's encoder and asserts the endorsed
 //! form. Both the decoded value and the captured `expected` types are checked,
 //! and the rendered reference tokens round-trip through
 //! `SourceReference::from_block`.
@@ -12,8 +12,8 @@
 
 #![cfg(feature = "nota-text")]
 
-use nota_next::{InstanceSchema, InstanceSchemaBody, NotaDecodeTraced, NotaSource, TypeReference};
-use schema_next::{InstanceSchemaText, SourceReference};
+use nota::{InstanceSchema, InstanceSchemaBody, NotaDecodeTraced, NotaSource, TypeReference};
+use schema::{InstanceSchemaText, SourceReference};
 use signal_spirit::{Certainty, Domain, DomainMatch, Entry, Input, Kind, Magnitude};
 
 fn schema_of<Value>(source: &str) -> (Value, InstanceSchema)
@@ -43,7 +43,7 @@ fn enum_payload(schema: &InstanceSchema) -> &InstanceSchema {
 }
 
 /// Every parenthesised reference token the renderer emits must parse back
-/// through schema-next's own reference reader.
+/// through schema's own reference reader.
 fn round_trips_as_reference(text: &str) {
     let block = NotaSource::new(text)
         .parse_root()

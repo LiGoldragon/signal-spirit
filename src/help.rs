@@ -1,11 +1,11 @@
-//! Help as a thin view over `schema-next`'s fully specified schema IR.
+//! Help as a thin view over `schema`'s fully specified schema IR.
 //!
 //! Help is not a separate language and carries no AST of its own. The model
 //! stores `SpecifiedSchema` values — authored `.schema` sugar decoded into the
 //! explicit semantic data tree. Rendering is a projection from that data into
-//! re-headed schema declarations, encoded by schema-next's declaration codec.
+//! re-headed schema declarations, encoded by schema's declaration codec.
 //!
-//! The text codec is schema-next's declaration codec end to end: encode via
+//! The text codec is schema's declaration codec end to end: encode via
 //! [`SourceDeclaration::to_schema_text`], decode via
 //! [`SourceDeclarations::from_schema_text`]. No hand `format!` printer, no
 //! parallel decoder. The rkyv codec is the rkyv derive on the Help wrappers and
@@ -13,8 +13,8 @@
 
 use std::fmt;
 
-use nota_next::{Block, Delimiter, Document};
-use schema_next::{
+use nota::{Block, Delimiter, Document};
+use ::schema::{
     ImportResolver, Name, SchemaEngine, SchemaError, SchemaIdentity, SchemaSource,
     SourceDeclaration, SourceDeclarationValue, SourceDeclarations, SpecifiedDeclaration,
     SpecifiedRoot, SpecifiedRootEnum, SpecifiedSchema,
@@ -29,7 +29,7 @@ pub enum HelpError {
     Schema(#[from] SchemaError),
 
     #[error("NOTA parse error: {0}")]
-    Nota(#[from] nota_next::NotaError),
+    Nota(#[from] nota::NotaError),
 
     #[error("invalid Help request: {0}")]
     InvalidRequest(String),
@@ -107,7 +107,7 @@ impl HelpResponse {
 
     /// Decode a help response from its schema text — the inverse of
     /// [`Self::to_schema_text`]. Each re-headed declaration parses straight
-    /// back into schema declaration data through schema-next's declaration
+    /// back into schema declaration data through schema's declaration
     /// decoder; the help entry is that [`SourceDeclaration`] with no
     /// intermediate Help AST.
     pub fn from_schema_text(source: &str) -> Result<Self, HelpError> {
@@ -115,7 +115,7 @@ impl HelpResponse {
         Ok(Self::from_source_declarations(&declarations))
     }
 
-    /// Encode the response as canonical schema text through schema-next's
+    /// Encode the response as canonical schema text through schema's
     /// declaration encoder.
     pub fn to_schema_text(&self) -> String {
         self.to_source_declarations().to_schema_text()
@@ -376,7 +376,7 @@ impl HelpEntry {
         )
     }
 
-    /// Encode this entry as canonical schema text through schema-next's
+    /// Encode this entry as canonical schema text through schema's
     /// declaration encoder.
     pub fn to_schema_text(&self) -> String {
         self.to_source_declaration().to_schema_text()
@@ -392,7 +392,7 @@ impl fmt::Display for HelpEntry {
 /// A Help response body owned by `signal-spirit`.
 ///
 /// The schema-codec value is kept private so clients do not consume
-/// schema-next source nouns as the public Help API.
+/// schema source nouns as the public Help API.
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
 #[rkyv(
     bytecheck(bounds(

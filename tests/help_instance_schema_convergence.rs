@@ -10,8 +10,8 @@
 
 #![cfg(feature = "nota-text")]
 
-use nota_next::{InstanceSchema, NotaDecodeTraced, NotaSource};
-use schema_next::InstanceSchemaText;
+use nota::{InstanceSchema, NotaDecodeTraced, NotaSource};
+use schema::InstanceSchemaText;
 use signal_spirit::{Domains, HelpModel, HelpRequest};
 
 /// Decode a real value and capture its per-instance schema trace.
@@ -30,7 +30,7 @@ where
 
 /// The schema body text Help projects for a named target. Help stores
 /// `SpecifiedSchema`; the rendered entry body is exposed through
-/// signal-spirit's own `HelpBody` API, not schema-next source nouns.
+/// signal-spirit's own `HelpBody` API, not schema source nouns.
 fn help_body_schema_text(target: &str) -> String {
     let model = HelpModel::from_signal_schema_source().expect("build help model");
     let response = model
@@ -56,7 +56,7 @@ fn help_domains_renders_the_canonical_vector_reference() {
 }
 
 #[test]
-fn help_body_exposes_schema_text_without_schema_next_source_nouns() {
+fn help_body_exposes_schema_text_without_schema_source_nouns() {
     let help_text = help_body_schema_text("Domains");
     assert_eq!(help_text, "(Vector Domain)");
 }

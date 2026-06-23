@@ -75,7 +75,7 @@ verdicts release or hold fan-out, while `Observing` means spirit emits the
 criome authorization request but proceeds without waiting for the verdict.
 
 **Text projection.** The default build is binary/rkyv-only and does not pull
-`nota-next`, `nota-codec`, or `signal-core`. The `nota-text` feature enables
+`nota`, `nota-codec`, or `signal-core`. The `nota-text` feature enables
 NOTA derives, manual NOTA codecs, and text round-trip tests for CLI/debug/audit
 edges. Daemon consumers use the default graph.
 
@@ -127,7 +127,7 @@ or dependencies of this crate.
 | Capture time appears only in daemon-produced provenance. | `RecordProvenance` carries one bare `YYYY-MM-DD` date field and one bare `HH:MM:SS` time field. |
 | Record identifiers are output-only. | `RecordIdentifier` appears in descriptions/provenance replies, not in `Entry`; `spirit` mints it from randomness, not from row position. |
 | Database classification is daemon-side only; no Sema payloads appear on the wire. | `EffectEmitted` carries contract-owned `operation` and `outcome` fields, and `spirit_contract_has_no_sema_classification_dependency_or_roots` guards the dependency and head set. |
-| Default consumers stay binary-only. | `default_dependency_tree_does_not_pull_text_or_legacy_signal_crates` proves the default normal dependency graph has no `nota-next`, `nota-codec`, or `signal-core`; `nota_text_feature_is_the_only_text_projection_opt_in` proves `nota-next` appears only when requested. |
+| Default consumers stay binary-only. | `default_dependency_tree_does_not_pull_text_or_legacy_signal_crates` proves the default normal dependency graph has no `nota`, `nota-codec`, or `signal-core`; `nota_text_feature_is_the_only_text_projection_opt_in` proves `nota` appears only when requested. |
 | This crate contains no runtime. | Source has no Kameo, Tokio, sockets, database engine, or sema-engine code. |
 
 ## Code Map

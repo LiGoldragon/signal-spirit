@@ -9,7 +9,7 @@ use signal_spirit::{
 use std::collections::BTreeSet;
 
 #[cfg(feature = "nota-text")]
-use nota_next::{NotaEncode, NotaSource};
+use nota::{NotaEncode, NotaSource};
 
 #[test]
 fn generated_input_frame_round_trips() {
@@ -248,7 +248,7 @@ fn generated_help_model_round_trips_through_rkyv() {
     );
 }
 
-/// The help text codec is schema-next's declaration codec, not a hand-rolled
+/// The help text codec is schema's declaration codec, not a hand-rolled
 /// or nota-derive one. For each representative target this asserts both the
 /// canonical rendered schema text AND a true round trip `decode(render(node))
 /// == node` through that same schema codec (`HelpResponse::to_schema_text` ->
@@ -322,10 +322,10 @@ struct DecodedHelpTargets {
 impl DecodedHelpTargets {
     fn from_deployed_schema_sources() -> Self {
         let signal_source =
-            schema_next::SchemaSource::from_schema_text(signal_spirit::SIGNAL_SCHEMA_SOURCE)
+            schema::SchemaSource::from_schema_text(signal_spirit::SIGNAL_SCHEMA_SOURCE)
                 .expect("signal schema source decodes");
         let domain_source =
-            schema_next::SchemaSource::from_schema_text(signal_spirit::DOMAIN_SCHEMA_SOURCE)
+            schema::SchemaSource::from_schema_text(signal_spirit::DOMAIN_SCHEMA_SOURCE)
                 .expect("domain schema source decodes");
         let mut targets = Self {
             root_names: BTreeSet::new(),
@@ -346,7 +346,7 @@ impl DecodedHelpTargets {
             .collect()
     }
 
-    fn insert_root_names(&mut self, root: &schema_next::SourceRootEnum) {
+    fn insert_root_names(&mut self, root: &schema::SourceRootEnum) {
         if let Some(body) = root.body().as_enum() {
             for variant in body.variants() {
                 self.root_names.insert(variant.name().as_str().to_owned());
@@ -354,7 +354,7 @@ impl DecodedHelpTargets {
         }
     }
 
-    fn insert_namespace_names(&mut self, namespace: &schema_next::SourceNamespace) {
+    fn insert_namespace_names(&mut self, namespace: &schema::SourceNamespace) {
         for entry in namespace.entries() {
             if let Some(value) = entry.value() {
                 self.declaration_names
@@ -367,16 +367,16 @@ impl DecodedHelpTargets {
         }
     }
 
-    fn insert_inline_declaration_names(&mut self, value: &schema_next::SourceDeclarationValue) {
+    fn insert_inline_declaration_names(&mut self, value: &schema::SourceDeclarationValue) {
         match value {
-            schema_next::SourceDeclarationValue::Struct(body) => {
+            schema::SourceDeclarationValue::Struct(body) => {
                 for field in body.fields() {
                     self.insert_field_declaration_name(field);
                 }
             }
-            schema_next::SourceDeclarationValue::Enum(body) => {
+            schema::SourceDeclarationValue::Enum(body) => {
                 for variant in body.variants() {
-                    if let Some(schema_next::SourceVariantPayload::Declaration(value)) =
+                    if let Some(schema::SourceVariantPayload::Declaration(value)) =
                         variant.payload_source()
                     {
                         self.declaration_names
@@ -385,20 +385,20 @@ impl DecodedHelpTargets {
                     }
                 }
             }
-            schema_next::SourceDeclarationValue::Reference(_)
-            | schema_next::SourceDeclarationValue::Text(_)
-            | schema_next::SourceDeclarationValue::Stream(_)
-            | schema_next::SourceDeclarationValue::Family(_) => {}
+            schema::SourceDeclarationValue::Reference(_)
+            | schema::SourceDeclarationValue::Text(_)
+            | schema::SourceDeclarationValue::Stream(_)
+            | schema::SourceDeclarationValue::Family(_) => {}
         }
     }
 
-    fn insert_field_declaration_name(&mut self, field: &schema_next::SourceField) {
+    fn insert_field_declaration_name(&mut self, field: &schema::SourceField) {
         if !Self::is_type_name(field.name().as_str()) {
             return;
         }
         self.declaration_names
             .insert(field.name().as_str().to_owned());
-        if let schema_next::SourceFieldValue::Declaration(value) = field.value() {
+        if let schema::SourceFieldValue::Declaration(value) = field.value() {
             self.insert_inline_declaration_names(value);
         }
     }
@@ -488,12 +488,12 @@ fn terminal_value_domains_convert_to_scope_all() {
 
 #[cfg(feature = "nota-text")]
 trait DomainNotaTest {
-    fn parse_domain(&self) -> Result<Domain, nota_next::NotaDecodeError>;
+    fn parse_domain(&self) -> Result<Domain, nota::NotaDecodeError>;
 }
 
 #[cfg(feature = "nota-text")]
 impl DomainNotaTest for str {
-    fn parse_domain(&self) -> Result<Domain, nota_next::NotaDecodeError> {
+    fn parse_domain(&self) -> Result<Domain, nota::NotaDecodeError> {
         NotaSource::new(self).parse::<Domain>()
     }
 }

@@ -83,6 +83,6 @@ runtime, no actors, no sockets, no storage, and no classifier logic.
   lifecycle policy.
 - Mandatory `Tap`/`Untap` observability surface is part of the
   contract per component observability discipline.
-- Default builds must stay binary/rkyv-only: no `nota-next`, no
+- Default builds must stay binary/rkyv-only: no `nota`, no
   `nota-codec`, and no `signal-core` in normal dependencies. Enable
   `nota-text` only at CLI/debug/audit edges.
