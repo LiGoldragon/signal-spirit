@@ -13,12 +13,12 @@
 
 use std::fmt;
 
-use nota::{Block, Delimiter, Document};
 use ::schema::{
     ImportResolver, Name, SchemaEngine, SchemaError, SchemaIdentity, SchemaSource,
     SourceDeclaration, SourceDeclarationValue, SourceDeclarations, SpecifiedDeclaration,
     SpecifiedRoot, SpecifiedRootEnum, SpecifiedSchema,
 };
+use nota::{Block, Delimiter, Document};
 use thiserror::Error;
 
 use crate::{DOMAIN_SCHEMA_SOURCE, SIGNAL_SCHEMA_SOURCE};

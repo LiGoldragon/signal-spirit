@@ -41,8 +41,8 @@
   DomainScopes signal-spirit:domain:DomainScopes
   ScopeSet signal-spirit:domain:ScopeSet
 }
-[State Record Propose Clarify Supersede Retire ResolveClarification Observe PublicTextSearch PublicRecords PrivateRecords Lookup Count Remove ChangeCertainty BumpImportance ChangeRecord RegisterReferent LookupStash CollectRemovalCandidates Tap Untap (SubscribeIntent SubscribeIntent opens IntentEventStream) Version Marker]
-[RecordAccepted Proposed Clarified Superseded Retired ClarificationResolved GuardianRejected ReferentGuardianRejected RecordsObserved RecordsStashed RecordFound RecordsCounted RecordRemoved CertaintyChanged ImportanceBumped RecordChanged ReferentRegistered RemovalCandidatesCollected ObservationTapped ObservationUntapped SubscriptionStarted VersionReported MarkerReported (Event IntentEvent) Error Rejected]
+[State Record Propose Clarify Supersede Retire ResolveClarification Observe PublicTextSearch PublicRecords PrivateRecords Lookup Count ChangeCertainty BumpImportance ChangeRecord RegisterReferent LookupStash Tap Untap (SubscribeIntent SubscribeIntent opens IntentEventStream) Version Marker]
+[RecordAccepted Proposed Clarified Superseded Retired ClarificationResolved GuardianRejected ReferentGuardianRejected RecordsObserved RecordsStashed RecordFound RecordsCounted CertaintyChanged ImportanceBumped RecordChanged ReferentRegistered ObservationTapped ObservationUntapped SubscriptionStarted VersionReported MarkerReported (Event IntentEvent) Error Rejected]
 {
   SourcePath String
   LocalPath String
@@ -64,13 +64,11 @@
   PrivateRecords RecordSelection
   Lookup RecordIdentifier
   Count Query
-  Remove Removal
   ChangeCertainty CertaintyChange
   BumpImportance ImportanceBump
   ChangeRecord RecordChange
   RegisterReferent ReferentRegistration
   LookupStash StashHandle
-  CollectRemovalCandidates RemovalCandidateCollection
   Tap ObserverFilter
   Untap SubscriptionToken
   SubscribeIntent Query
@@ -87,12 +85,10 @@
   RecordsStashed StashedObservation
   RecordFound FoundRecord
   RecordsCounted CountedRecords
-  RecordRemoved RemoveReceipt
   CertaintyChanged CertaintyChangeReceipt
   ImportanceBumped ImportanceBumpReceipt
   RecordChanged RecordChangeReceipt
   ReferentRegistered ReferentRegistrationReceipt
-  RemovalCandidatesCollected RemovalCandidatesCollection
   ObservationTapped ObserverSubscription
   ObservationUntapped ObserverRetraction
   SubscriptionStarted IntentSubscription
@@ -125,7 +121,6 @@
 
   DatabaseMarker { CommitSequence StateDigest }
   SemaReceipt { RecordIdentifier DatabaseMarker }
-  RemoveReceipt { RecordIdentifier }
   ObservedRecords { RecordSet }
   ObservedRecord { RecordIdentifier Entry }
   FoundRecord { RecordIdentifier Entry }
@@ -199,7 +194,6 @@
   AtMostImportance Importance
   AtLeastImportance Importance
 
-  Removal { RecordIdentifier Justification }
   RemovalCandidateCollection { RecordQuery Justification }
   RecordQuery Query
   RemovalArchiveRecord { RecordIdentifier Entry }
@@ -214,7 +208,7 @@
   ObserverFilter [All OperationsOnly EffectsOnly]
   ObserverSubscription { SubscriptionToken ObserverFilter ObservedOperations }
   ObserverRetraction { SubscriptionToken ObservedOperations }
-  OperationKind [State Record Propose Clarify Supersede Retire ResolveClarification Observe PublicTextSearch PublicRecords PrivateRecords Lookup Count Remove ChangeCertainty BumpImportance ChangeRecord RegisterReferent LookupStash CollectRemovalCandidates Tap Untap SubscribeIntent Version Marker]
+  OperationKind [State Record Propose Clarify Supersede Retire ResolveClarification Observe PublicTextSearch PublicRecords PrivateRecords Lookup Count ChangeCertainty BumpImportance ChangeRecord RegisterReferent LookupStash Tap Untap SubscribeIntent Version Marker]
   ObservedOperation { OperationKind }
   ObservedOperations (Vector ObservedOperation)
 
@@ -241,7 +235,7 @@
   RetirementReceipt { RecordIdentifier }
   RetiredIdentifier RecordIdentifier
   RetiredIdentifiers (Vector RetiredIdentifier)
-  GuardianRejectionReason [Duplicate Contradiction Compound NonIntent NegativeGuideline UnclearPrivacy UnclearDomain ClarifyTramples ClarifyLosesMeaning SupersedeTargetMissing RetrievalInsufficient MissingTestimony TestimonyFabricated InsufficientWarrant Overstated ImportanceUnsupported HarnessUnavailable HarnessMalformed HarnessTimedOut]
+  GuardianRejectionReason [Duplicate Contradiction Compound NonIntent NegativeGuideline Matter UnclearPrivacy UnclearDomain ClarifyTramples ClarifyLosesMeaning SupersedeTargetMissing RetrievalInsufficient MissingTestimony TestimonyFabricated InsufficientWarrant Overstated ImportanceUnsupported HarnessUnavailable HarnessMalformed HarnessTimedOut]
   GuardianRejection { GuardianRejectionReason RecordSet Explanation }
   ReferentGuardianRejectionReason [Duplicate Ambiguous TooVague AliasCollision NonReferent UnclearJustification HarnessUnavailable HarnessMalformed HarnessTimedOut]
   ReferentGuardianRejection { ReferentGuardianRejectionReason RegisteredReferents Explanation }

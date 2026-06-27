@@ -85,6 +85,20 @@ fn negative_guideline_rejection_reason_round_trips_through_nota() {
     );
 }
 
+#[cfg(feature = "nota-text")]
+#[test]
+fn matter_rejection_reason_round_trips_through_nota() {
+    let rendered = signal_spirit::GuardianRejectionReason::Matter.to_nota();
+
+    assert_eq!(rendered, "Matter");
+    assert_eq!(
+        NotaSource::new(&rendered)
+            .parse::<signal_spirit::GuardianRejectionReason>()
+            .expect("parse Matter reason"),
+        signal_spirit::GuardianRejectionReason::Matter
+    );
+}
+
 #[test]
 fn generated_signal_contract_exports_domain_tree() {
     let domain = Domain::Technology(Technology::Software(Software::Data(Some(

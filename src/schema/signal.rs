@@ -263,14 +263,6 @@ pub struct Count(Query);
     derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub struct Remove(Removal);
-
-#[rustfmt::skip]
-#[cfg_attr(
-    feature = "nota-text",
-    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
-)]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct ChangeCertainty(CertaintyChange);
 
 #[rustfmt::skip]
@@ -304,14 +296,6 @@ pub struct RegisterReferent(ReferentRegistration);
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct LookupStash(StashHandle);
-
-#[rustfmt::skip]
-#[cfg_attr(
-    feature = "nota-text",
-    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
-)]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub struct CollectRemovalCandidates(RemovalCandidateCollection);
 
 #[rustfmt::skip]
 #[cfg_attr(
@@ -439,14 +423,6 @@ pub struct RecordsCounted(CountedRecords);
     derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub struct RecordRemoved(RemoveReceipt);
-
-#[rustfmt::skip]
-#[cfg_attr(
-    feature = "nota-text",
-    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
-)]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct CertaintyChanged(CertaintyChangeReceipt);
 
 #[rustfmt::skip]
@@ -472,14 +448,6 @@ pub struct RecordChanged(RecordChangeReceipt);
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct ReferentRegistered(ReferentRegistrationReceipt);
-
-#[rustfmt::skip]
-#[cfg_attr(
-    feature = "nota-text",
-    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
-)]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub struct RemovalCandidatesCollected(RemovalCandidatesCollection);
 
 #[rustfmt::skip]
 #[cfg_attr(
@@ -726,14 +694,6 @@ pub struct SemaReceipt {
     pub record_identifier: RecordIdentifier,
     pub database_marker: DatabaseMarker,
 }
-
-#[rustfmt::skip]
-#[cfg_attr(
-    feature = "nota-text",
-    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
-)]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub struct RemoveReceipt(RecordIdentifier);
 
 #[rustfmt::skip]
 #[cfg_attr(
@@ -1370,17 +1330,6 @@ pub struct AtLeastImportance(Importance);
     derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub struct Removal {
-    pub record_identifier: RecordIdentifier,
-    pub justification: Justification,
-}
-
-#[rustfmt::skip]
-#[cfg_attr(
-    feature = "nota-text",
-    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
-)]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct RemovalCandidateCollection {
     pub record_query: RecordQuery,
     pub justification: Justification,
@@ -1555,13 +1504,11 @@ pub enum OperationKind {
     PrivateRecords,
     Lookup,
     Count,
-    Remove,
     ChangeCertainty,
     BumpImportance,
     ChangeRecord,
     RegisterReferent,
     LookupStash,
-    CollectRemovalCandidates,
     Tap,
     Untap,
     SubscribeIntent,
@@ -1835,6 +1782,7 @@ pub enum GuardianRejectionReason {
     Compound,
     NonIntent,
     NegativeGuideline,
+    Matter,
     UnclearPrivacy,
     UnclearDomain,
     ClarifyTramples,
@@ -2023,13 +1971,11 @@ pub enum Input {
     PrivateRecords(PrivateRecords),
     Lookup(Lookup),
     Count(Count),
-    Remove(Remove),
     ChangeCertainty(ChangeCertainty),
     BumpImportance(BumpImportance),
     ChangeRecord(ChangeRecord),
     RegisterReferent(RegisterReferent),
     LookupStash(LookupStash),
-    CollectRemovalCandidates(CollectRemovalCandidates),
     Tap(Tap),
     Untap(Untap),
     SubscribeIntent(SubscribeIntent),
@@ -2056,12 +2002,10 @@ pub enum Output {
     RecordsStashed(RecordsStashed),
     RecordFound(RecordFound),
     RecordsCounted(RecordsCounted),
-    RecordRemoved(RecordRemoved),
     CertaintyChanged(CertaintyChanged),
     ImportanceBumped(ImportanceBumped),
     RecordChanged(RecordChanged),
     ReferentRegistered(ReferentRegistered),
-    RemovalCandidatesCollected(RemovalCandidatesCollected),
     ObservationTapped(ObservationTapped),
     ObservationUntapped(ObservationUntapped),
     SubscriptionStarted(SubscriptionStarted),
@@ -2377,25 +2321,6 @@ impl From<Query> for Count {
 }
 
 #[rustfmt::skip]
-impl Remove {
-    pub fn new(payload: Removal) -> Self {
-        Self(payload)
-    }
-    pub fn payload(&self) -> &Removal {
-        &self.0
-    }
-    pub fn into_payload(self) -> Removal {
-        self.0
-    }
-}
-#[rustfmt::skip]
-impl From<Removal> for Remove {
-    fn from(payload: Removal) -> Self {
-        Self::new(payload)
-    }
-}
-
-#[rustfmt::skip]
 impl ChangeCertainty {
     pub fn new(payload: CertaintyChange) -> Self {
         Self(payload)
@@ -2486,25 +2411,6 @@ impl LookupStash {
 #[rustfmt::skip]
 impl From<StashHandle> for LookupStash {
     fn from(payload: StashHandle) -> Self {
-        Self::new(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl CollectRemovalCandidates {
-    pub fn new(payload: RemovalCandidateCollection) -> Self {
-        Self(payload)
-    }
-    pub fn payload(&self) -> &RemovalCandidateCollection {
-        &self.0
-    }
-    pub fn into_payload(self) -> RemovalCandidateCollection {
-        self.0
-    }
-}
-#[rustfmt::skip]
-impl From<RemovalCandidateCollection> for CollectRemovalCandidates {
-    fn from(payload: RemovalCandidateCollection) -> Self {
         Self::new(payload)
     }
 }
@@ -2795,25 +2701,6 @@ impl From<CountedRecords> for RecordsCounted {
 }
 
 #[rustfmt::skip]
-impl RecordRemoved {
-    pub fn new(payload: RemoveReceipt) -> Self {
-        Self(payload)
-    }
-    pub fn payload(&self) -> &RemoveReceipt {
-        &self.0
-    }
-    pub fn into_payload(self) -> RemoveReceipt {
-        self.0
-    }
-}
-#[rustfmt::skip]
-impl From<RemoveReceipt> for RecordRemoved {
-    fn from(payload: RemoveReceipt) -> Self {
-        Self::new(payload)
-    }
-}
-
-#[rustfmt::skip]
 impl CertaintyChanged {
     pub fn new(payload: CertaintyChangeReceipt) -> Self {
         Self(payload)
@@ -2885,25 +2772,6 @@ impl ReferentRegistered {
 #[rustfmt::skip]
 impl From<ReferentRegistrationReceipt> for ReferentRegistered {
     fn from(payload: ReferentRegistrationReceipt) -> Self {
-        Self::new(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl RemovalCandidatesCollected {
-    pub fn new(payload: RemovalCandidatesCollection) -> Self {
-        Self(payload)
-    }
-    pub fn payload(&self) -> &RemovalCandidatesCollection {
-        &self.0
-    }
-    pub fn into_payload(self) -> RemovalCandidatesCollection {
-        self.0
-    }
-}
-#[rustfmt::skip]
-impl From<RemovalCandidatesCollection> for RemovalCandidatesCollected {
-    fn from(payload: RemovalCandidatesCollection) -> Self {
         Self::new(payload)
     }
 }
@@ -3436,25 +3304,6 @@ impl SpiritGuardianMaximumOutputTokens {
 #[rustfmt::skip]
 impl From<Integer> for SpiritGuardianMaximumOutputTokens {
     fn from(payload: Integer) -> Self {
-        Self::new(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl RemoveReceipt {
-    pub fn new(payload: RecordIdentifier) -> Self {
-        Self(payload)
-    }
-    pub fn payload(&self) -> &RecordIdentifier {
-        &self.0
-    }
-    pub fn into_payload(self) -> RecordIdentifier {
-        self.0
-    }
-}
-#[rustfmt::skip]
-impl From<RecordIdentifier> for RemoveReceipt {
-    fn from(payload: RecordIdentifier) -> Self {
         Self::new(payload)
     }
 }
@@ -4751,9 +4600,6 @@ impl Input {
     pub fn count(payload: Query) -> Self {
         Self::Count(Count::new(payload))
     }
-    pub fn remove(payload: Removal) -> Self {
-        Self::Remove(Remove::new(payload))
-    }
     pub fn change_certainty(payload: CertaintyChange) -> Self {
         Self::ChangeCertainty(ChangeCertainty::new(payload))
     }
@@ -4768,9 +4614,6 @@ impl Input {
     }
     pub fn lookup_stash(payload: StashHandle) -> Self {
         Self::LookupStash(LookupStash::new(payload))
-    }
-    pub fn collect_removal_candidates(payload: RemovalCandidateCollection) -> Self {
-        Self::CollectRemovalCandidates(CollectRemovalCandidates::new(payload))
     }
     pub fn tap(payload: ObserverFilter) -> Self {
         Self::Tap(Tap::new(payload))
@@ -4821,9 +4664,6 @@ impl Output {
     pub fn records_counted(payload: CountedRecords) -> Self {
         Self::RecordsCounted(RecordsCounted::new(payload))
     }
-    pub fn record_removed(payload: RemoveReceipt) -> Self {
-        Self::RecordRemoved(RecordRemoved::new(payload))
-    }
     pub fn certainty_changed(payload: CertaintyChangeReceipt) -> Self {
         Self::CertaintyChanged(CertaintyChanged::new(payload))
     }
@@ -4835,9 +4675,6 @@ impl Output {
     }
     pub fn referent_registered(payload: ReferentRegistrationReceipt) -> Self {
         Self::ReferentRegistered(ReferentRegistered::new(payload))
-    }
-    pub fn removal_candidates_collected(payload: RemovalCandidatesCollection) -> Self {
-        Self::RemovalCandidatesCollected(RemovalCandidatesCollected::new(payload))
     }
     pub fn observation_tapped(payload: ObserverSubscription) -> Self {
         Self::ObservationTapped(ObservationTapped::new(payload))
@@ -5097,13 +4934,6 @@ impl From<Count> for Input {
 }
 
 #[rustfmt::skip]
-impl From<Remove> for Input {
-    fn from(payload: Remove) -> Self {
-        Self::Remove(payload)
-    }
-}
-
-#[rustfmt::skip]
 impl From<ChangeCertainty> for Input {
     fn from(payload: ChangeCertainty) -> Self {
         Self::ChangeCertainty(payload)
@@ -5135,13 +4965,6 @@ impl From<RegisterReferent> for Input {
 impl From<LookupStash> for Input {
     fn from(payload: LookupStash) -> Self {
         Self::LookupStash(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl From<CollectRemovalCandidates> for Input {
-    fn from(payload: CollectRemovalCandidates) -> Self {
-        Self::CollectRemovalCandidates(payload)
     }
 }
 
@@ -5251,13 +5074,6 @@ impl From<RecordsCounted> for Output {
 }
 
 #[rustfmt::skip]
-impl From<RecordRemoved> for Output {
-    fn from(payload: RecordRemoved) -> Self {
-        Self::RecordRemoved(payload)
-    }
-}
-
-#[rustfmt::skip]
 impl From<CertaintyChanged> for Output {
     fn from(payload: CertaintyChanged) -> Self {
         Self::CertaintyChanged(payload)
@@ -5282,13 +5098,6 @@ impl From<RecordChanged> for Output {
 impl From<ReferentRegistered> for Output {
     fn from(payload: ReferentRegistered) -> Self {
         Self::ReferentRegistered(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl From<RemovalCandidatesCollected> for Output {
-    fn from(payload: RemovalCandidatesCollected) -> Self {
-        Self::RemovalCandidatesCollected(payload)
     }
 }
 
@@ -5395,18 +5204,16 @@ pub mod short_header {
     pub const INPUT_PRIVATE_RECORDS: u64 = 0x000A000000000000;
     pub const INPUT_LOOKUP: u64 = 0x000B000000000000;
     pub const INPUT_COUNT: u64 = 0x000C000000000000;
-    pub const INPUT_REMOVE: u64 = 0x000D000000000000;
-    pub const INPUT_CHANGE_CERTAINTY: u64 = 0x000E000000000000;
-    pub const INPUT_BUMP_IMPORTANCE: u64 = 0x000F000000000000;
-    pub const INPUT_CHANGE_RECORD: u64 = 0x0010000000000000;
-    pub const INPUT_REGISTER_REFERENT: u64 = 0x0011000000000000;
-    pub const INPUT_LOOKUP_STASH: u64 = 0x0012000000000000;
-    pub const INPUT_COLLECT_REMOVAL_CANDIDATES: u64 = 0x0013000000000000;
-    pub const INPUT_TAP: u64 = 0x0014000000000000;
-    pub const INPUT_UNTAP: u64 = 0x0015000000000000;
-    pub const INPUT_SUBSCRIBE_INTENT: u64 = 0x0016000000000000;
-    pub const INPUT_VERSION: u64 = 0x0017000000000000;
-    pub const INPUT_MARKER: u64 = 0x0018000000000000;
+    pub const INPUT_CHANGE_CERTAINTY: u64 = 0x000D000000000000;
+    pub const INPUT_BUMP_IMPORTANCE: u64 = 0x000E000000000000;
+    pub const INPUT_CHANGE_RECORD: u64 = 0x000F000000000000;
+    pub const INPUT_REGISTER_REFERENT: u64 = 0x0010000000000000;
+    pub const INPUT_LOOKUP_STASH: u64 = 0x0011000000000000;
+    pub const INPUT_TAP: u64 = 0x0012000000000000;
+    pub const INPUT_UNTAP: u64 = 0x0013000000000000;
+    pub const INPUT_SUBSCRIBE_INTENT: u64 = 0x0014000000000000;
+    pub const INPUT_VERSION: u64 = 0x0015000000000000;
+    pub const INPUT_MARKER: u64 = 0x0016000000000000;
     pub const OUTPUT_RECORD_ACCEPTED: u64 = 0x0100000000000000;
     pub const OUTPUT_PROPOSED: u64 = 0x0101000000000000;
     pub const OUTPUT_CLARIFIED: u64 = 0x0102000000000000;
@@ -5419,20 +5226,18 @@ pub mod short_header {
     pub const OUTPUT_RECORDS_STASHED: u64 = 0x0109000000000000;
     pub const OUTPUT_RECORD_FOUND: u64 = 0x010A000000000000;
     pub const OUTPUT_RECORDS_COUNTED: u64 = 0x010B000000000000;
-    pub const OUTPUT_RECORD_REMOVED: u64 = 0x010C000000000000;
-    pub const OUTPUT_CERTAINTY_CHANGED: u64 = 0x010D000000000000;
-    pub const OUTPUT_IMPORTANCE_BUMPED: u64 = 0x010E000000000000;
-    pub const OUTPUT_RECORD_CHANGED: u64 = 0x010F000000000000;
-    pub const OUTPUT_REFERENT_REGISTERED: u64 = 0x0110000000000000;
-    pub const OUTPUT_REMOVAL_CANDIDATES_COLLECTED: u64 = 0x0111000000000000;
-    pub const OUTPUT_OBSERVATION_TAPPED: u64 = 0x0112000000000000;
-    pub const OUTPUT_OBSERVATION_UNTAPPED: u64 = 0x0113000000000000;
-    pub const OUTPUT_SUBSCRIPTION_STARTED: u64 = 0x0114000000000000;
-    pub const OUTPUT_VERSION_REPORTED: u64 = 0x0115000000000000;
-    pub const OUTPUT_MARKER_REPORTED: u64 = 0x0116000000000000;
-    pub const OUTPUT_EVENT: u64 = 0x0117000000000000;
-    pub const OUTPUT_ERROR: u64 = 0x0118000000000000;
-    pub const OUTPUT_REJECTED: u64 = 0x0119000000000000;
+    pub const OUTPUT_CERTAINTY_CHANGED: u64 = 0x010C000000000000;
+    pub const OUTPUT_IMPORTANCE_BUMPED: u64 = 0x010D000000000000;
+    pub const OUTPUT_RECORD_CHANGED: u64 = 0x010E000000000000;
+    pub const OUTPUT_REFERENT_REGISTERED: u64 = 0x010F000000000000;
+    pub const OUTPUT_OBSERVATION_TAPPED: u64 = 0x0110000000000000;
+    pub const OUTPUT_OBSERVATION_UNTAPPED: u64 = 0x0111000000000000;
+    pub const OUTPUT_SUBSCRIPTION_STARTED: u64 = 0x0112000000000000;
+    pub const OUTPUT_VERSION_REPORTED: u64 = 0x0113000000000000;
+    pub const OUTPUT_MARKER_REPORTED: u64 = 0x0114000000000000;
+    pub const OUTPUT_EVENT: u64 = 0x0115000000000000;
+    pub const OUTPUT_ERROR: u64 = 0x0116000000000000;
+    pub const OUTPUT_REJECTED: u64 = 0x0117000000000000;
 }
 
 #[rustfmt::skip]
@@ -5499,13 +5304,11 @@ pub enum InputRoute {
     PrivateRecords,
     Lookup,
     Count,
-    Remove,
     ChangeCertainty,
     BumpImportance,
     ChangeRecord,
     RegisterReferent,
     LookupStash,
-    CollectRemovalCandidates,
     Tap,
     Untap,
     SubscribeIntent,
@@ -5541,12 +5344,10 @@ pub enum OutputRoute {
     RecordsStashed,
     RecordFound,
     RecordsCounted,
-    RecordRemoved,
     CertaintyChanged,
     ImportanceBumped,
     RecordChanged,
     ReferentRegistered,
-    RemovalCandidatesCollected,
     ObservationTapped,
     ObservationUntapped,
     SubscriptionStarted,
@@ -5574,13 +5375,11 @@ impl Input {
             Self::PrivateRecords(_) => InputRoute::PrivateRecords,
             Self::Lookup(_) => InputRoute::Lookup,
             Self::Count(_) => InputRoute::Count,
-            Self::Remove(_) => InputRoute::Remove,
             Self::ChangeCertainty(_) => InputRoute::ChangeCertainty,
             Self::BumpImportance(_) => InputRoute::BumpImportance,
             Self::ChangeRecord(_) => InputRoute::ChangeRecord,
             Self::RegisterReferent(_) => InputRoute::RegisterReferent,
             Self::LookupStash(_) => InputRoute::LookupStash,
-            Self::CollectRemovalCandidates(_) => InputRoute::CollectRemovalCandidates,
             Self::Tap(_) => InputRoute::Tap,
             Self::Untap(_) => InputRoute::Untap,
             Self::SubscribeIntent(_) => InputRoute::SubscribeIntent,
@@ -5603,15 +5402,11 @@ impl Input {
             Self::PrivateRecords(_) => short_header::INPUT_PRIVATE_RECORDS,
             Self::Lookup(_) => short_header::INPUT_LOOKUP,
             Self::Count(_) => short_header::INPUT_COUNT,
-            Self::Remove(_) => short_header::INPUT_REMOVE,
             Self::ChangeCertainty(_) => short_header::INPUT_CHANGE_CERTAINTY,
             Self::BumpImportance(_) => short_header::INPUT_BUMP_IMPORTANCE,
             Self::ChangeRecord(_) => short_header::INPUT_CHANGE_RECORD,
             Self::RegisterReferent(_) => short_header::INPUT_REGISTER_REFERENT,
             Self::LookupStash(_) => short_header::INPUT_LOOKUP_STASH,
-            Self::CollectRemovalCandidates(_) => {
-                short_header::INPUT_COLLECT_REMOVAL_CANDIDATES
-            }
             Self::Tap(_) => short_header::INPUT_TAP,
             Self::Untap(_) => short_header::INPUT_UNTAP,
             Self::SubscribeIntent(_) => short_header::INPUT_SUBSCRIBE_INTENT,
@@ -5636,15 +5431,11 @@ impl Input {
             short_header::INPUT_PRIVATE_RECORDS => Ok(InputRoute::PrivateRecords),
             short_header::INPUT_LOOKUP => Ok(InputRoute::Lookup),
             short_header::INPUT_COUNT => Ok(InputRoute::Count),
-            short_header::INPUT_REMOVE => Ok(InputRoute::Remove),
             short_header::INPUT_CHANGE_CERTAINTY => Ok(InputRoute::ChangeCertainty),
             short_header::INPUT_BUMP_IMPORTANCE => Ok(InputRoute::BumpImportance),
             short_header::INPUT_CHANGE_RECORD => Ok(InputRoute::ChangeRecord),
             short_header::INPUT_REGISTER_REFERENT => Ok(InputRoute::RegisterReferent),
             short_header::INPUT_LOOKUP_STASH => Ok(InputRoute::LookupStash),
-            short_header::INPUT_COLLECT_REMOVAL_CANDIDATES => {
-                Ok(InputRoute::CollectRemovalCandidates)
-            }
             short_header::INPUT_TAP => Ok(InputRoute::Tap),
             short_header::INPUT_UNTAP => Ok(InputRoute::Untap),
             short_header::INPUT_SUBSCRIBE_INTENT => Ok(InputRoute::SubscribeIntent),
@@ -5712,14 +5503,10 @@ impl Output {
             Self::RecordsStashed(_) => OutputRoute::RecordsStashed,
             Self::RecordFound(_) => OutputRoute::RecordFound,
             Self::RecordsCounted(_) => OutputRoute::RecordsCounted,
-            Self::RecordRemoved(_) => OutputRoute::RecordRemoved,
             Self::CertaintyChanged(_) => OutputRoute::CertaintyChanged,
             Self::ImportanceBumped(_) => OutputRoute::ImportanceBumped,
             Self::RecordChanged(_) => OutputRoute::RecordChanged,
             Self::ReferentRegistered(_) => OutputRoute::ReferentRegistered,
-            Self::RemovalCandidatesCollected(_) => {
-                OutputRoute::RemovalCandidatesCollected
-            }
             Self::ObservationTapped(_) => OutputRoute::ObservationTapped,
             Self::ObservationUntapped(_) => OutputRoute::ObservationUntapped,
             Self::SubscriptionStarted(_) => OutputRoute::SubscriptionStarted,
@@ -5746,14 +5533,10 @@ impl Output {
             Self::RecordsStashed(_) => short_header::OUTPUT_RECORDS_STASHED,
             Self::RecordFound(_) => short_header::OUTPUT_RECORD_FOUND,
             Self::RecordsCounted(_) => short_header::OUTPUT_RECORDS_COUNTED,
-            Self::RecordRemoved(_) => short_header::OUTPUT_RECORD_REMOVED,
             Self::CertaintyChanged(_) => short_header::OUTPUT_CERTAINTY_CHANGED,
             Self::ImportanceBumped(_) => short_header::OUTPUT_IMPORTANCE_BUMPED,
             Self::RecordChanged(_) => short_header::OUTPUT_RECORD_CHANGED,
             Self::ReferentRegistered(_) => short_header::OUTPUT_REFERENT_REGISTERED,
-            Self::RemovalCandidatesCollected(_) => {
-                short_header::OUTPUT_REMOVAL_CANDIDATES_COLLECTED
-            }
             Self::ObservationTapped(_) => short_header::OUTPUT_OBSERVATION_TAPPED,
             Self::ObservationUntapped(_) => short_header::OUTPUT_OBSERVATION_UNTAPPED,
             Self::SubscriptionStarted(_) => short_header::OUTPUT_SUBSCRIPTION_STARTED,
@@ -5784,15 +5567,11 @@ impl Output {
             short_header::OUTPUT_RECORDS_STASHED => Ok(OutputRoute::RecordsStashed),
             short_header::OUTPUT_RECORD_FOUND => Ok(OutputRoute::RecordFound),
             short_header::OUTPUT_RECORDS_COUNTED => Ok(OutputRoute::RecordsCounted),
-            short_header::OUTPUT_RECORD_REMOVED => Ok(OutputRoute::RecordRemoved),
             short_header::OUTPUT_CERTAINTY_CHANGED => Ok(OutputRoute::CertaintyChanged),
             short_header::OUTPUT_IMPORTANCE_BUMPED => Ok(OutputRoute::ImportanceBumped),
             short_header::OUTPUT_RECORD_CHANGED => Ok(OutputRoute::RecordChanged),
             short_header::OUTPUT_REFERENT_REGISTERED => {
                 Ok(OutputRoute::ReferentRegistered)
-            }
-            short_header::OUTPUT_REMOVAL_CANDIDATES_COLLECTED => {
-                Ok(OutputRoute::RemovalCandidatesCollected)
             }
             short_header::OUTPUT_OBSERVATION_TAPPED => Ok(OutputRoute::ObservationTapped),
             short_header::OUTPUT_OBSERVATION_UNTAPPED => {
@@ -5870,13 +5649,11 @@ impl signal_frame::SignalOperationHeads for Input {
         "PrivateRecords",
         "Lookup",
         "Count",
-        "Remove",
         "ChangeCertainty",
         "BumpImportance",
         "ChangeRecord",
         "RegisterReferent",
         "LookupStash",
-        "CollectRemovalCandidates",
         "Tap",
         "Untap",
         "SubscribeIntent",

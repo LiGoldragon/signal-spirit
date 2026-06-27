@@ -13,9 +13,9 @@ pub mod help;
 
 use std::collections::BTreeSet;
 
+pub use crate::schema::signal::*;
 #[cfg(feature = "nota-text")]
 pub use help::{HelpBody, HelpError, HelpModel, HelpRequest, HelpResponse};
-pub use crate::schema::signal::*;
 
 pub type SpiritRequest = Input;
 pub type SpiritReply = Output;
@@ -226,10 +226,8 @@ impl Input {
             | Self::Version
             | Self::Marker => Ok(()),
             Self::ChangeRecord(change) => change.payload().validate(),
-            Self::Remove(remove) => remove.payload().validate(),
             Self::RegisterReferent(register) => register.payload().validate(),
             Self::Retire(retire) => retire.payload().validate(),
-            Self::CollectRemovalCandidates(collection) => collection.payload().validate(),
             Self::SubscribeIntent(query) => query.payload().validate(),
             Self::Count(count) => count.payload().validate(),
         }
@@ -334,12 +332,6 @@ impl ReferentRegistration {
     pub fn validate(&self) -> Result<(), ValidationError> {
         self.referent.validate()?;
         self.aliases.validate()?;
-        self.justification.validate()
-    }
-}
-
-impl Removal {
-    pub fn validate(&self) -> Result<(), ValidationError> {
         self.justification.validate()
     }
 }
@@ -518,13 +510,11 @@ impl OperationKind {
             Input::PrivateRecords(_) => Self::PrivateRecords,
             Input::Lookup(_) => Self::Lookup,
             Input::Count(_) => Self::Count,
-            Input::Remove(_) => Self::Remove,
             Input::ChangeCertainty(_) => Self::ChangeCertainty,
             Input::BumpImportance(_) => Self::BumpImportance,
             Input::ChangeRecord(_) => Self::ChangeRecord,
             Input::RegisterReferent(_) => Self::RegisterReferent,
             Input::LookupStash(_) => Self::LookupStash,
-            Input::CollectRemovalCandidates(_) => Self::CollectRemovalCandidates,
             Input::Tap(_) => Self::Tap,
             Input::Untap(_) => Self::Untap,
             Input::SubscribeIntent(_) => Self::SubscribeIntent,
