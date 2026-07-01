@@ -16,6 +16,16 @@ Meta-policy lifecycle/configuration orders live in the sibling meta
 contract. Runtime actors, sockets, storage, classifier logic, and mind
 forwarding live in `spirit`.
 
+## Direction
+
+`signal-spirit` is the **ordinary peer-callable wire contract** for `spirit`. Its explicit goals: carry the ordinary contract for psyche-state observation, intent-record submission/observation, and subscription lifecycle; honour the single-channel-per-crate boundary; keep the wire surface on the current `signal-frame` stack; and stay binary-first with NOTA projection behind an explicit `nota-text` feature.
+
+The record shape enforces **description-only discipline**: one agent-clarified `Description`, a `Kind`, required certainty, daemon-stamped time, and user-creatable topic strings. Daemon-stamped timestamps only — clients never supply capture time. Wire replies are terse; no verbatim echo of submitted content.
+
+Privacy is a second directional `Magnitude` axis, not a named tier enum: `Zero` means open/public, higher magnitudes narrow the audience. The mandatory `Tap`/`Untap` observable surface is injected by `signal_channel!`; the domain-specific `Watch`/`Unwatch` pairs for psyche-state and intent-record streams coexist without collision.
+
+Daemon startup carries `AuthorizationMode`: `Gating` keeps criome verdicts fail-closed for fan-out; `Observing` emits criome authorization requests and lets the local head proceed for monitoring.
+
 ## Contract/Daemon Boundary
 
 This contract owns only the ordinary public wire vocabulary. The
