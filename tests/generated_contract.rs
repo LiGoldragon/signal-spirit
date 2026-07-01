@@ -455,7 +455,9 @@ fn curated_leaf_domain_tags_round_trip_through_nota() {
 
     assert_eq!(
         domain,
-        Domain::Technology(Technology::Software(Software::Data(DataLeaf::SchemaEvolution)))
+        Domain::Technology(Technology::Software(Software::Data(
+            DataLeaf::SchemaEvolution
+        )))
     );
     assert_eq!(
         domain.to_nota(),
