@@ -1012,7 +1012,7 @@ impl Domain {
     }
 
     fn schema() -> Self {
-        Self::software(Software::Data(Some(DataLeaf::SchemaEvolution)))
+        Self::software(Software::Data(DataLeaf::SchemaEvolution))
     }
 
     fn notation() -> Self {
@@ -1024,15 +1024,15 @@ impl Domain {
     }
 
     fn programming() -> Self {
-        Self::software(Software::Programming(None))
+        Self::software(Software::Programming(ProgrammingLeaf::All))
     }
 
     fn testing() -> Self {
-        Self::software(Software::Quality(Some(QualityLeaf::Testing)))
+        Self::software(Software::Quality(QualityLeaf::Testing))
     }
 
     fn architecture() -> Self {
-        Self::software(Software::Engineering(Some(EngineeringLeaf::Architecture)))
+        Self::software(Software::Engineering(EngineeringLeaf::Architecture))
     }
 
     fn documentation() -> Self {
@@ -1040,11 +1040,11 @@ impl Domain {
     }
 
     fn intelligence() -> Self {
-        Self::software(Software::Intelligence(Some(IntelligenceLeaf::AgentSystems)))
+        Self::software(Software::Intelligence(IntelligenceLeaf::AgentSystems))
     }
 
     fn infrastructure() -> Self {
-        Self::software(Software::Operations(Some(OperationsLeaf::Deployment)))
+        Self::software(Software::Operations(OperationsLeaf::Deployment))
     }
 
     fn wellbeing() -> Self {

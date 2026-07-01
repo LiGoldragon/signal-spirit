@@ -29,39 +29,39 @@
     (Technology)
   ]
   Technology [
-    (Hardware (Optional HardwareLeaf))
+    (Hardware HardwareLeaf)
     (Software)
   ]
-  HardwareLeaf [Networking]
+  HardwareLeaf [All Networking]
   Software [
-    (Programming (Optional ProgrammingLeaf))
+    (Programming ProgrammingLeaf)
     Theory
-    (Systems (Optional SystemsLeaf))
-    (Distributed (Optional DistributedLeaf))
-    (Data (Optional DataLeaf))
-    (Intelligence (Optional IntelligenceLeaf))
-    (Security (Optional SecurityLeaf))
-    (Quality (Optional QualityLeaf))
-    (Operations (Optional OperationsLeaf))
-    (Observability (Optional ObservabilityLeaf))
-    (Surfaces (Optional SurfacesLeaf))
-    (Engineering (Optional EngineeringLeaf))
+    (Systems SystemsLeaf)
+    (Distributed DistributedLeaf)
+    (Data DataLeaf)
+    (Intelligence IntelligenceLeaf)
+    (Security SecurityLeaf)
+    (Quality QualityLeaf)
+    (Operations OperationsLeaf)
+    (Observability ObservabilityLeaf)
+    (Surfaces SurfacesLeaf)
+    (Engineering EngineeringLeaf)
   ]
-  ProgrammingLeaf [TypeSystems Compilation Parsing Grammars CodeGeneration Metaprogramming Macros DomainSpecificLanguages]
-  SystemsLeaf [SystemsProgramming Concurrency]
-  DistributedLeaf [ProtocolDesign EventDrivenArchitecture]
-  DataLeaf [Persistence Serialization Formats Modeling SchemaEvolution Migration]
-  IntelligenceLeaf [AgentSystems]
-  SecurityLeaf [Cryptography Authentication Authorization SecretsManagement Privacy]
-  QualityLeaf [Testing]
-  OperationsLeaf [BuildSystem ReleaseEngineering DependencyManagement Deployment ConfigurationManagement]
-  ObservabilityLeaf [Tracing]
-  SurfacesLeaf [Visualization CommandLineInterfaces]
-  EngineeringLeaf [Architecture Design ApplicationProgrammingInterfaces Documentation VersionControl DevelopmentProcess Management Modularity]
+  ProgrammingLeaf [All TypeSystems Compilation Parsing Grammars CodeGeneration Metaprogramming Macros DomainSpecificLanguages]
+  SystemsLeaf [All SystemsProgramming Concurrency]
+  DistributedLeaf [All ProtocolDesign EventDrivenArchitecture]
+  DataLeaf [All Persistence Serialization Formats Modeling SchemaEvolution Migration]
+  IntelligenceLeaf [All AgentSystems]
+  SecurityLeaf [All Cryptography Authentication Authorization SecretsManagement Privacy]
+  QualityLeaf [All Testing]
+  OperationsLeaf [All BuildSystem ReleaseEngineering DependencyManagement Deployment ConfigurationManagement]
+  ObservabilityLeaf [All Tracing]
+  SurfacesLeaf [All Visualization CommandLineInterfaces]
+  EngineeringLeaf [All Architecture Design ApplicationProgrammingInterfaces Documentation VersionControl DevelopmentProcess Management Modularity]
   DomainScope (ScopeOf Domain)
   DomainScopes (Vector DomainScope)
   ScopeSet (Vector DomainScope)
 }
 [
-  (Equivalence [(Information Database) (Technology Software Data)])
+  (Equivalence [(Information Database) (Technology Software Data All)])
 ]

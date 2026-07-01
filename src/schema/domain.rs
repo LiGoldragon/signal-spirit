@@ -737,212 +737,14 @@ pub enum Domain {
 }
 
 #[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum Technology {
-    Hardware(Option<HardwareLeaf>),
+    Hardware(HardwareLeaf),
     Software(Software),
-}
-#[rustfmt::skip]
-#[cfg(feature = "nota-text")]
-impl nota::NotaBodyDecode for Technology {
-    fn from_nota_body(body: &nota::NotaBody<'_>) -> Result<Self, nota::NotaDecodeError> {
-        let root_objects = body.root_objects();
-        if root_objects.len() == 1
-            && let Some(variant) = root_objects[0].demote_to_string()
-        {
-            return match variant {
-                "Hardware" => Ok(Self::Hardware(None)),
-                other => {
-                    Err(nota::NotaDecodeError::UnknownVariant {
-                        enum_name: "Technology",
-                        variant: other.to_owned(),
-                    })
-                }
-            };
-        }
-        let children = body.expect_fields("Technology", 2)?;
-        let variant = children[0]
-            .demote_to_string()
-            .ok_or(nota::NotaDecodeError::ExpectedAtom {
-                type_name: "enum variant",
-            })?;
-        match variant {
-            "Hardware" => {
-                Ok(
-                    Self::Hardware(
-                        Some(
-                            <HardwareLeaf as nota::NotaDecode>::from_nota_block(
-                                &children[1],
-                            )?,
-                        ),
-                    ),
-                )
-            }
-            "Software" => {
-                Ok(
-                    Self::Software(
-                        <Software as nota::NotaDecode>::from_nota_block(&children[1])?,
-                    ),
-                )
-            }
-            other => {
-                Err(nota::NotaDecodeError::UnknownVariant {
-                    enum_name: "Technology",
-                    variant: other.to_owned(),
-                })
-            }
-        }
-    }
-}
-#[rustfmt::skip]
-#[cfg(feature = "nota-text")]
-impl nota::NotaDecode for Technology {
-    fn from_nota_block(block: &nota::Block) -> Result<Self, nota::NotaDecodeError> {
-        if block.demote_to_string().is_some() {
-            let root_objects = std::slice::from_ref(block);
-            let body = nota::NotaBody::new(root_objects);
-            return <Self as nota::NotaBodyDecode>::from_nota_body(&body);
-        }
-        let body = nota::NotaBlock::new(block)
-            .expect_body(nota::Delimiter::Parenthesis, "Technology")?;
-        <Self as nota::NotaBodyDecode>::from_nota_body(&body)
-    }
-}
-#[rustfmt::skip]
-#[cfg(feature = "nota-text")]
-impl nota::NotaBodyEncode for Technology {
-    fn to_nota_body(&self) -> nota::NotaBodyEncoding {
-        match self {
-            Self::Hardware(payload) => {
-                let mut fields = vec!["Hardware".to_owned()];
-                if let Some(payload) = payload {
-                    fields.push(nota::NotaEncode::to_nota(payload));
-                }
-                nota::NotaBodyEncoding::new(fields)
-            }
-            Self::Software(payload) => {
-                nota::NotaBodyEncoding::new(
-                    vec!["Software".to_owned(), nota::NotaEncode::to_nota(payload),],
-                )
-            }
-        }
-    }
-}
-#[rustfmt::skip]
-#[cfg(feature = "nota-text")]
-impl nota::NotaEncode for Technology {
-    fn to_nota(&self) -> String {
-        let body = <Self as nota::NotaBodyEncode>::to_nota_body(self);
-        if body.fields().len() == 1 {
-            body.to_nota()
-        } else {
-            body.to_delimited_nota(nota::Delimiter::Parenthesis)
-        }
-    }
-}
-#[rustfmt::skip]
-#[cfg(feature = "nota-text")]
-impl nota::NotaDecodeTraced for Technology {
-    fn instance_reference() -> nota::TypeReference {
-        nota::TypeReference::named("Technology")
-    }
-    fn from_nota_block_traced(
-        block: &nota::Block,
-    ) -> Result<nota::DecodedWithSchema<Self>, nota::NotaDecodeError> {
-        if let Some(variant) = block.demote_to_string() {
-            match variant {
-                "Hardware" => {
-                    return Ok(
-                        nota::DecodedWithSchema::new(
-                            Self::Hardware(None),
-                            nota::InstanceSchema::new(
-                                <Self as nota::NotaDecodeTraced>::instance_reference(),
-                                nota::InstanceSchemaBody::EnumPayload(
-                                    Some(
-                                        Box::new(
-                                            nota::InstanceSchema::new(
-                                                nota::TypeReference::optional(
-                                                    nota::TypeReference::named("HardwareLeaf"),
-                                                ),
-                                                nota::InstanceSchemaBody::Optional(None),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    );
-                }
-                other => {
-                    return Err(nota::NotaDecodeError::UnknownVariant {
-                        enum_name: "Technology",
-                        variant: other.to_owned(),
-                    });
-                }
-            }
-        }
-        let body = nota::NotaBlock::new(block)
-            .expect_body(nota::Delimiter::Parenthesis, "Technology")?;
-        let children = body.expect_fields("Technology", 2)?;
-        let variant = children[0]
-            .demote_to_string()
-            .ok_or(nota::NotaDecodeError::ExpectedAtom {
-                type_name: "enum variant",
-            })?;
-        match variant {
-            "Hardware" => {
-                let leaf = <HardwareLeaf as nota::NotaDecodeTraced>::from_nota_block_traced(
-                    &children[1],
-                )?;
-                let (leaf_value, leaf_schema) = leaf.into_parts();
-                Ok(
-                    nota::DecodedWithSchema::new(
-                        Self::Hardware(Some(leaf_value)),
-                        nota::InstanceSchema::new(
-                            <Self as nota::NotaDecodeTraced>::instance_reference(),
-                            nota::InstanceSchemaBody::EnumPayload(
-                                Some(
-                                    Box::new(
-                                        nota::InstanceSchema::new(
-                                            nota::TypeReference::optional(
-                                                nota::TypeReference::named("HardwareLeaf"),
-                                            ),
-                                            nota::InstanceSchemaBody::Optional(
-                                                Some(Box::new(leaf_schema)),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    ),
-                )
-            }
-            "Software" => {
-                let decoded = <Software as nota::NotaDecodeTraced>::from_nota_block_traced(
-                    &children[1],
-                )?;
-                let (payload_value, payload_schema) = decoded.into_parts();
-                Ok(
-                    nota::DecodedWithSchema::new(
-                        Self::Software(payload_value),
-                        nota::InstanceSchema::new(
-                            <Self as nota::NotaDecodeTraced>::instance_reference(),
-                            nota::InstanceSchemaBody::EnumPayload(
-                                Some(Box::new(payload_schema)),
-                            ),
-                        ),
-                    ),
-                )
-            }
-            other => {
-                Err(nota::NotaDecodeError::UnknownVariant {
-                    enum_name: "Technology",
-                    variant: other.to_owned(),
-                })
-            }
-        }
-    }
 }
 
 #[rustfmt::skip]
@@ -961,900 +763,29 @@ impl nota::NotaDecodeTraced for Technology {
     Eq,
 )]
 pub enum HardwareLeaf {
+    All,
     Networking,
 }
 
 #[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum Software {
-    Programming(Option<ProgrammingLeaf>),
+    Programming(ProgrammingLeaf),
     Theory,
-    Systems(Option<SystemsLeaf>),
-    Distributed(Option<DistributedLeaf>),
-    Data(Option<DataLeaf>),
-    Intelligence(Option<IntelligenceLeaf>),
-    Security(Option<SecurityLeaf>),
-    Quality(Option<QualityLeaf>),
-    Operations(Option<OperationsLeaf>),
-    Observability(Option<ObservabilityLeaf>),
-    Surfaces(Option<SurfacesLeaf>),
-    Engineering(Option<EngineeringLeaf>),
-}
-#[rustfmt::skip]
-#[cfg(feature = "nota-text")]
-impl nota::NotaBodyDecode for Software {
-    fn from_nota_body(body: &nota::NotaBody<'_>) -> Result<Self, nota::NotaDecodeError> {
-        let root_objects = body.root_objects();
-        if root_objects.len() == 1
-            && let Some(variant) = root_objects[0].demote_to_string()
-        {
-            return match variant {
-                "Theory" => Ok(Self::Theory),
-                "Programming" => Ok(Self::Programming(None)),
-                "Systems" => Ok(Self::Systems(None)),
-                "Distributed" => Ok(Self::Distributed(None)),
-                "Data" => Ok(Self::Data(None)),
-                "Intelligence" => Ok(Self::Intelligence(None)),
-                "Security" => Ok(Self::Security(None)),
-                "Quality" => Ok(Self::Quality(None)),
-                "Operations" => Ok(Self::Operations(None)),
-                "Observability" => Ok(Self::Observability(None)),
-                "Surfaces" => Ok(Self::Surfaces(None)),
-                "Engineering" => Ok(Self::Engineering(None)),
-                other => {
-                    Err(nota::NotaDecodeError::UnknownVariant {
-                        enum_name: "Software",
-                        variant: other.to_owned(),
-                    })
-                }
-            };
-        }
-        let children = body.expect_fields("Software", 2)?;
-        let variant = children[0]
-            .demote_to_string()
-            .ok_or(nota::NotaDecodeError::ExpectedAtom {
-                type_name: "enum variant",
-            })?;
-        match variant {
-            "Programming" => {
-                Ok(
-                    Self::Programming(
-                        Some(
-                            <ProgrammingLeaf as nota::NotaDecode>::from_nota_block(
-                                &children[1],
-                            )?,
-                        ),
-                    ),
-                )
-            }
-            "Systems" => {
-                Ok(
-                    Self::Systems(
-                        Some(
-                            <SystemsLeaf as nota::NotaDecode>::from_nota_block(
-                                &children[1],
-                            )?,
-                        ),
-                    ),
-                )
-            }
-            "Distributed" => {
-                Ok(
-                    Self::Distributed(
-                        Some(
-                            <DistributedLeaf as nota::NotaDecode>::from_nota_block(
-                                &children[1],
-                            )?,
-                        ),
-                    ),
-                )
-            }
-            "Data" => {
-                Ok(
-                    Self::Data(
-                        Some(
-                            <DataLeaf as nota::NotaDecode>::from_nota_block(
-                                &children[1],
-                            )?,
-                        ),
-                    ),
-                )
-            }
-            "Intelligence" => {
-                Ok(
-                    Self::Intelligence(
-                        Some(
-                            <IntelligenceLeaf as nota::NotaDecode>::from_nota_block(
-                                &children[1],
-                            )?,
-                        ),
-                    ),
-                )
-            }
-            "Security" => {
-                Ok(
-                    Self::Security(
-                        Some(
-                            <SecurityLeaf as nota::NotaDecode>::from_nota_block(
-                                &children[1],
-                            )?,
-                        ),
-                    ),
-                )
-            }
-            "Quality" => {
-                Ok(
-                    Self::Quality(
-                        Some(
-                            <QualityLeaf as nota::NotaDecode>::from_nota_block(
-                                &children[1],
-                            )?,
-                        ),
-                    ),
-                )
-            }
-            "Operations" => {
-                Ok(
-                    Self::Operations(
-                        Some(
-                            <OperationsLeaf as nota::NotaDecode>::from_nota_block(
-                                &children[1],
-                            )?,
-                        ),
-                    ),
-                )
-            }
-            "Observability" => {
-                Ok(
-                    Self::Observability(
-                        Some(
-                            <ObservabilityLeaf as nota::NotaDecode>::from_nota_block(
-                                &children[1],
-                            )?,
-                        ),
-                    ),
-                )
-            }
-            "Surfaces" => {
-                Ok(
-                    Self::Surfaces(
-                        Some(
-                            <SurfacesLeaf as nota::NotaDecode>::from_nota_block(
-                                &children[1],
-                            )?,
-                        ),
-                    ),
-                )
-            }
-            "Engineering" => {
-                Ok(
-                    Self::Engineering(
-                        Some(
-                            <EngineeringLeaf as nota::NotaDecode>::from_nota_block(
-                                &children[1],
-                            )?,
-                        ),
-                    ),
-                )
-            }
-            other => {
-                Err(nota::NotaDecodeError::UnknownVariant {
-                    enum_name: "Software",
-                    variant: other.to_owned(),
-                })
-            }
-        }
-    }
-}
-#[rustfmt::skip]
-#[cfg(feature = "nota-text")]
-impl nota::NotaDecode for Software {
-    fn from_nota_block(block: &nota::Block) -> Result<Self, nota::NotaDecodeError> {
-        if block.demote_to_string().is_some() {
-            let root_objects = std::slice::from_ref(block);
-            let body = nota::NotaBody::new(root_objects);
-            return <Self as nota::NotaBodyDecode>::from_nota_body(&body);
-        }
-        let body = nota::NotaBlock::new(block)
-            .expect_body(nota::Delimiter::Parenthesis, "Software")?;
-        <Self as nota::NotaBodyDecode>::from_nota_body(&body)
-    }
-}
-#[rustfmt::skip]
-#[cfg(feature = "nota-text")]
-impl nota::NotaBodyEncode for Software {
-    fn to_nota_body(&self) -> nota::NotaBodyEncoding {
-        match self {
-            Self::Programming(payload) => {
-                let mut fields = vec!["Programming".to_owned()];
-                if let Some(payload) = payload {
-                    fields.push(nota::NotaEncode::to_nota(payload));
-                }
-                nota::NotaBodyEncoding::new(fields)
-            }
-            Self::Theory => nota::NotaBodyEncoding::new(vec!["Theory".to_owned()]),
-            Self::Systems(payload) => {
-                let mut fields = vec!["Systems".to_owned()];
-                if let Some(payload) = payload {
-                    fields.push(nota::NotaEncode::to_nota(payload));
-                }
-                nota::NotaBodyEncoding::new(fields)
-            }
-            Self::Distributed(payload) => {
-                let mut fields = vec!["Distributed".to_owned()];
-                if let Some(payload) = payload {
-                    fields.push(nota::NotaEncode::to_nota(payload));
-                }
-                nota::NotaBodyEncoding::new(fields)
-            }
-            Self::Data(payload) => {
-                let mut fields = vec!["Data".to_owned()];
-                if let Some(payload) = payload {
-                    fields.push(nota::NotaEncode::to_nota(payload));
-                }
-                nota::NotaBodyEncoding::new(fields)
-            }
-            Self::Intelligence(payload) => {
-                let mut fields = vec!["Intelligence".to_owned()];
-                if let Some(payload) = payload {
-                    fields.push(nota::NotaEncode::to_nota(payload));
-                }
-                nota::NotaBodyEncoding::new(fields)
-            }
-            Self::Security(payload) => {
-                let mut fields = vec!["Security".to_owned()];
-                if let Some(payload) = payload {
-                    fields.push(nota::NotaEncode::to_nota(payload));
-                }
-                nota::NotaBodyEncoding::new(fields)
-            }
-            Self::Quality(payload) => {
-                let mut fields = vec!["Quality".to_owned()];
-                if let Some(payload) = payload {
-                    fields.push(nota::NotaEncode::to_nota(payload));
-                }
-                nota::NotaBodyEncoding::new(fields)
-            }
-            Self::Operations(payload) => {
-                let mut fields = vec!["Operations".to_owned()];
-                if let Some(payload) = payload {
-                    fields.push(nota::NotaEncode::to_nota(payload));
-                }
-                nota::NotaBodyEncoding::new(fields)
-            }
-            Self::Observability(payload) => {
-                let mut fields = vec!["Observability".to_owned()];
-                if let Some(payload) = payload {
-                    fields.push(nota::NotaEncode::to_nota(payload));
-                }
-                nota::NotaBodyEncoding::new(fields)
-            }
-            Self::Surfaces(payload) => {
-                let mut fields = vec!["Surfaces".to_owned()];
-                if let Some(payload) = payload {
-                    fields.push(nota::NotaEncode::to_nota(payload));
-                }
-                nota::NotaBodyEncoding::new(fields)
-            }
-            Self::Engineering(payload) => {
-                let mut fields = vec!["Engineering".to_owned()];
-                if let Some(payload) = payload {
-                    fields.push(nota::NotaEncode::to_nota(payload));
-                }
-                nota::NotaBodyEncoding::new(fields)
-            }
-        }
-    }
-}
-#[rustfmt::skip]
-#[cfg(feature = "nota-text")]
-impl nota::NotaEncode for Software {
-    fn to_nota(&self) -> String {
-        let body = <Self as nota::NotaBodyEncode>::to_nota_body(self);
-        if body.fields().len() == 1 {
-            body.to_nota()
-        } else {
-            body.to_delimited_nota(nota::Delimiter::Parenthesis)
-        }
-    }
-}
-#[rustfmt::skip]
-#[cfg(feature = "nota-text")]
-impl nota::NotaDecodeTraced for Software {
-    fn instance_reference() -> nota::TypeReference {
-        nota::TypeReference::named("Software")
-    }
-    fn from_nota_block_traced(
-        block: &nota::Block,
-    ) -> Result<nota::DecodedWithSchema<Self>, nota::NotaDecodeError> {
-        if let Some(variant) = block.demote_to_string() {
-            match variant {
-                "Theory" => {
-                    return Ok(
-                        nota::DecodedWithSchema::new(
-                            Self::Theory,
-                            nota::InstanceSchema::new(
-                                <Self as nota::NotaDecodeTraced>::instance_reference(),
-                                nota::InstanceSchemaBody::EnumPayload(None),
-                            ),
-                        ),
-                    );
-                }
-                "Programming" => {
-                    return Ok(
-                        nota::DecodedWithSchema::new(
-                            Self::Programming(None),
-                            nota::InstanceSchema::new(
-                                <Self as nota::NotaDecodeTraced>::instance_reference(),
-                                nota::InstanceSchemaBody::EnumPayload(
-                                    Some(
-                                        Box::new(
-                                            nota::InstanceSchema::new(
-                                                nota::TypeReference::optional(
-                                                    nota::TypeReference::named("ProgrammingLeaf"),
-                                                ),
-                                                nota::InstanceSchemaBody::Optional(None),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    );
-                }
-                "Systems" => {
-                    return Ok(
-                        nota::DecodedWithSchema::new(
-                            Self::Systems(None),
-                            nota::InstanceSchema::new(
-                                <Self as nota::NotaDecodeTraced>::instance_reference(),
-                                nota::InstanceSchemaBody::EnumPayload(
-                                    Some(
-                                        Box::new(
-                                            nota::InstanceSchema::new(
-                                                nota::TypeReference::optional(
-                                                    nota::TypeReference::named("SystemsLeaf"),
-                                                ),
-                                                nota::InstanceSchemaBody::Optional(None),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    );
-                }
-                "Distributed" => {
-                    return Ok(
-                        nota::DecodedWithSchema::new(
-                            Self::Distributed(None),
-                            nota::InstanceSchema::new(
-                                <Self as nota::NotaDecodeTraced>::instance_reference(),
-                                nota::InstanceSchemaBody::EnumPayload(
-                                    Some(
-                                        Box::new(
-                                            nota::InstanceSchema::new(
-                                                nota::TypeReference::optional(
-                                                    nota::TypeReference::named("DistributedLeaf"),
-                                                ),
-                                                nota::InstanceSchemaBody::Optional(None),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    );
-                }
-                "Data" => {
-                    return Ok(
-                        nota::DecodedWithSchema::new(
-                            Self::Data(None),
-                            nota::InstanceSchema::new(
-                                <Self as nota::NotaDecodeTraced>::instance_reference(),
-                                nota::InstanceSchemaBody::EnumPayload(
-                                    Some(
-                                        Box::new(
-                                            nota::InstanceSchema::new(
-                                                nota::TypeReference::optional(
-                                                    nota::TypeReference::named("DataLeaf"),
-                                                ),
-                                                nota::InstanceSchemaBody::Optional(None),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    );
-                }
-                "Intelligence" => {
-                    return Ok(
-                        nota::DecodedWithSchema::new(
-                            Self::Intelligence(None),
-                            nota::InstanceSchema::new(
-                                <Self as nota::NotaDecodeTraced>::instance_reference(),
-                                nota::InstanceSchemaBody::EnumPayload(
-                                    Some(
-                                        Box::new(
-                                            nota::InstanceSchema::new(
-                                                nota::TypeReference::optional(
-                                                    nota::TypeReference::named("IntelligenceLeaf"),
-                                                ),
-                                                nota::InstanceSchemaBody::Optional(None),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    );
-                }
-                "Security" => {
-                    return Ok(
-                        nota::DecodedWithSchema::new(
-                            Self::Security(None),
-                            nota::InstanceSchema::new(
-                                <Self as nota::NotaDecodeTraced>::instance_reference(),
-                                nota::InstanceSchemaBody::EnumPayload(
-                                    Some(
-                                        Box::new(
-                                            nota::InstanceSchema::new(
-                                                nota::TypeReference::optional(
-                                                    nota::TypeReference::named("SecurityLeaf"),
-                                                ),
-                                                nota::InstanceSchemaBody::Optional(None),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    );
-                }
-                "Quality" => {
-                    return Ok(
-                        nota::DecodedWithSchema::new(
-                            Self::Quality(None),
-                            nota::InstanceSchema::new(
-                                <Self as nota::NotaDecodeTraced>::instance_reference(),
-                                nota::InstanceSchemaBody::EnumPayload(
-                                    Some(
-                                        Box::new(
-                                            nota::InstanceSchema::new(
-                                                nota::TypeReference::optional(
-                                                    nota::TypeReference::named("QualityLeaf"),
-                                                ),
-                                                nota::InstanceSchemaBody::Optional(None),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    );
-                }
-                "Operations" => {
-                    return Ok(
-                        nota::DecodedWithSchema::new(
-                            Self::Operations(None),
-                            nota::InstanceSchema::new(
-                                <Self as nota::NotaDecodeTraced>::instance_reference(),
-                                nota::InstanceSchemaBody::EnumPayload(
-                                    Some(
-                                        Box::new(
-                                            nota::InstanceSchema::new(
-                                                nota::TypeReference::optional(
-                                                    nota::TypeReference::named("OperationsLeaf"),
-                                                ),
-                                                nota::InstanceSchemaBody::Optional(None),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    );
-                }
-                "Observability" => {
-                    return Ok(
-                        nota::DecodedWithSchema::new(
-                            Self::Observability(None),
-                            nota::InstanceSchema::new(
-                                <Self as nota::NotaDecodeTraced>::instance_reference(),
-                                nota::InstanceSchemaBody::EnumPayload(
-                                    Some(
-                                        Box::new(
-                                            nota::InstanceSchema::new(
-                                                nota::TypeReference::optional(
-                                                    nota::TypeReference::named("ObservabilityLeaf"),
-                                                ),
-                                                nota::InstanceSchemaBody::Optional(None),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    );
-                }
-                "Surfaces" => {
-                    return Ok(
-                        nota::DecodedWithSchema::new(
-                            Self::Surfaces(None),
-                            nota::InstanceSchema::new(
-                                <Self as nota::NotaDecodeTraced>::instance_reference(),
-                                nota::InstanceSchemaBody::EnumPayload(
-                                    Some(
-                                        Box::new(
-                                            nota::InstanceSchema::new(
-                                                nota::TypeReference::optional(
-                                                    nota::TypeReference::named("SurfacesLeaf"),
-                                                ),
-                                                nota::InstanceSchemaBody::Optional(None),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    );
-                }
-                "Engineering" => {
-                    return Ok(
-                        nota::DecodedWithSchema::new(
-                            Self::Engineering(None),
-                            nota::InstanceSchema::new(
-                                <Self as nota::NotaDecodeTraced>::instance_reference(),
-                                nota::InstanceSchemaBody::EnumPayload(
-                                    Some(
-                                        Box::new(
-                                            nota::InstanceSchema::new(
-                                                nota::TypeReference::optional(
-                                                    nota::TypeReference::named("EngineeringLeaf"),
-                                                ),
-                                                nota::InstanceSchemaBody::Optional(None),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    );
-                }
-                other => {
-                    return Err(nota::NotaDecodeError::UnknownVariant {
-                        enum_name: "Software",
-                        variant: other.to_owned(),
-                    });
-                }
-            }
-        }
-        let body = nota::NotaBlock::new(block)
-            .expect_body(nota::Delimiter::Parenthesis, "Software")?;
-        let children = body.expect_fields("Software", 2)?;
-        let variant = children[0]
-            .demote_to_string()
-            .ok_or(nota::NotaDecodeError::ExpectedAtom {
-                type_name: "enum variant",
-            })?;
-        match variant {
-            "Programming" => {
-                let leaf = <ProgrammingLeaf as nota::NotaDecodeTraced>::from_nota_block_traced(
-                    &children[1],
-                )?;
-                let (leaf_value, leaf_schema) = leaf.into_parts();
-                Ok(
-                    nota::DecodedWithSchema::new(
-                        Self::Programming(Some(leaf_value)),
-                        nota::InstanceSchema::new(
-                            <Self as nota::NotaDecodeTraced>::instance_reference(),
-                            nota::InstanceSchemaBody::EnumPayload(
-                                Some(
-                                    Box::new(
-                                        nota::InstanceSchema::new(
-                                            nota::TypeReference::optional(
-                                                nota::TypeReference::named("ProgrammingLeaf"),
-                                            ),
-                                            nota::InstanceSchemaBody::Optional(
-                                                Some(Box::new(leaf_schema)),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    ),
-                )
-            }
-            "Systems" => {
-                let leaf = <SystemsLeaf as nota::NotaDecodeTraced>::from_nota_block_traced(
-                    &children[1],
-                )?;
-                let (leaf_value, leaf_schema) = leaf.into_parts();
-                Ok(
-                    nota::DecodedWithSchema::new(
-                        Self::Systems(Some(leaf_value)),
-                        nota::InstanceSchema::new(
-                            <Self as nota::NotaDecodeTraced>::instance_reference(),
-                            nota::InstanceSchemaBody::EnumPayload(
-                                Some(
-                                    Box::new(
-                                        nota::InstanceSchema::new(
-                                            nota::TypeReference::optional(
-                                                nota::TypeReference::named("SystemsLeaf"),
-                                            ),
-                                            nota::InstanceSchemaBody::Optional(
-                                                Some(Box::new(leaf_schema)),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    ),
-                )
-            }
-            "Distributed" => {
-                let leaf = <DistributedLeaf as nota::NotaDecodeTraced>::from_nota_block_traced(
-                    &children[1],
-                )?;
-                let (leaf_value, leaf_schema) = leaf.into_parts();
-                Ok(
-                    nota::DecodedWithSchema::new(
-                        Self::Distributed(Some(leaf_value)),
-                        nota::InstanceSchema::new(
-                            <Self as nota::NotaDecodeTraced>::instance_reference(),
-                            nota::InstanceSchemaBody::EnumPayload(
-                                Some(
-                                    Box::new(
-                                        nota::InstanceSchema::new(
-                                            nota::TypeReference::optional(
-                                                nota::TypeReference::named("DistributedLeaf"),
-                                            ),
-                                            nota::InstanceSchemaBody::Optional(
-                                                Some(Box::new(leaf_schema)),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    ),
-                )
-            }
-            "Data" => {
-                let leaf = <DataLeaf as nota::NotaDecodeTraced>::from_nota_block_traced(
-                    &children[1],
-                )?;
-                let (leaf_value, leaf_schema) = leaf.into_parts();
-                Ok(
-                    nota::DecodedWithSchema::new(
-                        Self::Data(Some(leaf_value)),
-                        nota::InstanceSchema::new(
-                            <Self as nota::NotaDecodeTraced>::instance_reference(),
-                            nota::InstanceSchemaBody::EnumPayload(
-                                Some(
-                                    Box::new(
-                                        nota::InstanceSchema::new(
-                                            nota::TypeReference::optional(
-                                                nota::TypeReference::named("DataLeaf"),
-                                            ),
-                                            nota::InstanceSchemaBody::Optional(
-                                                Some(Box::new(leaf_schema)),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    ),
-                )
-            }
-            "Intelligence" => {
-                let leaf = <IntelligenceLeaf as nota::NotaDecodeTraced>::from_nota_block_traced(
-                    &children[1],
-                )?;
-                let (leaf_value, leaf_schema) = leaf.into_parts();
-                Ok(
-                    nota::DecodedWithSchema::new(
-                        Self::Intelligence(Some(leaf_value)),
-                        nota::InstanceSchema::new(
-                            <Self as nota::NotaDecodeTraced>::instance_reference(),
-                            nota::InstanceSchemaBody::EnumPayload(
-                                Some(
-                                    Box::new(
-                                        nota::InstanceSchema::new(
-                                            nota::TypeReference::optional(
-                                                nota::TypeReference::named("IntelligenceLeaf"),
-                                            ),
-                                            nota::InstanceSchemaBody::Optional(
-                                                Some(Box::new(leaf_schema)),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    ),
-                )
-            }
-            "Security" => {
-                let leaf = <SecurityLeaf as nota::NotaDecodeTraced>::from_nota_block_traced(
-                    &children[1],
-                )?;
-                let (leaf_value, leaf_schema) = leaf.into_parts();
-                Ok(
-                    nota::DecodedWithSchema::new(
-                        Self::Security(Some(leaf_value)),
-                        nota::InstanceSchema::new(
-                            <Self as nota::NotaDecodeTraced>::instance_reference(),
-                            nota::InstanceSchemaBody::EnumPayload(
-                                Some(
-                                    Box::new(
-                                        nota::InstanceSchema::new(
-                                            nota::TypeReference::optional(
-                                                nota::TypeReference::named("SecurityLeaf"),
-                                            ),
-                                            nota::InstanceSchemaBody::Optional(
-                                                Some(Box::new(leaf_schema)),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    ),
-                )
-            }
-            "Quality" => {
-                let leaf = <QualityLeaf as nota::NotaDecodeTraced>::from_nota_block_traced(
-                    &children[1],
-                )?;
-                let (leaf_value, leaf_schema) = leaf.into_parts();
-                Ok(
-                    nota::DecodedWithSchema::new(
-                        Self::Quality(Some(leaf_value)),
-                        nota::InstanceSchema::new(
-                            <Self as nota::NotaDecodeTraced>::instance_reference(),
-                            nota::InstanceSchemaBody::EnumPayload(
-                                Some(
-                                    Box::new(
-                                        nota::InstanceSchema::new(
-                                            nota::TypeReference::optional(
-                                                nota::TypeReference::named("QualityLeaf"),
-                                            ),
-                                            nota::InstanceSchemaBody::Optional(
-                                                Some(Box::new(leaf_schema)),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    ),
-                )
-            }
-            "Operations" => {
-                let leaf = <OperationsLeaf as nota::NotaDecodeTraced>::from_nota_block_traced(
-                    &children[1],
-                )?;
-                let (leaf_value, leaf_schema) = leaf.into_parts();
-                Ok(
-                    nota::DecodedWithSchema::new(
-                        Self::Operations(Some(leaf_value)),
-                        nota::InstanceSchema::new(
-                            <Self as nota::NotaDecodeTraced>::instance_reference(),
-                            nota::InstanceSchemaBody::EnumPayload(
-                                Some(
-                                    Box::new(
-                                        nota::InstanceSchema::new(
-                                            nota::TypeReference::optional(
-                                                nota::TypeReference::named("OperationsLeaf"),
-                                            ),
-                                            nota::InstanceSchemaBody::Optional(
-                                                Some(Box::new(leaf_schema)),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    ),
-                )
-            }
-            "Observability" => {
-                let leaf = <ObservabilityLeaf as nota::NotaDecodeTraced>::from_nota_block_traced(
-                    &children[1],
-                )?;
-                let (leaf_value, leaf_schema) = leaf.into_parts();
-                Ok(
-                    nota::DecodedWithSchema::new(
-                        Self::Observability(Some(leaf_value)),
-                        nota::InstanceSchema::new(
-                            <Self as nota::NotaDecodeTraced>::instance_reference(),
-                            nota::InstanceSchemaBody::EnumPayload(
-                                Some(
-                                    Box::new(
-                                        nota::InstanceSchema::new(
-                                            nota::TypeReference::optional(
-                                                nota::TypeReference::named("ObservabilityLeaf"),
-                                            ),
-                                            nota::InstanceSchemaBody::Optional(
-                                                Some(Box::new(leaf_schema)),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    ),
-                )
-            }
-            "Surfaces" => {
-                let leaf = <SurfacesLeaf as nota::NotaDecodeTraced>::from_nota_block_traced(
-                    &children[1],
-                )?;
-                let (leaf_value, leaf_schema) = leaf.into_parts();
-                Ok(
-                    nota::DecodedWithSchema::new(
-                        Self::Surfaces(Some(leaf_value)),
-                        nota::InstanceSchema::new(
-                            <Self as nota::NotaDecodeTraced>::instance_reference(),
-                            nota::InstanceSchemaBody::EnumPayload(
-                                Some(
-                                    Box::new(
-                                        nota::InstanceSchema::new(
-                                            nota::TypeReference::optional(
-                                                nota::TypeReference::named("SurfacesLeaf"),
-                                            ),
-                                            nota::InstanceSchemaBody::Optional(
-                                                Some(Box::new(leaf_schema)),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    ),
-                )
-            }
-            "Engineering" => {
-                let leaf = <EngineeringLeaf as nota::NotaDecodeTraced>::from_nota_block_traced(
-                    &children[1],
-                )?;
-                let (leaf_value, leaf_schema) = leaf.into_parts();
-                Ok(
-                    nota::DecodedWithSchema::new(
-                        Self::Engineering(Some(leaf_value)),
-                        nota::InstanceSchema::new(
-                            <Self as nota::NotaDecodeTraced>::instance_reference(),
-                            nota::InstanceSchemaBody::EnumPayload(
-                                Some(
-                                    Box::new(
-                                        nota::InstanceSchema::new(
-                                            nota::TypeReference::optional(
-                                                nota::TypeReference::named("EngineeringLeaf"),
-                                            ),
-                                            nota::InstanceSchemaBody::Optional(
-                                                Some(Box::new(leaf_schema)),
-                                            ),
-                                        ),
-                                    ),
-                                ),
-                            ),
-                        ),
-                    ),
-                )
-            }
-            other => {
-                Err(nota::NotaDecodeError::UnknownVariant {
-                    enum_name: "Software",
-                    variant: other.to_owned(),
-                })
-            }
-        }
-    }
+    Systems(SystemsLeaf),
+    Distributed(DistributedLeaf),
+    Data(DataLeaf),
+    Intelligence(IntelligenceLeaf),
+    Security(SecurityLeaf),
+    Quality(QualityLeaf),
+    Operations(OperationsLeaf),
+    Observability(ObservabilityLeaf),
+    Surfaces(SurfacesLeaf),
+    Engineering(EngineeringLeaf),
 }
 
 #[rustfmt::skip]
@@ -1873,6 +804,7 @@ impl nota::NotaDecodeTraced for Software {
     Eq,
 )]
 pub enum ProgrammingLeaf {
+    All,
     TypeSystems,
     Compilation,
     Parsing,
@@ -1899,6 +831,7 @@ pub enum ProgrammingLeaf {
     Eq,
 )]
 pub enum SystemsLeaf {
+    All,
     SystemsProgramming,
     Concurrency,
 }
@@ -1919,6 +852,7 @@ pub enum SystemsLeaf {
     Eq,
 )]
 pub enum DistributedLeaf {
+    All,
     ProtocolDesign,
     EventDrivenArchitecture,
 }
@@ -1939,6 +873,7 @@ pub enum DistributedLeaf {
     Eq,
 )]
 pub enum DataLeaf {
+    All,
     Persistence,
     Serialization,
     Formats,
@@ -1963,6 +898,7 @@ pub enum DataLeaf {
     Eq,
 )]
 pub enum IntelligenceLeaf {
+    All,
     AgentSystems,
 }
 
@@ -1982,6 +918,7 @@ pub enum IntelligenceLeaf {
     Eq,
 )]
 pub enum SecurityLeaf {
+    All,
     Cryptography,
     Authentication,
     Authorization,
@@ -2005,6 +942,7 @@ pub enum SecurityLeaf {
     Eq,
 )]
 pub enum QualityLeaf {
+    All,
     Testing,
 }
 
@@ -2024,6 +962,7 @@ pub enum QualityLeaf {
     Eq,
 )]
 pub enum OperationsLeaf {
+    All,
     BuildSystem,
     ReleaseEngineering,
     DependencyManagement,
@@ -2047,6 +986,7 @@ pub enum OperationsLeaf {
     Eq,
 )]
 pub enum ObservabilityLeaf {
+    All,
     Tracing,
 }
 
@@ -2066,6 +1006,7 @@ pub enum ObservabilityLeaf {
     Eq,
 )]
 pub enum SurfacesLeaf {
+    All,
     Visualization,
     CommandLineInterfaces,
 }
@@ -2086,6 +1027,7 @@ pub enum SurfacesLeaf {
     Eq,
 )]
 pub enum EngineeringLeaf {
+    All,
     Architecture,
     Design,
     ApplicationProgrammingInterfaces,
@@ -3558,6 +2500,7 @@ impl InformationScope {
 impl From<HardwareLeaf> for HardwareLeafScope {
     fn from(value: HardwareLeaf) -> Self {
         match value {
+            HardwareLeaf::All => Self::All,
             HardwareLeaf::Networking => Self::Networking,
         }
     }
@@ -3572,6 +2515,7 @@ impl HardwareLeafScope {
 impl From<ProgrammingLeaf> for ProgrammingLeafScope {
     fn from(value: ProgrammingLeaf) -> Self {
         match value {
+            ProgrammingLeaf::All => Self::All,
             ProgrammingLeaf::TypeSystems => Self::TypeSystems,
             ProgrammingLeaf::Compilation => Self::Compilation,
             ProgrammingLeaf::Parsing => Self::Parsing,
@@ -3600,6 +2544,7 @@ impl ProgrammingLeafScope {
 impl From<SystemsLeaf> for SystemsLeafScope {
     fn from(value: SystemsLeaf) -> Self {
         match value {
+            SystemsLeaf::All => Self::All,
             SystemsLeaf::SystemsProgramming => Self::SystemsProgramming,
             SystemsLeaf::Concurrency => Self::Concurrency,
         }
@@ -3618,6 +2563,7 @@ impl SystemsLeafScope {
 impl From<DistributedLeaf> for DistributedLeafScope {
     fn from(value: DistributedLeaf) -> Self {
         match value {
+            DistributedLeaf::All => Self::All,
             DistributedLeaf::ProtocolDesign => Self::ProtocolDesign,
             DistributedLeaf::EventDrivenArchitecture => Self::EventDrivenArchitecture,
         }
@@ -3636,6 +2582,7 @@ impl DistributedLeafScope {
 impl From<DataLeaf> for DataLeafScope {
     fn from(value: DataLeaf) -> Self {
         match value {
+            DataLeaf::All => Self::All,
             DataLeaf::Persistence => Self::Persistence,
             DataLeaf::Serialization => Self::Serialization,
             DataLeaf::Formats => Self::Formats,
@@ -3660,6 +2607,7 @@ impl DataLeafScope {
 impl From<IntelligenceLeaf> for IntelligenceLeafScope {
     fn from(value: IntelligenceLeaf) -> Self {
         match value {
+            IntelligenceLeaf::All => Self::All,
             IntelligenceLeaf::AgentSystems => Self::AgentSystems,
         }
     }
@@ -3676,6 +2624,7 @@ impl IntelligenceLeafScope {
 impl From<SecurityLeaf> for SecurityLeafScope {
     fn from(value: SecurityLeaf) -> Self {
         match value {
+            SecurityLeaf::All => Self::All,
             SecurityLeaf::Cryptography => Self::Cryptography,
             SecurityLeaf::Authentication => Self::Authentication,
             SecurityLeaf::Authorization => Self::Authorization,
@@ -3699,6 +2648,7 @@ impl SecurityLeafScope {
 impl From<QualityLeaf> for QualityLeafScope {
     fn from(value: QualityLeaf) -> Self {
         match value {
+            QualityLeaf::All => Self::All,
             QualityLeaf::Testing => Self::Testing,
         }
     }
@@ -3713,6 +2663,7 @@ impl QualityLeafScope {
 impl From<OperationsLeaf> for OperationsLeafScope {
     fn from(value: OperationsLeaf) -> Self {
         match value {
+            OperationsLeaf::All => Self::All,
             OperationsLeaf::BuildSystem => Self::BuildSystem,
             OperationsLeaf::ReleaseEngineering => Self::ReleaseEngineering,
             OperationsLeaf::DependencyManagement => Self::DependencyManagement,
@@ -3737,6 +2688,7 @@ impl OperationsLeafScope {
 impl From<ObservabilityLeaf> for ObservabilityLeafScope {
     fn from(value: ObservabilityLeaf) -> Self {
         match value {
+            ObservabilityLeaf::All => Self::All,
             ObservabilityLeaf::Tracing => Self::Tracing,
         }
     }
@@ -3751,6 +2703,7 @@ impl ObservabilityLeafScope {
 impl From<SurfacesLeaf> for SurfacesLeafScope {
     fn from(value: SurfacesLeaf) -> Self {
         match value {
+            SurfacesLeaf::All => Self::All,
             SurfacesLeaf::Visualization => Self::Visualization,
             SurfacesLeaf::CommandLineInterfaces => Self::CommandLineInterfaces,
         }
@@ -3769,6 +2722,7 @@ impl SurfacesLeafScope {
 impl From<EngineeringLeaf> for EngineeringLeafScope {
     fn from(value: EngineeringLeaf) -> Self {
         match value {
+            EngineeringLeaf::All => Self::All,
             EngineeringLeaf::Architecture => Self::Architecture,
             EngineeringLeaf::Design => Self::Design,
             EngineeringLeaf::ApplicationProgrammingInterfaces => {
@@ -3799,73 +2753,18 @@ impl EngineeringLeafScope {
 impl From<Software> for SoftwareScope {
     fn from(value: Software) -> Self {
         match value {
-            Software::Programming(payload) => {
-                match payload {
-                    Some(payload) => Self::Programming(payload.into()),
-                    None => Self::Programming(ProgrammingLeafScope::All),
-                }
-            }
+            Software::Programming(payload) => Self::Programming(payload.into()),
             Software::Theory => Self::Theory,
-            Software::Systems(payload) => {
-                match payload {
-                    Some(payload) => Self::Systems(payload.into()),
-                    None => Self::Systems(SystemsLeafScope::All),
-                }
-            }
-            Software::Distributed(payload) => {
-                match payload {
-                    Some(payload) => Self::Distributed(payload.into()),
-                    None => Self::Distributed(DistributedLeafScope::All),
-                }
-            }
-            Software::Data(payload) => {
-                match payload {
-                    Some(payload) => Self::Data(payload.into()),
-                    None => Self::Data(DataLeafScope::All),
-                }
-            }
-            Software::Intelligence(payload) => {
-                match payload {
-                    Some(payload) => Self::Intelligence(payload.into()),
-                    None => Self::Intelligence(IntelligenceLeafScope::All),
-                }
-            }
-            Software::Security(payload) => {
-                match payload {
-                    Some(payload) => Self::Security(payload.into()),
-                    None => Self::Security(SecurityLeafScope::All),
-                }
-            }
-            Software::Quality(payload) => {
-                match payload {
-                    Some(payload) => Self::Quality(payload.into()),
-                    None => Self::Quality(QualityLeafScope::All),
-                }
-            }
-            Software::Operations(payload) => {
-                match payload {
-                    Some(payload) => Self::Operations(payload.into()),
-                    None => Self::Operations(OperationsLeafScope::All),
-                }
-            }
-            Software::Observability(payload) => {
-                match payload {
-                    Some(payload) => Self::Observability(payload.into()),
-                    None => Self::Observability(ObservabilityLeafScope::All),
-                }
-            }
-            Software::Surfaces(payload) => {
-                match payload {
-                    Some(payload) => Self::Surfaces(payload.into()),
-                    None => Self::Surfaces(SurfacesLeafScope::All),
-                }
-            }
-            Software::Engineering(payload) => {
-                match payload {
-                    Some(payload) => Self::Engineering(payload.into()),
-                    None => Self::Engineering(EngineeringLeafScope::All),
-                }
-            }
+            Software::Systems(payload) => Self::Systems(payload.into()),
+            Software::Distributed(payload) => Self::Distributed(payload.into()),
+            Software::Data(payload) => Self::Data(payload.into()),
+            Software::Intelligence(payload) => Self::Intelligence(payload.into()),
+            Software::Security(payload) => Self::Security(payload.into()),
+            Software::Quality(payload) => Self::Quality(payload.into()),
+            Software::Operations(payload) => Self::Operations(payload.into()),
+            Software::Observability(payload) => Self::Observability(payload.into()),
+            Software::Surfaces(payload) => Self::Surfaces(payload.into()),
+            Software::Engineering(payload) => Self::Engineering(payload.into()),
         }
     }
 }
@@ -3906,12 +2805,7 @@ impl SoftwareScope {
 impl From<Technology> for TechnologyScope {
     fn from(value: Technology) -> Self {
         match value {
-            Technology::Hardware(payload) => {
-                match payload {
-                    Some(payload) => Self::Hardware(payload.into()),
-                    None => Self::Hardware(HardwareLeafScope::All),
-                }
-            }
+            Technology::Hardware(payload) => Self::Hardware(payload.into()),
             Technology::Software(payload) => Self::Software(payload.into()),
         }
     }
@@ -4151,7 +3045,7 @@ impl Domain {
 
 #[rustfmt::skip]
 impl Technology {
-    pub fn hardware(payload: Option<HardwareLeaf>) -> Self {
+    pub fn hardware(payload: HardwareLeaf) -> Self {
         Self::Hardware(payload)
     }
     pub fn software(payload: Software) -> Self {
@@ -4161,37 +3055,37 @@ impl Technology {
 
 #[rustfmt::skip]
 impl Software {
-    pub fn programming(payload: Option<ProgrammingLeaf>) -> Self {
+    pub fn programming(payload: ProgrammingLeaf) -> Self {
         Self::Programming(payload)
     }
-    pub fn systems(payload: Option<SystemsLeaf>) -> Self {
+    pub fn systems(payload: SystemsLeaf) -> Self {
         Self::Systems(payload)
     }
-    pub fn distributed(payload: Option<DistributedLeaf>) -> Self {
+    pub fn distributed(payload: DistributedLeaf) -> Self {
         Self::Distributed(payload)
     }
-    pub fn data(payload: Option<DataLeaf>) -> Self {
+    pub fn data(payload: DataLeaf) -> Self {
         Self::Data(payload)
     }
-    pub fn intelligence(payload: Option<IntelligenceLeaf>) -> Self {
+    pub fn intelligence(payload: IntelligenceLeaf) -> Self {
         Self::Intelligence(payload)
     }
-    pub fn security(payload: Option<SecurityLeaf>) -> Self {
+    pub fn security(payload: SecurityLeaf) -> Self {
         Self::Security(payload)
     }
-    pub fn quality(payload: Option<QualityLeaf>) -> Self {
+    pub fn quality(payload: QualityLeaf) -> Self {
         Self::Quality(payload)
     }
-    pub fn operations(payload: Option<OperationsLeaf>) -> Self {
+    pub fn operations(payload: OperationsLeaf) -> Self {
         Self::Operations(payload)
     }
-    pub fn observability(payload: Option<ObservabilityLeaf>) -> Self {
+    pub fn observability(payload: ObservabilityLeaf) -> Self {
         Self::Observability(payload)
     }
-    pub fn surfaces(payload: Option<SurfacesLeaf>) -> Self {
+    pub fn surfaces(payload: SurfacesLeaf) -> Self {
         Self::Surfaces(payload)
     }
-    pub fn engineering(payload: Option<EngineeringLeaf>) -> Self {
+    pub fn engineering(payload: EngineeringLeaf) -> Self {
         Self::Engineering(payload)
     }
 }
@@ -4365,9 +3259,93 @@ impl From<Technology> for Domain {
 }
 
 #[rustfmt::skip]
+impl From<HardwareLeaf> for Technology {
+    fn from(payload: HardwareLeaf) -> Self {
+        Self::Hardware(payload)
+    }
+}
+
+#[rustfmt::skip]
 impl From<Software> for Technology {
     fn from(payload: Software) -> Self {
         Self::Software(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<ProgrammingLeaf> for Software {
+    fn from(payload: ProgrammingLeaf) -> Self {
+        Self::Programming(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<SystemsLeaf> for Software {
+    fn from(payload: SystemsLeaf) -> Self {
+        Self::Systems(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<DistributedLeaf> for Software {
+    fn from(payload: DistributedLeaf) -> Self {
+        Self::Distributed(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<DataLeaf> for Software {
+    fn from(payload: DataLeaf) -> Self {
+        Self::Data(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<IntelligenceLeaf> for Software {
+    fn from(payload: IntelligenceLeaf) -> Self {
+        Self::Intelligence(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<SecurityLeaf> for Software {
+    fn from(payload: SecurityLeaf) -> Self {
+        Self::Security(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<QualityLeaf> for Software {
+    fn from(payload: QualityLeaf) -> Self {
+        Self::Quality(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<OperationsLeaf> for Software {
+    fn from(payload: OperationsLeaf) -> Self {
+        Self::Operations(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<ObservabilityLeaf> for Software {
+    fn from(payload: ObservabilityLeaf) -> Self {
+        Self::Observability(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<SurfacesLeaf> for Software {
+    fn from(payload: SurfacesLeaf) -> Self {
+        Self::Surfaces(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<EngineeringLeaf> for Software {
+    fn from(payload: EngineeringLeaf) -> Self {
+        Self::Engineering(payload)
     }
 }
 

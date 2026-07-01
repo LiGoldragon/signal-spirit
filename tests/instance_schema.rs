@@ -1,8 +1,9 @@
 //! Per-instance schema over the REAL spirit contract.
 //!
 //! Each test decodes a real signal-spirit value with the generated
-//! decoder-driven `NotaDecodeTraced` (the emitter put it on every type,
-//! including the hand-emitted optional-leaf `Domain` taxonomy), then renders
+//! decoder-driven `NotaDecodeTraced` (the emitter puts the canonical derive
+//! on every type, including the whole `Domain` taxonomy whose value leaves now
+//! carry required payloads), then renders
 //! the captured trace through schema's encoder and asserts the endorsed
 //! form. Both the decoded value and the captured `expected` types are checked,
 //! and the rendered reference tokens round-trip through
@@ -110,40 +111,44 @@ fn domain_path_traces_expected_types_down_the_real_taxonomy() {
         schema_of::<Domain>("(Technology (Software (Programming CodeGeneration)))");
     assert!(matches!(value, Domain::Technology(_)));
 
-    // Expected-type trace: Domain -> Technology -> Software -> (Optional ProgrammingLeaf).
+    // Expected-type trace: Domain -> Technology -> Software -> ProgrammingLeaf.
     assert_eq!(named(schema.expected()), "Domain");
     let technology = enum_payload(&schema);
     assert_eq!(named(technology.expected()), "Technology");
     let software = enum_payload(technology);
     assert_eq!(named(software.expected()), "Software");
-    // Software::Programming carries Option<ProgrammingLeaf>; the payload node is
-    // the optional, with the leaf type one level in.
-    let optional = enum_payload(software);
-    match optional.expected() {
-        TypeReference::Optional(inner) => assert_eq!(named(inner), "ProgrammingLeaf"),
-        other => panic!("expected (Optional ProgrammingLeaf), found {other:?}"),
-    }
-    let InstanceSchemaBody::Optional(Some(leaf)) = optional.body() else {
-        panic!("the realized programming leaf must be present");
-    };
-    assert_eq!(named(leaf.expected()), "ProgrammingLeaf");
+    // Software::Programming now carries a required ProgrammingLeaf; the payload
+    // node is the leaf enum itself, with no intervening Optional.
+    let programming = enum_payload(software);
+    assert_eq!(named(programming.expected()), "ProgrammingLeaf");
+    assert!(matches!(
+        programming.body(),
+        InstanceSchemaBody::EnumPayload(None)
+    ));
 }
 
 #[test]
-fn bare_optional_leaf_variant_traces_an_empty_optional() {
-    // (Technology (Software Programming)) -> Software::Programming(None).
-    let (value, schema) = schema_of::<Domain>("(Technology (Software Programming))");
+fn bare_leaf_variant_without_payload_is_rejected_and_all_traces_the_leaf() {
+    // Strict positional NOTA: bare `Programming` no longer decodes — the payload
+    // is required. The whole-category value is the explicit `All` leaf, which
+    // traces the required ProgrammingLeaf payload with no empty Optional.
+    let bare = NotaSource::new("(Technology (Software Programming))")
+        .parse_root()
+        .expect("parse a single root object");
+    assert!(
+        Domain::from_nota_block_traced(&bare).is_err(),
+        "bare Programming must be rejected now that the payload is required"
+    );
+
+    let (value, schema) = schema_of::<Domain>("(Technology (Software (Programming All)))");
     assert!(matches!(value, Domain::Technology(_)));
     let software = enum_payload(enum_payload(&schema));
     assert_eq!(named(software.expected()), "Software");
-    let optional = enum_payload(software);
-    match optional.expected() {
-        TypeReference::Optional(inner) => assert_eq!(named(inner), "ProgrammingLeaf"),
-        other => panic!("expected (Optional ProgrammingLeaf), found {other:?}"),
-    }
+    let programming = enum_payload(software);
+    assert_eq!(named(programming.expected()), "ProgrammingLeaf");
     assert!(matches!(
-        optional.body(),
-        InstanceSchemaBody::Optional(None)
+        programming.body(),
+        InstanceSchemaBody::EnumPayload(None)
     ));
 }
 

@@ -101,9 +101,9 @@ fn matter_rejection_reason_round_trips_through_nota() {
 
 #[test]
 fn generated_signal_contract_exports_domain_tree() {
-    let domain = Domain::Technology(Technology::Software(Software::Data(Some(
+    let domain = Domain::Technology(Technology::Software(Software::Data(
         DataLeaf::SchemaEvolution,
-    ))));
+    )));
 
     assert!(matches!(domain, Domain::Technology(_)));
 }
@@ -428,15 +428,22 @@ impl DecodedHelpTargets {
 #[cfg(feature = "nota-text")]
 #[test]
 fn terminal_value_domain_tags_round_trip_through_nota() {
-    let domain = "(Technology (Software Data))"
+    // Strict positional NOTA: bare `Data` no longer decodes — a variant payload
+    // must always appear, and the whole-category value is the explicit `All`.
+    assert!(
+        "(Technology (Software Data))".parse_domain().is_err(),
+        "bare Data must be rejected now that the payload is required"
+    );
+
+    let domain = "(Technology (Software (Data All)))"
         .parse_domain()
-        .expect("terminal data domain parses");
+        .expect("explicit all-data domain parses");
 
     assert_eq!(
         domain,
-        Domain::Technology(Technology::Software(Software::Data(None)))
+        Domain::Technology(Technology::Software(Software::Data(DataLeaf::All)))
     );
-    assert_eq!(domain.to_nota(), "(Technology (Software Data))");
+    assert_eq!(domain.to_nota(), "(Technology (Software (Data All)))");
 }
 
 #[cfg(feature = "nota-text")]
@@ -448,9 +455,7 @@ fn curated_leaf_domain_tags_round_trip_through_nota() {
 
     assert_eq!(
         domain,
-        Domain::Technology(Technology::Software(Software::Data(Some(
-            DataLeaf::SchemaEvolution,
-        ))))
+        Domain::Technology(Technology::Software(Software::Data(DataLeaf::SchemaEvolution)))
     );
     assert_eq!(
         domain.to_nota(),
@@ -490,12 +495,12 @@ fn deleted_software_leaves_do_not_parse() {
 #[test]
 fn terminal_value_domains_convert_to_scope_all() {
     let scope = DomainScope::from(Domain::Technology(Technology::Software(Software::Data(
-        None,
+        DataLeaf::All,
     ))));
 
     assert!(
         scope.contains_domain(&Domain::Technology(Technology::Software(Software::Data(
-            Some(DataLeaf::SchemaEvolution),
+            DataLeaf::SchemaEvolution,
         ))))
     );
 }

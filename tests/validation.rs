@@ -7,7 +7,7 @@ use signal_spirit::{
 fn active_entry_rejects_empty_referents() {
     let entry = Entry {
         domains: Domains::new(vec![Domain::Technology(Technology::Software(
-            Software::Data(Some(DataLeaf::SchemaEvolution)),
+            Software::Data(DataLeaf::SchemaEvolution),
         ))]),
         kind: Kind::Decision,
         description: Description::new("active entries need retrieval keys"),
@@ -24,7 +24,7 @@ fn active_entry_rejects_empty_referents() {
 fn zero_certainty_entry_allows_empty_referents() {
     let entry = Entry {
         domains: Domains::new(vec![Domain::Technology(Technology::Software(
-            Software::Data(Some(DataLeaf::SchemaEvolution)),
+            Software::Data(DataLeaf::SchemaEvolution),
         ))]),
         kind: Kind::Decision,
         description: Description::new("zero entries may remain legacy removal candidates"),
@@ -41,7 +41,7 @@ fn zero_certainty_entry_allows_empty_referents() {
 fn active_entry_accepts_non_empty_referents() {
     let entry = Entry {
         domains: Domains::new(vec![Domain::Technology(Technology::Software(
-            Software::Data(Some(DataLeaf::SchemaEvolution)),
+            Software::Data(DataLeaf::SchemaEvolution),
         ))]),
         kind: Kind::Decision,
         description: Description::new("active entries carry retrieval keys"),
