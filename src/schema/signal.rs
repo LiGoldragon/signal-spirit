@@ -319,6 +319,14 @@ pub struct Untap(SubscriptionToken);
     derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct ApplyAuthorizedRecord(AuthorizedRecordApplication);
+
+#[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct SubscribeIntent(Query);
 
 #[rustfmt::skip]
@@ -480,6 +488,22 @@ pub struct SubscriptionStarted(IntentSubscription);
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct MarkerReported(DatabaseMarker);
+
+#[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct RecordApplied(RecordApplicationReceipt);
+
+#[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct ApplyRefused(ApplyRefusal);
 
 #[rustfmt::skip]
 #[cfg_attr(
@@ -694,6 +718,75 @@ pub struct SemaReceipt {
     pub record_identifier: RecordIdentifier,
     pub database_marker: DatabaseMarker,
 }
+
+#[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct VersionedEntryHex(String);
+
+#[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct AuthorizedEvidenceHex(String);
+
+#[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct AuthorizedRecordApplication {
+    pub record_identifier: RecordIdentifier,
+    pub versioned_entry_hex: VersionedEntryHex,
+    pub authorized_evidence_hex: AuthorizedEvidenceHex,
+}
+
+#[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct RecordApplicationReceipt {
+    pub record_identifier: RecordIdentifier,
+    pub database_marker: DatabaseMarker,
+}
+
+#[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
+#[derive(
+    rkyv::Archive,
+    rkyv::Serialize,
+    rkyv::Deserialize,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+)]
+pub enum ApplyRefusalReason {
+    MalformedRecord,
+    RehashMismatch,
+    AuthorizationDenied,
+    AuthorizationUnavailable,
+}
+
+#[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct ApplyRefusal(ApplyRefusalReason);
 
 #[rustfmt::skip]
 #[cfg_attr(
@@ -1511,6 +1604,7 @@ pub enum OperationKind {
     LookupStash,
     Tap,
     Untap,
+    ApplyAuthorizedRecord,
     SubscribeIntent,
     Version,
     Marker,
@@ -1978,6 +2072,7 @@ pub enum Input {
     LookupStash(LookupStash),
     Tap(Tap),
     Untap(Untap),
+    ApplyAuthorizedRecord(ApplyAuthorizedRecord),
     SubscribeIntent(SubscribeIntent),
     Version,
     Marker,
@@ -2011,6 +2106,8 @@ pub enum Output {
     SubscriptionStarted(SubscriptionStarted),
     VersionReported(VersionReported),
     MarkerReported(MarkerReported),
+    RecordApplied(RecordApplied),
+    ApplyRefused(ApplyRefused),
     Event(IntentEvent),
     Error(Error),
     Rejected(Rejected),
@@ -2454,6 +2551,25 @@ impl From<SubscriptionToken> for Untap {
 }
 
 #[rustfmt::skip]
+impl ApplyAuthorizedRecord {
+    pub fn new(payload: AuthorizedRecordApplication) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &AuthorizedRecordApplication {
+        &self.0
+    }
+    pub fn into_payload(self) -> AuthorizedRecordApplication {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<AuthorizedRecordApplication> for ApplyAuthorizedRecord {
+    fn from(payload: AuthorizedRecordApplication) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
 impl SubscribeIntent {
     pub fn new(payload: Query) -> Self {
         Self(payload)
@@ -2848,6 +2964,44 @@ impl MarkerReported {
 #[rustfmt::skip]
 impl From<DatabaseMarker> for MarkerReported {
     fn from(payload: DatabaseMarker) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl RecordApplied {
+    pub fn new(payload: RecordApplicationReceipt) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &RecordApplicationReceipt {
+        &self.0
+    }
+    pub fn into_payload(self) -> RecordApplicationReceipt {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<RecordApplicationReceipt> for RecordApplied {
+    fn from(payload: RecordApplicationReceipt) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl ApplyRefused {
+    pub fn new(payload: ApplyRefusal) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &ApplyRefusal {
+        &self.0
+    }
+    pub fn into_payload(self) -> ApplyRefusal {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<ApplyRefusal> for ApplyRefused {
+    fn from(payload: ApplyRefusal) -> Self {
         Self::new(payload)
     }
 }
@@ -3304,6 +3458,63 @@ impl SpiritGuardianMaximumOutputTokens {
 #[rustfmt::skip]
 impl From<Integer> for SpiritGuardianMaximumOutputTokens {
     fn from(payload: Integer) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl VersionedEntryHex {
+    pub fn new(payload: impl Into<String>) -> Self {
+        Self(payload.into())
+    }
+    pub fn payload(&self) -> &String {
+        &self.0
+    }
+    pub fn into_payload(self) -> String {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<String> for VersionedEntryHex {
+    fn from(payload: String) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl AuthorizedEvidenceHex {
+    pub fn new(payload: impl Into<String>) -> Self {
+        Self(payload.into())
+    }
+    pub fn payload(&self) -> &String {
+        &self.0
+    }
+    pub fn into_payload(self) -> String {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<String> for AuthorizedEvidenceHex {
+    fn from(payload: String) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl ApplyRefusal {
+    pub fn new(payload: ApplyRefusalReason) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &ApplyRefusalReason {
+        &self.0
+    }
+    pub fn into_payload(self) -> ApplyRefusalReason {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<ApplyRefusalReason> for ApplyRefusal {
+    fn from(payload: ApplyRefusalReason) -> Self {
         Self::new(payload)
     }
 }
@@ -4621,6 +4832,9 @@ impl Input {
     pub fn untap(payload: SubscriptionToken) -> Self {
         Self::Untap(Untap::new(payload))
     }
+    pub fn apply_authorized_record(payload: AuthorizedRecordApplication) -> Self {
+        Self::ApplyAuthorizedRecord(ApplyAuthorizedRecord::new(payload))
+    }
     pub fn subscribe_intent(payload: Query) -> Self {
         Self::SubscribeIntent(SubscribeIntent::new(payload))
     }
@@ -4690,6 +4904,12 @@ impl Output {
     }
     pub fn marker_reported(payload: DatabaseMarker) -> Self {
         Self::MarkerReported(MarkerReported::new(payload))
+    }
+    pub fn record_applied(payload: RecordApplicationReceipt) -> Self {
+        Self::RecordApplied(RecordApplied::new(payload))
+    }
+    pub fn apply_refused(payload: ApplyRefusal) -> Self {
+        Self::ApplyRefused(ApplyRefused::new(payload))
     }
     pub fn event(payload: IntentEvent) -> Self {
         Self::Event(payload)
@@ -4983,6 +5203,13 @@ impl From<Untap> for Input {
 }
 
 #[rustfmt::skip]
+impl From<ApplyAuthorizedRecord> for Input {
+    fn from(payload: ApplyAuthorizedRecord) -> Self {
+        Self::ApplyAuthorizedRecord(payload)
+    }
+}
+
+#[rustfmt::skip]
 impl From<SubscribeIntent> for Input {
     fn from(payload: SubscribeIntent) -> Self {
         Self::SubscribeIntent(payload)
@@ -5137,6 +5364,20 @@ impl From<MarkerReported> for Output {
 }
 
 #[rustfmt::skip]
+impl From<RecordApplied> for Output {
+    fn from(payload: RecordApplied) -> Self {
+        Self::RecordApplied(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<ApplyRefused> for Output {
+    fn from(payload: ApplyRefused) -> Self {
+        Self::ApplyRefused(payload)
+    }
+}
+
+#[rustfmt::skip]
 impl From<IntentEvent> for Output {
     fn from(payload: IntentEvent) -> Self {
         Self::Event(payload)
@@ -5211,9 +5452,10 @@ pub mod short_header {
     pub const INPUT_LOOKUP_STASH: u64 = 0x0011000000000000;
     pub const INPUT_TAP: u64 = 0x0012000000000000;
     pub const INPUT_UNTAP: u64 = 0x0013000000000000;
-    pub const INPUT_SUBSCRIBE_INTENT: u64 = 0x0014000000000000;
-    pub const INPUT_VERSION: u64 = 0x0015000000000000;
-    pub const INPUT_MARKER: u64 = 0x0016000000000000;
+    pub const INPUT_APPLY_AUTHORIZED_RECORD: u64 = 0x0014000000000000;
+    pub const INPUT_SUBSCRIBE_INTENT: u64 = 0x0015000000000000;
+    pub const INPUT_VERSION: u64 = 0x0016000000000000;
+    pub const INPUT_MARKER: u64 = 0x0017000000000000;
     pub const OUTPUT_RECORD_ACCEPTED: u64 = 0x0100000000000000;
     pub const OUTPUT_PROPOSED: u64 = 0x0101000000000000;
     pub const OUTPUT_CLARIFIED: u64 = 0x0102000000000000;
@@ -5235,9 +5477,11 @@ pub mod short_header {
     pub const OUTPUT_SUBSCRIPTION_STARTED: u64 = 0x0112000000000000;
     pub const OUTPUT_VERSION_REPORTED: u64 = 0x0113000000000000;
     pub const OUTPUT_MARKER_REPORTED: u64 = 0x0114000000000000;
-    pub const OUTPUT_EVENT: u64 = 0x0115000000000000;
-    pub const OUTPUT_ERROR: u64 = 0x0116000000000000;
-    pub const OUTPUT_REJECTED: u64 = 0x0117000000000000;
+    pub const OUTPUT_RECORD_APPLIED: u64 = 0x0115000000000000;
+    pub const OUTPUT_APPLY_REFUSED: u64 = 0x0116000000000000;
+    pub const OUTPUT_EVENT: u64 = 0x0117000000000000;
+    pub const OUTPUT_ERROR: u64 = 0x0118000000000000;
+    pub const OUTPUT_REJECTED: u64 = 0x0119000000000000;
 }
 
 #[rustfmt::skip]
@@ -5311,6 +5555,7 @@ pub enum InputRoute {
     LookupStash,
     Tap,
     Untap,
+    ApplyAuthorizedRecord,
     SubscribeIntent,
     Version,
     Marker,
@@ -5353,6 +5598,8 @@ pub enum OutputRoute {
     SubscriptionStarted,
     VersionReported,
     MarkerReported,
+    RecordApplied,
+    ApplyRefused,
     Event,
     Error,
     Rejected,
@@ -5382,6 +5629,7 @@ impl Input {
             Self::LookupStash(_) => InputRoute::LookupStash,
             Self::Tap(_) => InputRoute::Tap,
             Self::Untap(_) => InputRoute::Untap,
+            Self::ApplyAuthorizedRecord(_) => InputRoute::ApplyAuthorizedRecord,
             Self::SubscribeIntent(_) => InputRoute::SubscribeIntent,
             Self::Version => InputRoute::Version,
             Self::Marker => InputRoute::Marker,
@@ -5409,6 +5657,7 @@ impl Input {
             Self::LookupStash(_) => short_header::INPUT_LOOKUP_STASH,
             Self::Tap(_) => short_header::INPUT_TAP,
             Self::Untap(_) => short_header::INPUT_UNTAP,
+            Self::ApplyAuthorizedRecord(_) => short_header::INPUT_APPLY_AUTHORIZED_RECORD,
             Self::SubscribeIntent(_) => short_header::INPUT_SUBSCRIBE_INTENT,
             Self::Version => short_header::INPUT_VERSION,
             Self::Marker => short_header::INPUT_MARKER,
@@ -5438,6 +5687,9 @@ impl Input {
             short_header::INPUT_LOOKUP_STASH => Ok(InputRoute::LookupStash),
             short_header::INPUT_TAP => Ok(InputRoute::Tap),
             short_header::INPUT_UNTAP => Ok(InputRoute::Untap),
+            short_header::INPUT_APPLY_AUTHORIZED_RECORD => {
+                Ok(InputRoute::ApplyAuthorizedRecord)
+            }
             short_header::INPUT_SUBSCRIBE_INTENT => Ok(InputRoute::SubscribeIntent),
             short_header::INPUT_VERSION => Ok(InputRoute::Version),
             short_header::INPUT_MARKER => Ok(InputRoute::Marker),
@@ -5512,6 +5764,8 @@ impl Output {
             Self::SubscriptionStarted(_) => OutputRoute::SubscriptionStarted,
             Self::VersionReported(_) => OutputRoute::VersionReported,
             Self::MarkerReported(_) => OutputRoute::MarkerReported,
+            Self::RecordApplied(_) => OutputRoute::RecordApplied,
+            Self::ApplyRefused(_) => OutputRoute::ApplyRefused,
             Self::Event(_) => OutputRoute::Event,
             Self::Error(_) => OutputRoute::Error,
             Self::Rejected(_) => OutputRoute::Rejected,
@@ -5542,6 +5796,8 @@ impl Output {
             Self::SubscriptionStarted(_) => short_header::OUTPUT_SUBSCRIPTION_STARTED,
             Self::VersionReported(_) => short_header::OUTPUT_VERSION_REPORTED,
             Self::MarkerReported(_) => short_header::OUTPUT_MARKER_REPORTED,
+            Self::RecordApplied(_) => short_header::OUTPUT_RECORD_APPLIED,
+            Self::ApplyRefused(_) => short_header::OUTPUT_APPLY_REFUSED,
             Self::Event(_) => short_header::OUTPUT_EVENT,
             Self::Error(_) => short_header::OUTPUT_ERROR,
             Self::Rejected(_) => short_header::OUTPUT_REJECTED,
@@ -5582,6 +5838,8 @@ impl Output {
             }
             short_header::OUTPUT_VERSION_REPORTED => Ok(OutputRoute::VersionReported),
             short_header::OUTPUT_MARKER_REPORTED => Ok(OutputRoute::MarkerReported),
+            short_header::OUTPUT_RECORD_APPLIED => Ok(OutputRoute::RecordApplied),
+            short_header::OUTPUT_APPLY_REFUSED => Ok(OutputRoute::ApplyRefused),
             short_header::OUTPUT_EVENT => Ok(OutputRoute::Event),
             short_header::OUTPUT_ERROR => Ok(OutputRoute::Error),
             short_header::OUTPUT_REJECTED => Ok(OutputRoute::Rejected),
@@ -5656,6 +5914,7 @@ impl signal_frame::SignalOperationHeads for Input {
         "LookupStash",
         "Tap",
         "Untap",
+        "ApplyAuthorizedRecord",
         "SubscribeIntent",
         "Version",
         "Marker",

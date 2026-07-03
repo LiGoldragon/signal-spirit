@@ -223,6 +223,7 @@ impl Input {
             | Self::LookupStash(_)
             | Self::Tap(_)
             | Self::Untap(_)
+            | Self::ApplyAuthorizedRecord(_)
             | Self::Version
             | Self::Marker => Ok(()),
             Self::ChangeRecord(change) => change.payload().validate(),
@@ -517,6 +518,7 @@ impl OperationKind {
             Input::LookupStash(_) => Self::LookupStash,
             Input::Tap(_) => Self::Tap,
             Input::Untap(_) => Self::Untap,
+            Input::ApplyAuthorizedRecord(_) => Self::ApplyAuthorizedRecord,
             Input::SubscribeIntent(_) => Self::SubscribeIntent,
             Input::Version => Self::Version,
             Input::Marker => Self::Marker,
