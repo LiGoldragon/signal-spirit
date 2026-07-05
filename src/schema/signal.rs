@@ -551,6 +551,14 @@ pub struct Referents(Vec<Referent>);
     derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct Aliases(Referents);
+
+#[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct Description(String);
 
 #[rustfmt::skip]
@@ -954,7 +962,7 @@ pub struct Proposal {
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct ReferentRegistration {
     pub referent: Referent,
-    pub aliases: Referents,
+    pub aliases: Aliases,
     pub justification: Justification,
 }
 
@@ -974,7 +982,7 @@ pub struct ReferentRegistrationReceipt(Referent);
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct RegisteredReferent {
     pub referent: Referent,
-    pub aliases: Referents,
+    pub aliases: Aliases,
 }
 
 #[rustfmt::skip]
@@ -1088,6 +1096,14 @@ pub enum ValidationError {
     derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub(crate) struct AgentSocketPath(ConfigurationPath);
+
+#[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub(crate) struct ProviderName(Option<SpiritGuardianProviderName>);
 
 #[rustfmt::skip]
@@ -1104,6 +1120,14 @@ pub(crate) struct ModelName(Option<SpiritGuardianModelName>);
     derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub(crate) struct TimeoutMilliseconds(SpiritGuardianTimeoutMilliseconds);
+
+#[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub(crate) struct MaximumOutputTokens(Option<SpiritGuardianMaximumOutputTokens>);
 
 #[rustfmt::skip]
@@ -1113,10 +1137,10 @@ pub(crate) struct MaximumOutputTokens(Option<SpiritGuardianMaximumOutputTokens>)
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct SpiritGuardianAgentConfiguration {
-    pub agent_socket_path: ConfigurationPath,
+    pub(crate) agent_socket_path: AgentSocketPath,
     pub(crate) provider_name: ProviderName,
     pub(crate) model_name: ModelName,
-    pub timeout_milliseconds: SpiritGuardianTimeoutMilliseconds,
+    pub(crate) timeout_milliseconds: TimeoutMilliseconds,
     pub(crate) maximum_output_tokens: MaximumOutputTokens,
 }
 
@@ -1146,22 +1170,6 @@ pub enum AuthorizationMode {
     derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub(crate) struct MetaSocketPath(Option<ConfigurationPath>);
-
-#[rustfmt::skip]
-#[cfg_attr(
-    feature = "nota-text",
-    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
-)]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub(crate) struct TraceSocketPath(Option<ConfigurationPath>);
-
-#[rustfmt::skip]
-#[cfg_attr(
-    feature = "nota-text",
-    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
-)]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub(crate) struct GuardianAgentConfiguration(Option<SpiritGuardianAgentConfiguration>);
 
 #[rustfmt::skip]
@@ -1172,9 +1180,9 @@ pub(crate) struct GuardianAgentConfiguration(Option<SpiritGuardianAgentConfigura
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct SpiritDaemonConfiguration {
     pub socket_path: ConfigurationPath,
-    pub(crate) meta_socket_path: MetaSocketPath,
+    pub meta_socket_path: Option<ConfigurationPath>,
     pub database_path: ConfigurationPath,
-    pub(crate) trace_socket_path: TraceSocketPath,
+    pub trace_socket_path: Option<ConfigurationPath>,
     pub authorization_mode: AuthorizationMode,
     pub(crate) guardian_agent_configuration: GuardianAgentConfiguration,
 }
@@ -3102,6 +3110,25 @@ impl From<Vec<Referent>> for Referents {
 }
 
 #[rustfmt::skip]
+impl Aliases {
+    pub fn new(payload: Referents) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &Referents {
+        &self.0
+    }
+    pub fn into_payload(self) -> Referents {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<Referents> for Aliases {
+    fn from(payload: Referents) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
 impl Description {
     pub fn new(payload: impl Into<String>) -> Self {
         Self(payload.into())
@@ -3805,6 +3832,25 @@ impl From<RecordIdentifier> for IntentRetired {
 }
 
 #[rustfmt::skip]
+impl AgentSocketPath {
+    pub fn new(payload: ConfigurationPath) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &ConfigurationPath {
+        &self.0
+    }
+    pub fn into_payload(self) -> ConfigurationPath {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<ConfigurationPath> for AgentSocketPath {
+    fn from(payload: ConfigurationPath) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
 impl ProviderName {
     pub fn new(payload: Option<SpiritGuardianProviderName>) -> Self {
         Self(payload)
@@ -3843,6 +3889,25 @@ impl From<Option<SpiritGuardianModelName>> for ModelName {
 }
 
 #[rustfmt::skip]
+impl TimeoutMilliseconds {
+    pub fn new(payload: SpiritGuardianTimeoutMilliseconds) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &SpiritGuardianTimeoutMilliseconds {
+        &self.0
+    }
+    pub fn into_payload(self) -> SpiritGuardianTimeoutMilliseconds {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<SpiritGuardianTimeoutMilliseconds> for TimeoutMilliseconds {
+    fn from(payload: SpiritGuardianTimeoutMilliseconds) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
 impl MaximumOutputTokens {
     pub fn new(payload: Option<SpiritGuardianMaximumOutputTokens>) -> Self {
         Self(payload)
@@ -3857,44 +3922,6 @@ impl MaximumOutputTokens {
 #[rustfmt::skip]
 impl From<Option<SpiritGuardianMaximumOutputTokens>> for MaximumOutputTokens {
     fn from(payload: Option<SpiritGuardianMaximumOutputTokens>) -> Self {
-        Self::new(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl MetaSocketPath {
-    pub fn new(payload: Option<ConfigurationPath>) -> Self {
-        Self(payload)
-    }
-    pub fn payload(&self) -> &Option<ConfigurationPath> {
-        &self.0
-    }
-    pub fn into_payload(self) -> Option<ConfigurationPath> {
-        self.0
-    }
-}
-#[rustfmt::skip]
-impl From<Option<ConfigurationPath>> for MetaSocketPath {
-    fn from(payload: Option<ConfigurationPath>) -> Self {
-        Self::new(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl TraceSocketPath {
-    pub fn new(payload: Option<ConfigurationPath>) -> Self {
-        Self(payload)
-    }
-    pub fn payload(&self) -> &Option<ConfigurationPath> {
-        &self.0
-    }
-    pub fn into_payload(self) -> Option<ConfigurationPath> {
-        self.0
-    }
-}
-#[rustfmt::skip]
-impl From<Option<ConfigurationPath>> for TraceSocketPath {
-    fn from(payload: Option<ConfigurationPath>) -> Self {
         Self::new(payload)
     }
 }

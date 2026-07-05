@@ -79,10 +79,10 @@ impl SpiritGuardianAgentConfiguration {
         maximum_output_tokens: Option<SpiritGuardianMaximumOutputTokens>,
     ) -> Self {
         Self {
-            agent_socket_path,
+            agent_socket_path: AgentSocketPath::new(agent_socket_path),
             provider_name: ProviderName::new(provider_name),
             model_name: ModelName::new(model_name),
-            timeout_milliseconds,
+            timeout_milliseconds: TimeoutMilliseconds::new(timeout_milliseconds),
             maximum_output_tokens: MaximumOutputTokens::new(maximum_output_tokens),
         }
     }
@@ -106,7 +106,7 @@ impl SpiritGuardianAgentConfiguration {
     }
 
     pub fn timeout_milliseconds(&self) -> u64 {
-        self.timeout_milliseconds.clone().into_u64()
+        self.timeout_milliseconds.payload().clone().into_u64()
     }
 
     pub fn maximum_output_tokens(&self) -> Option<u64> {
@@ -121,16 +121,16 @@ impl SpiritDaemonConfiguration {
     pub fn new(socket_path: ConfigurationPath, database_path: ConfigurationPath) -> Self {
         Self {
             socket_path,
-            meta_socket_path: MetaSocketPath::new(None),
+            meta_socket_path: None,
             database_path,
-            trace_socket_path: TraceSocketPath::new(None),
+            trace_socket_path: None,
             authorization_mode: AuthorizationMode::Gating,
             guardian_agent_configuration: GuardianAgentConfiguration::new(None),
         }
     }
 
     pub fn with_meta_socket_path(mut self, meta_socket_path: ConfigurationPath) -> Self {
-        self.meta_socket_path = MetaSocketPath::new(Some(meta_socket_path));
+        self.meta_socket_path = Some(meta_socket_path);
         self
     }
 
@@ -144,7 +144,7 @@ impl SpiritDaemonConfiguration {
     }
 
     pub fn with_trace_socket_path(mut self, trace_socket_path: ConfigurationPath) -> Self {
-        self.trace_socket_path = TraceSocketPath::new(Some(trace_socket_path));
+        self.trace_socket_path = Some(trace_socket_path);
         self
     }
 
@@ -159,7 +159,6 @@ impl SpiritDaemonConfiguration {
 
     pub fn meta_socket_path(&self) -> Option<&str> {
         self.meta_socket_path
-            .payload()
             .as_ref()
             .map(ConfigurationPath::as_str)
     }
@@ -170,7 +169,6 @@ impl SpiritDaemonConfiguration {
 
     pub fn trace_socket_path(&self) -> Option<&str> {
         self.trace_socket_path
-            .payload()
             .as_ref()
             .map(ConfigurationPath::as_str)
     }
@@ -326,6 +324,12 @@ impl Referents {
             return Err(ValidationError::EmptyQueryReferent);
         }
         Ok(())
+    }
+}
+
+impl Aliases {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        self.payload().validate()
     }
 }
 

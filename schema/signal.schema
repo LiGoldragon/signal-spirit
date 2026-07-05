@@ -102,6 +102,7 @@
   Domains (Vector Domain)
   Referent String
   Referents (Vector Referent)
+  Aliases Referents
   Description String
   Keyword String
   Keywords (Vector Keyword)
@@ -146,9 +147,9 @@
   Justification { Testimony Reasoning }
   RecordRequest { Entry Justification }
   Proposal { Entry Justification }
-  ReferentRegistration { Referent aliases.Referents Justification }
+  ReferentRegistration { Referent Aliases Justification }
   ReferentRegistrationReceipt { Referent }
-  RegisteredReferent { Referent aliases.Referents }
+  RegisteredReferent { Referent Aliases }
   RegisteredReferents (Vector RegisteredReferent)
   VersionReported VersionReport
   VersionReport { VersionText }
@@ -160,18 +161,18 @@
   IntentEventStream (Stream { token.SubscriptionToken opened.SubscriptionStarted event.IntentEvent close.SubscriptionToken })
   ValidationError [EmptyDomain EmptyDescription EmptyQueryDomain EmptyKeyword EmptySearchText EmptyQueryReferent StashHandleNotFound EmptyReferents]
   SpiritGuardianAgentConfiguration {
-    agent_socket_path.ConfigurationPath
+    AgentSocketPath.ConfigurationPath
     ProviderName.(Optional SpiritGuardianProviderName)
     ModelName.(Optional SpiritGuardianModelName)
-    timeout_milliseconds.SpiritGuardianTimeoutMilliseconds
+    TimeoutMilliseconds.SpiritGuardianTimeoutMilliseconds
     MaximumOutputTokens.(Optional SpiritGuardianMaximumOutputTokens)
   }
   AuthorizationMode [Gating Observing]
   SpiritDaemonConfiguration {
     socket_path.ConfigurationPath
-    MetaSocketPath.(Optional ConfigurationPath)
+    meta_socket_path.(Optional ConfigurationPath)
     database_path.ConfigurationPath
-    TraceSocketPath.(Optional ConfigurationPath)
+    trace_socket_path.(Optional ConfigurationPath)
     AuthorizationMode
     GuardianAgentConfiguration.(Optional SpiritGuardianAgentConfiguration)
   }

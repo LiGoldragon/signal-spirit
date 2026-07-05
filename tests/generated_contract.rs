@@ -146,46 +146,47 @@ fn generated_help_model_renders_spirit_one_level_shapes() {
             .expect("render top-level help")
             .entries()
             .iter()
-            .any(|entry| entry.to_string() == "(Record { Entry Justification })"),
-        "top-level help should include Record's one-level payload shape"
+            .any(|entry| {
+                entry.name().as_str() == "Record"
+                    && entry.to_string()
+                        == "{ Entry Justification }\n{ Domains Kind Description Certainty Importance Privacy Referents }\n{ Testimony Reasoning }"
+            }),
+        "top-level help should include Record's positional payload rows"
     );
     assert_eq!(
         model
             .render(&signal_spirit::HelpRequest::for_name("Record"))
             .expect("render Record help")
             .to_string(),
-        "(Record { Entry Justification })"
+        "{ Entry Justification }\n{ Domains Kind Description Certainty Importance Privacy Referents }\n{ Testimony Reasoning }"
     );
     assert_eq!(
         model
             .render(&signal_spirit::HelpRequest::for_name("Entry"))
             .expect("render Entry help")
             .to_string(),
-        "(Entry { Domains Kind Description Certainty Importance Privacy Referents })"
+        "{ Domains Kind Description Certainty Importance Privacy Referents }\n(Vector Domain)\n[Decision Principle Correction Clarification Constraint]\nString\nMagnitude\nMagnitude\nMagnitude\n(Vector Referent)"
     );
     assert_eq!(
         model
             .render(&signal_spirit::HelpRequest::for_name("Domains"))
             .expect("render Domains help")
             .to_string(),
-        "(Domains (Vector Domain))"
+        "(Vector Domain)"
     );
     assert_eq!(
         model
             .render(&signal_spirit::HelpRequest::for_name("Description"))
             .expect("render Description help")
             .to_string(),
-        "(Description String)"
+        "String"
     );
     assert_eq!(
         model
             .render(&signal_spirit::HelpRequest::for_name("VerbatimQuote"))
             .expect("render VerbatimQuote help")
             .to_string(),
-        // Help is projected from the fully specified schema. The field keeps
-        // the named role here; `(Help OptionalAntecedent)` is the next
-        // navigation step that shows `(Optional Antecedent)`.
-        "(VerbatimQuote { QuoteText OptionalAntecedent })"
+        "{ QuoteText OptionalAntecedent }\nString\n(Optional Antecedent)"
     );
 }
 
@@ -213,8 +214,12 @@ fn generated_help_model_renders_every_decoded_schema_target() {
             .unwrap_or_else(|error| panic!("render decoded Help target {name}: {error}"))
             .to_string();
         assert!(
-            rendered.starts_with(&format!("({name}")),
-            "decoded Help target {name} rendered an unexpected shape: {rendered}"
+            !rendered.trim().is_empty(),
+            "decoded Help target {name} rendered no positional rows"
+        );
+        assert!(
+            !rendered.starts_with(&format!("({name} ")),
+            "decoded Help target {name} leaked a wrapper head: {rendered}"
         );
     }
 
@@ -223,17 +228,17 @@ fn generated_help_model_renders_every_decoded_schema_target() {
             .render(&signal_spirit::HelpRequest::for_name("Domain"))
             .expect("render imported Domain help")
             .to_string(),
-        // Help renders one structural level. Same-named payload variants are
-        // encoded in the schema codec's self-tagged form, so each Domain arm is
-        // one navigable step away from its nested enum body.
-        "(Domain [(Health) (Food) (Home) (Finance) (Work) (Craft) (Knowledge) (Education) (Language) (Art) (Kinship) (Selfhood) (Spirituality) (Governance) (Law) (Community) (Nature) (Travel) (Commerce) (Leisure) (Appearance) (Safety) (Information) (Technology)])"
+        // Help renders the positional body only. Same-named payload variants
+        // are encoded in the schema codec's self-tagged form, so each Domain
+        // arm is one navigable step away from its nested enum body.
+        "[(Health) (Food) (Home) (Finance) (Work) (Craft) (Knowledge) (Education) (Language) (Art) (Kinship) (Selfhood) (Spirituality) (Governance) (Law) (Community) (Nature) (Travel) (Commerce) (Leisure) (Appearance) (Safety) (Information) (Technology)]"
     );
     assert_eq!(
         model
             .render(&signal_spirit::HelpRequest::for_name("IntentEventStream"))
             .expect("render stream help")
             .to_string(),
-        "(IntentEventStream (Stream { token.SubscriptionToken opened.SubscriptionStarted event.IntentEvent close.SubscriptionToken }))"
+        "(Stream { token.SubscriptionToken opened.SubscriptionStarted event.IntentEvent close.SubscriptionToken })"
     );
 }
 
@@ -262,34 +267,37 @@ fn generated_help_model_round_trips_through_rkyv() {
     );
 }
 
-/// The help text codec is schema's declaration codec, not a hand-rolled
+/// The help text codec is schema's declaration-body codec, not a hand-rolled
 /// or nota-derive one. For each representative target this asserts both the
-/// canonical rendered schema text AND a true round trip `decode(render(node))
-/// == node` through that same schema codec (`HelpResponse::to_schema_text` ->
-/// `HelpResponse::from_schema_text`). Covered shapes: a struct (`Record`), a
-/// struct of newtype roles (`Entry`), a vector reference rendered through the
-/// specified schema as the canonical `(Vector Domain)` (`Domains`), a newtype
-/// (`RecordAccepted`), an enum (`DomainMatch`), and a stream
-/// (`IntentEventStream`).
+/// canonical rendered positional rows and a true row round trip through that
+/// same schema codec (`HelpResponse::to_schema_text` ->
+/// `HelpResponse::from_schema_text` -> `to_schema_text`). Covered shapes: a
+/// root payload struct (`Record`), a struct of newtype roles (`Entry`), a vector
+/// reference rendered through TrueSchema as the canonical `(Vector Domain)`
+/// (`Domains`), a newtype (`RecordAccepted`), an enum (`DomainMatch`), and a
+/// stream (`IntentEventStream`).
 #[cfg(feature = "nota-text")]
 #[test]
 fn generated_help_round_trips_through_the_schema_codec() {
     let model = signal_spirit::HelpModel::from_signal_schema_source().expect("build help model");
 
     for (target, expected) in [
-        ("Record", "(Record { Entry Justification })"),
+        (
+            "Record",
+            "{ Entry Justification }\n{ Domains Kind Description Certainty Importance Privacy Referents }\n{ Testimony Reasoning }",
+        ),
         (
             "Entry",
-            "(Entry { Domains Kind Description Certainty Importance Privacy Referents })",
+            "{ Domains Kind Description Certainty Importance Privacy Referents }\n(Vector Domain)\n[Decision Principle Correction Clarification Constraint]\nString\nMagnitude\nMagnitude\nMagnitude\n(Vector Referent)",
         ),
-        ("Domains", "(Domains (Vector Domain))"),
-        ("RecordAccepted", "(RecordAccepted RecordIdentifier)"),
+        ("Domains", "(Vector Domain)"),
+        ("RecordAccepted", "RecordIdentifier"),
         // Same-named payload variants project to the schema codec's self-tagged
         // form and round trip without leaking a duplicate payload name.
-        ("DomainMatch", "(DomainMatch [Any (Partial) (Full)])"),
+        ("DomainMatch", "[Any (Partial) (Full)]"),
         (
             "IntentEventStream",
-            "(IntentEventStream (Stream { token.SubscriptionToken opened.SubscriptionStarted event.IntentEvent close.SubscriptionToken }))",
+            "(Stream { token.SubscriptionToken opened.SubscriptionStarted event.IntentEvent close.SubscriptionToken })",
         ),
     ] {
         let response = model
@@ -299,7 +307,7 @@ fn generated_help_round_trips_through_the_schema_codec() {
         let encoded = response.to_schema_text();
         assert_eq!(
             encoded, expected,
-            "{target} should render its canonical schema declaration"
+            "{target} should render its canonical positional help rows"
         );
         assert_eq!(
             response.to_string(),
@@ -310,12 +318,13 @@ fn generated_help_round_trips_through_the_schema_codec() {
         let decoded = signal_spirit::HelpResponse::from_schema_text(&encoded)
             .unwrap_or_else(|error| panic!("decode {target} help schema text: {error}"));
         assert_eq!(
-            decoded, response,
-            "{target} must round trip decode(render(node)) == node through the schema codec"
+            decoded.to_schema_text(),
+            encoded,
+            "{target} must round trip positional rows through the schema codec"
         );
     }
 
-    // The multi-declaration top-level response round trips as one schema
+    // The multi-entry top-level response round trips as one positional row
     // document through the same codec.
     let top_level = model
         .render(&signal_spirit::HelpRequest::new(None))
@@ -323,7 +332,7 @@ fn generated_help_round_trips_through_the_schema_codec() {
     let encoded = top_level.to_schema_text();
     let decoded =
         signal_spirit::HelpResponse::from_schema_text(&encoded).expect("decode top-level help");
-    assert_eq!(decoded, top_level);
+    assert_eq!(decoded.to_schema_text(), encoded);
 }
 
 #[cfg(feature = "nota-text")]

@@ -23,7 +23,7 @@ impl SchemaBuild {
         println!("cargo:rerun-if-changed=src/schema/domain.rs");
         println!("cargo:rerun-if-changed=src/schema/signal.rs");
 
-        let plan = GenerationPlan::new(&self.crate_root, "signal-spirit", "0.9.0")
+        let plan = GenerationPlan::new(&self.crate_root, "signal-spirit", "0.10.0")
             .with_module(ModuleEmission::declaration_module("domain"))
             .with_module(ModuleEmission::wire_contract_module("signal"));
 
