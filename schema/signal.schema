@@ -41,8 +41,8 @@
   DomainScopes signal-spirit:domain:DomainScopes
   ScopeSet signal-spirit:domain:ScopeSet
 }
-[State Record Propose Clarify Supersede Retire ResolveClarification Observe PublicTextSearch PublicRecords PrivateRecords Lookup Count ChangeCertainty BumpImportance ChangeRecord RegisterReferent LookupStash Tap Untap (SubscribeIntent SubscribeIntent opens IntentEventStream) Version Marker]
-[RecordAccepted Proposed Clarified Superseded Retired ClarificationResolved GuardianRejected ReferentGuardianRejected RecordsObserved RecordsStashed RecordFound RecordsCounted CertaintyChanged ImportanceBumped RecordChanged ReferentRegistered ObservationTapped ObservationUntapped SubscriptionStarted VersionReported MarkerReported (Event IntentEvent) Error Rejected]
+[State Record Propose Clarify Supersede Retire ResolveClarification Observe PublicTextSearch PublicRecords PrivateRecords Lookup Count ChangeCertainty BumpImportance ChangeRecord RegisterReferent LookupStash Tap Untap ApplyAuthorizedRecord (SubscribeIntent SubscribeIntent opens IntentEventStream) Version Marker]
+[RecordAccepted Proposed Clarified Superseded Retired ClarificationResolved GuardianRejected ReferentGuardianRejected RecordsObserved RecordsStashed RecordFound RecordsCounted CertaintyChanged ImportanceBumped RecordChanged ReferentRegistered ObservationTapped ObservationUntapped SubscriptionStarted VersionReported MarkerReported RecordApplied ApplyRefused (Event IntentEvent) Error Rejected]
 {
   SourcePath String
   LocalPath String
@@ -71,6 +71,7 @@
   LookupStash StashHandle
   Tap ObserverFilter
   Untap SubscriptionToken
+  ApplyAuthorizedRecord AuthorizedRecordApplication
   SubscribeIntent Query
 
   RecordAccepted RecordIdentifier
@@ -93,6 +94,8 @@
   ObservationUntapped ObserverRetraction
   SubscriptionStarted IntentSubscription
   MarkerReported DatabaseMarker
+  RecordApplied RecordApplicationReceipt
+  ApplyRefused ApplyRefusal
   Error ErrorReport
   Rejected SignalRejection
 
@@ -121,6 +124,12 @@
 
   DatabaseMarker { CommitSequence StateDigest }
   SemaReceipt { RecordIdentifier DatabaseMarker }
+  VersionedEntryHex String
+  AuthorizedEvidenceHex String
+  AuthorizedRecordApplication { RecordIdentifier VersionedEntryHex AuthorizedEvidenceHex }
+  RecordApplicationReceipt { RecordIdentifier DatabaseMarker }
+  ApplyRefusalReason [MalformedRecord RehashMismatch AuthorizationDenied AuthorizationUnavailable]
+  ApplyRefusal { ApplyRefusalReason }
   ObservedRecords { RecordSet }
   ObservedRecord { RecordIdentifier Entry }
   FoundRecord { RecordIdentifier Entry }
@@ -208,7 +217,7 @@
   ObserverFilter [All OperationsOnly EffectsOnly]
   ObserverSubscription { SubscriptionToken ObserverFilter ObservedOperations }
   ObserverRetraction { SubscriptionToken ObservedOperations }
-  OperationKind [State Record Propose Clarify Supersede Retire ResolveClarification Observe PublicTextSearch PublicRecords PrivateRecords Lookup Count ChangeCertainty BumpImportance ChangeRecord RegisterReferent LookupStash Tap Untap SubscribeIntent Version Marker]
+  OperationKind [State Record Propose Clarify Supersede Retire ResolveClarification Observe PublicTextSearch PublicRecords PrivateRecords Lookup Count ChangeCertainty BumpImportance ChangeRecord RegisterReferent LookupStash Tap Untap ApplyAuthorizedRecord SubscribeIntent Version Marker]
   ObservedOperation { OperationKind }
   ObservedOperations (Vector ObservedOperation)
 
