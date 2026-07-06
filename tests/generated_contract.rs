@@ -1,15 +1,18 @@
 use signal_spirit::{
     ClarificationRecordIdentifier, ClarificationResolution, ClarificationResolutionReceipt,
-    DataLeaf, Description, Domain, DomainScope, Input, InputRoute, Justification, Output,
-    OutputRoute, QuoteText, Reasoning, RecordIdentifier, RecordIdentifiers, Software,
-    TargetClarification, TargetClarifications, Technology, Testimony, VerbatimQuote, VersionReport,
-    VersionText,
+    DataLeaf, Description, Domain, DomainMatch, DomainScope, DomainScopes, Domains, Input,
+    InputRoute, Justification, Output, OutputRoute, QuoteText, Reasoning, RecordIdentifier,
+    RecordIdentifiers, ScopeSet, Software, TargetClarification, TargetClarifications, Technology,
+    Testimony, VerbatimQuote, VersionReport, VersionText,
 };
 #[cfg(feature = "nota-text")]
 use std::collections::BTreeSet;
 
 #[cfg(feature = "nota-text")]
 use nota::{NotaEncode, NotaSource};
+
+#[cfg(feature = "nota-text")]
+const DOMAIN_HELP_ROW: &str = "[All (Health) (Food) (Home) (Finance) (Work) (Craft) (Knowledge) (Education) (Language) (Art) (Kinship) (Selfhood) (Spirituality) (Governance) (Law) (Community) (Nature) (Travel) (Commerce) (Leisure) (Appearance) (Safety) (Information) (Technology)]";
 
 #[test]
 fn generated_input_frame_round_trips() {
@@ -106,6 +109,16 @@ fn generated_signal_contract_exports_domain_tree() {
     )));
 
     assert!(matches!(domain, Domain::Technology(_)));
+}
+
+#[test]
+fn generated_signal_contract_exports_top_level_all_domain() {
+    let domain = Domain::All;
+    let bytes = rkyv::to_bytes::<rkyv::rancor::Error>(&domain).expect("archive Domain::All");
+    let decoded = rkyv::from_bytes::<Domain, rkyv::rancor::Error>(&bytes)
+        .expect("decode Domain::All archive");
+
+    assert_eq!(decoded, Domain::All);
 }
 
 #[cfg(feature = "nota-text")]
@@ -230,8 +243,9 @@ fn generated_help_model_renders_every_decoded_schema_target() {
             .to_string(),
         // Help renders the positional body only. Same-named payload variants
         // are encoded in the schema codec's self-tagged form, so each Domain
-        // arm is one navigable step away from its nested enum body.
-        "[(Health) (Food) (Home) (Finance) (Work) (Craft) (Knowledge) (Education) (Language) (Art) (Kinship) (Selfhood) (Spirituality) (Governance) (Law) (Community) (Nature) (Travel) (Commerce) (Leisure) (Appearance) (Safety) (Information) (Technology)]"
+        // arm is one navigable step away from its nested enum body. Top-level
+        // All is the explicit payload-free universal domain.
+        DOMAIN_HELP_ROW
     );
     assert_eq!(
         model
@@ -294,6 +308,7 @@ fn generated_help_round_trips_through_the_schema_codec() {
         ("RecordAccepted", "RecordIdentifier"),
         // Same-named payload variants project to the schema codec's self-tagged
         // form and round trip without leaking a duplicate payload name.
+        ("Domain", DOMAIN_HELP_ROW),
         ("DomainMatch", "[Any (Partial) (Full)]"),
         (
             "IntentEventStream",
@@ -436,6 +451,15 @@ impl DecodedHelpTargets {
 
 #[cfg(feature = "nota-text")]
 #[test]
+fn top_level_all_domain_round_trips_through_nota() {
+    let domain = "All".parse_domain().expect("top-level all domain parses");
+
+    assert_eq!(domain, Domain::All);
+    assert_eq!(domain.to_nota(), "All");
+}
+
+#[cfg(feature = "nota-text")]
+#[test]
 fn terminal_value_domain_tags_round_trip_through_nota() {
     // Strict positional NOTA: bare `Data` no longer decodes — a variant payload
     // must always appear, and the whole-category value is the explicit `All`.
@@ -514,6 +538,23 @@ fn terminal_value_domains_convert_to_scope_all() {
             DataLeaf::SchemaEvolution,
         ))))
     );
+}
+
+#[test]
+fn top_level_all_scope_matches_every_entry_domain() {
+    let all_scope = DomainScope::from(Domain::All);
+    let data_domain = Domain::Technology(Technology::Software(Software::Data(
+        DataLeaf::SchemaEvolution,
+    )));
+    let domains = Domains::new(vec![data_domain.clone()]);
+
+    assert_eq!(all_scope, DomainScope::All);
+    assert!(all_scope.matches_domain(&data_domain));
+    assert!(data_domain.matches_scope(&all_scope));
+    assert!(ScopeSet::new(vec![all_scope.clone()]).matches_domain(&data_domain));
+    assert!(DomainScopes::new(vec![all_scope.clone()]).matches_any_domain(&domains));
+    assert!(DomainMatch::partial(DomainScopes::new(vec![all_scope.clone()])).matches(&domains));
+    assert!(DomainMatch::full(DomainScopes::new(vec![all_scope])).matches(&domains));
 }
 
 #[cfg(feature = "nota-text")]

@@ -11,6 +11,8 @@ use nota::{Document, NotaDecode, NotaEncode};
 use schema::{ImportResolver, SchemaEngine, SchemaIdentity, SchemaSource, TrueSchema};
 use signal_spirit::{DOMAIN_SCHEMA_SOURCE, HelpModel, HelpRequest, SIGNAL_SCHEMA_SOURCE};
 
+const DOMAIN_HELP_ROW: &str = "[All (Health) (Food) (Home) (Finance) (Work) (Craft) (Knowledge) (Education) (Language) (Art) (Kinship) (Selfhood) (Spirituality) (Governance) (Law) (Community) (Nature) (Travel) (Commerce) (Leisure) (Appearance) (Safety) (Information) (Technology)]";
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct DecodedSpiritSchemas {
     signal: TrueSchema,
@@ -96,6 +98,22 @@ fn decoded_spirit_signal_true_schema_projects_to_structured_nota() {
         decoded, schemas.signal,
         "structured NOTA projection should decode back to the same TrueSchema"
     );
+
+    let rendered_domain = schemas.domain.to_nota();
+    assert!(
+        rendered_domain.contains(
+            "(Public Domain [] (Enum (Domain [(All None None) (Health (Some (Plain Health)) None)"
+        ),
+        "structured Domain TrueSchema NOTA should include top-level All before concrete domains"
+    );
+    let domain_document =
+        Document::parse(&rendered_domain).expect("structured Domain TrueSchema NOTA parses");
+    let decoded_domain = TrueSchema::from_nota_block(&domain_document.root_objects()[0])
+        .expect("structured Domain TrueSchema NOTA decodes");
+    assert_eq!(
+        decoded_domain, schemas.domain,
+        "structured Domain NOTA projection should decode back to the same TrueSchema"
+    );
 }
 
 #[test]
@@ -123,5 +141,13 @@ fn decoded_true_schema_feeds_label_free_help_rows() {
             .to_string(),
         "{ Domains Kind Description Certainty Importance Privacy Referents }\n(Vector Domain)\n[Decision Principle Correction Clarification Constraint]\nString\nMagnitude\nMagnitude\nMagnitude\n(Vector Referent)",
         "Entry Help should be projected from decoded TrueSchema rows"
+    );
+    assert_eq!(
+        model
+            .render(&HelpRequest::for_name("Domain"))
+            .expect("render Domain help")
+            .to_string(),
+        DOMAIN_HELP_ROW,
+        "Domain Help should include top-level All from decoded TrueSchema rows"
     );
 }

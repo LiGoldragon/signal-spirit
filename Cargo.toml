@@ -1,6 +1,6 @@
 [package]
 name         = "signal-spirit"
-version      = "0.10.0"
+version      = "0.11.0"
 edition      = "2024"
 rust-version = "1.89"
 license      = "MIT OR Apache-2.0"
@@ -32,7 +32,7 @@ thiserror    = "2"
 version-projection = { git = "https://github.com/LiGoldragon/version-projection.git", branch = "main", default-features = false }
 
 [build-dependencies]
-schema-rust = { package = "schema-rust", git = "https://github.com/LiGoldragon/schema-rust.git", rev = "31aad1dc494c24a4390234842f15a93afe666dee" }
+schema-rust = { package = "schema-rust", git = "https://github.com/LiGoldragon/schema-rust.git", rev = "886a9009077bdf9ee0e71fa0fa31aaf6e5444dd3" }
 
 [dev-dependencies]
 nota = { package = "nota", git = "https://github.com/LiGoldragon/nota.git", branch = "main" }

@@ -897,7 +897,12 @@ impl DomainScopes {
 
 impl DomainScope {
     pub fn matches_domain(&self, domain: &Domain) -> bool {
-        self.contains_domain(domain)
+        match self {
+            // Root Domain::All is the contract's universal domain, not a
+            // leaf-unspecified variant under one current branch.
+            Self::All => true,
+            _ => self.contains_domain(domain),
+        }
     }
 }
 
@@ -917,7 +922,7 @@ impl ScopeSet {
 
 impl Domain {
     pub fn matches_scope(&self, scope: &DomainScope) -> bool {
-        scope.contains_domain(self)
+        scope.matches_domain(self)
     }
 
     fn software(payload: Software) -> Self {

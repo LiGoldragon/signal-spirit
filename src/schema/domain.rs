@@ -710,6 +710,7 @@ pub enum Information {
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum Domain {
+    All,
     Health(Health),
     Food(Food),
     Home(Home),
@@ -1045,6 +1046,7 @@ pub enum EngineeringLeaf {
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum DomainScope {
+    All,
     Health(HealthScope),
     Food(FoodScope),
     Home(HomeScope),
@@ -2825,6 +2827,7 @@ impl TechnologyScope {
 impl From<Domain> for DomainScope {
     fn from(value: Domain) -> Self {
         match value {
+            Domain::All => Self::All,
             Domain::Health(payload) => Self::Health(payload.into()),
             Domain::Food(payload) => Self::Food(payload.into()),
             Domain::Home(payload) => Self::Home(payload.into()),
@@ -2856,6 +2859,7 @@ impl From<Domain> for DomainScope {
 impl DomainScope {
     pub fn contains_scope(&self, scope: &Self) -> bool {
         match (self, scope) {
+            (Self::All, Self::All) => true,
             (Self::Health(left), Self::Health(right)) => left.contains_scope(right),
             (Self::Food(left), Self::Food(right)) => left.contains_scope(right),
             (Self::Home(left), Self::Home(right)) => left.contains_scope(right),
