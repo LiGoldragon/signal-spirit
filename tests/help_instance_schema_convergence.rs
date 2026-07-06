@@ -1,9 +1,9 @@
-//! Convergence proof: Help and per-instance schema project through the same
-//! canonical schema reference spine and render identical schema text.
+//! Convergence proof: Help and per-instance schema project the same canonical
+//! schema reference spine.
 //!
-//! Help stores `SpecifiedSchema`. A rendered Help response projects that value
-//! into schema declarations; per-instance schema records the decoder's expected
-//! reference. Both paths render `(Vector Domain)` for the `Domains` newtype
+//! Help stores `TrueSchema` and displays label-free declaration-body rows;
+//! per-instance schema records the decoder's expected declaration reference.
+//! Both paths still render `(Vector Domain)` for the `Domains` newtype body
 //! through the one schema encoder.
 //!
 //! Gated behind `nota-text` like the rest of the text surface.
@@ -29,8 +29,8 @@ where
 }
 
 /// The schema body text Help projects for a named target. Help stores
-/// `SpecifiedSchema`; the rendered entry body is exposed through
-/// signal-spirit's own `HelpBody` API, not schema source nouns.
+/// `TrueSchema`; the rendered entry body is exposed through signal-spirit's own
+/// `HelpBody` API, not schema source nouns.
 fn help_body_schema_text(target: &str) -> String {
     let model = HelpModel::from_signal_schema_source().expect("build help model");
     let response = model
@@ -52,7 +52,7 @@ fn help_domains_renders_the_canonical_vector_reference() {
         .to_string();
     // The dropped `(Vec Domain)` alias is gone; Help projects the canonical
     // `(Vector Domain)` through the one schema encoder.
-    assert_eq!(rendered, "(Domains (Vector Domain))");
+    assert_eq!(rendered, "(Vector Domain)");
 }
 
 #[test]
@@ -63,9 +63,9 @@ fn help_body_exposes_schema_text_without_schema_source_nouns() {
 
 #[test]
 fn help_domains_reference_matches_instance_schema_expansion() {
-    // The whole-declaration views also agree: Help's `(Domains (Vector Domain))`
-    // and the empty value's expanded per-instance schema are the same string,
-    // because both re-head the same resolved vector reference.
+    // Help is now label-free, while per-instance schema still renders the
+    // whole declaration. The body reference remains the same canonical vector
+    // projection in both views.
     let model = HelpModel::from_signal_schema_source().expect("build help model");
     let help_rendered = model
         .render(&HelpRequest::for_name("Domains"))
@@ -75,6 +75,7 @@ fn help_domains_reference_matches_instance_schema_expansion() {
     let schema = instance_schema_of::<Domains>("[]");
     let instance_expanded = InstanceSchemaText::new(&schema).expanded();
 
-    assert_eq!(help_rendered, instance_expanded);
-    assert_eq!(help_rendered, "(Domains (Vector Domain))");
+    assert_eq!(help_rendered, "(Vector Domain)");
+    assert_eq!(help_body_schema_text("Domains"), "(Vector Domain)");
+    assert_eq!(instance_expanded, "(Domains (Vector Domain))");
 }

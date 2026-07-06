@@ -1,22 +1,25 @@
-//! Help as a thin view over `schema`'s fully specified schema IR.
+//! Help as a thin typed view over `schema`'s TrueSchema model.
 //!
 //! Help is not a separate language and carries no AST of its own. The model
-//! stores `SpecifiedSchema` values — authored `.schema` sugar decoded into the
-//! explicit semantic data tree. Rendering is a projection from that data into
-//! re-headed schema declarations, encoded by schema's declaration codec.
+//! stores [`TrueSchema`] values — authored `.schema` sugar decoded into the
+//! canonical semantic data tree. Rendering is a final projection from that
+//! typed data into positional schema rows encoded by schema's declaration-body
+//! codec.
 //!
-//! The text codec is schema's declaration codec end to end: encode via
-//! [`SourceDeclaration::to_schema_text`], decode via
-//! [`SourceDeclarations::from_schema_text`]. No hand `format!` printer, no
+//! The text codec is schema's body codec end to end: each [`HelpBody`] encodes
+//! via [`SourceDeclarationValue::to_schema_text`] and decodes via
+//! [`SourceDeclarationValue::from_block`]. No hand `format!` printer, no
 //! parallel decoder. The rkyv codec is the rkyv derive on the Help wrappers and
-//! on the stored `SpecifiedSchema` values.
+//! on the stored [`TrueSchema`] values.
 
 use std::fmt;
 
 use ::schema::{
-    ImportResolver, Name, SchemaEngine, SchemaError, SchemaIdentity, SchemaSource,
-    SourceDeclaration, SourceDeclarationValue, SourceDeclarations, SpecifiedDeclaration,
-    SpecifiedRoot, SpecifiedRootEnum, SpecifiedSchema,
+    EnumDeclaration, EnumVariant, FamilyDeclaration, ImportResolver, Name, Root, SchemaEngine,
+    SchemaError, SchemaIdentity, SchemaSource, SourceDeclarationValue, SourceEnumBody,
+    SourceFamilyBody, SourceField, SourceReference, SourceStreamBody, SourceStructBody,
+    SourceVariantPayload, SourceVariantSignature, StreamDeclaration, TrueSchema, TypeDeclaration,
+    TypeReference,
 };
 use nota::{Block, Delimiter, Document};
 use thiserror::Error;
@@ -89,8 +92,10 @@ impl HelpRequest {
     }
 }
 
-/// A help response is a list of (re-headed) schema declarations — the schema IR
-/// for the requested roots/type. It round-trips through the one schema codec.
+/// A help response is a list of typed help entries. Rendering projects only the
+/// row bodies: no `(Name Body)` wrapper, no field labels, and no name/type
+/// pairs. The entry names remain available to callers that need machine
+/// navigation.
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct HelpResponse {
     entries: Vec<HelpEntry>,
@@ -105,39 +110,28 @@ impl HelpResponse {
         &self.entries
     }
 
-    /// Decode a help response from its schema text — the inverse of
-    /// [`Self::to_schema_text`]. Each re-headed declaration parses straight
-    /// back into schema declaration data through schema's declaration
-    /// decoder; the help entry is that [`SourceDeclaration`] with no
-    /// intermediate Help AST.
+    /// Decode a displayed help response from positional schema rows — the
+    /// inverse of [`Self::to_schema_text`]. Each row parses straight back into
+    /// schema declaration-body data through schema's own body decoder.
     pub fn from_schema_text(source: &str) -> Result<Self, HelpError> {
-        let declarations = SourceDeclarations::from_schema_text(source)?;
-        Ok(Self::from_source_declarations(&declarations))
+        let document = Document::parse(source)?;
+        let rows = document
+            .root_objects()
+            .iter()
+            .map(HelpBody::from_block)
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(Self::new(vec![HelpEntry::new(Name::new("Help"), rows)]))
     }
 
-    /// Encode the response as canonical schema text through schema's
-    /// declaration encoder.
+    /// Encode the response as positional schema rows through schema's body
+    /// encoder. This is the final display boundary.
     pub fn to_schema_text(&self) -> String {
-        self.to_source_declarations().to_schema_text()
-    }
-
-    fn from_source_declarations(declarations: &SourceDeclarations) -> Self {
-        Self::new(
-            declarations
-                .declarations()
-                .iter()
-                .map(HelpEntry::from_source_declaration)
-                .collect(),
-        )
-    }
-
-    fn to_source_declarations(&self) -> SourceDeclarations {
-        SourceDeclarations::new(
-            self.entries()
-                .iter()
-                .map(HelpEntry::to_source_declaration)
-                .collect(),
-        )
+        self.entries
+            .iter()
+            .flat_map(HelpEntry::rows)
+            .map(HelpBody::to_schema_text)
+            .collect::<Vec<_>>()
+            .join("\n")
     }
 }
 
@@ -161,7 +155,7 @@ impl fmt::Display for HelpResponse {
 )]
 pub struct HelpModel {
     #[rkyv(omit_bounds)]
-    schemas: Vec<SpecifiedSchema>,
+    schemas: Vec<TrueSchema>,
 }
 
 impl HelpModel {
@@ -184,19 +178,14 @@ impl HelpModel {
             &domain_source,
             SchemaIdentity::new("signal-domain:domain", "0.1.0"),
         )?;
-        let signal_schema = SpecifiedSchema::from(&signal_schema);
-        let domain_schema = SpecifiedSchema::from(&domain_schema);
-        Ok(Self::from_specified_schemas(vec![
-            signal_schema,
-            domain_schema,
-        ]))
+        Ok(Self::from_true_schemas(vec![signal_schema, domain_schema]))
     }
 
-    pub fn from_specified_schemas(schemas: Vec<SpecifiedSchema>) -> Self {
+    pub fn from_true_schemas(schemas: Vec<TrueSchema>) -> Self {
         Self { schemas }
     }
 
-    pub fn schemas(&self) -> &[SpecifiedSchema] {
+    pub fn schemas(&self) -> &[TrueSchema] {
         &self.schemas
     }
 
@@ -205,125 +194,178 @@ impl HelpModel {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
-struct HelpCatalog {
-    roots: Vec<HelpEntry>,
-    nodes: Vec<HelpEntry>,
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct HelpCatalog<'schema> {
+    schemas: &'schema [TrueSchema],
 }
 
-impl HelpCatalog {
-    fn from_schemas(schemas: &[SpecifiedSchema]) -> Self {
-        let mut builder = HelpCatalogBuilder::empty();
-        for schema in schemas {
-            builder.insert_schema(schema);
-        }
-        builder.into_catalog()
+impl<'schema> HelpCatalog<'schema> {
+    fn from_schemas(schemas: &'schema [TrueSchema]) -> Self {
+        Self { schemas }
     }
 
     fn render(&self, request: &HelpRequest) -> Result<HelpResponse, HelpError> {
         match request.target() {
-            None => Ok(HelpResponse::new(self.roots.clone())),
+            None => Ok(HelpResponse::new(self.root_entries())),
             Some(target) => self
-                .roots
-                .iter()
-                .find(|entry| entry.name() == target)
-                .or_else(|| self.nodes.iter().find(|entry| entry.name() == target))
-                .cloned()
+                .entry_named(target)
                 .map(|entry| HelpResponse::new(vec![entry]))
                 .ok_or_else(|| HelpError::UnknownTarget(target.as_str().to_owned())),
         }
     }
-}
 
-#[derive(Clone, Debug, Eq, PartialEq)]
-struct HelpCatalogBuilder {
-    roots: Vec<HelpEntry>,
-    nodes: Vec<HelpEntry>,
-}
+    fn root_entries(&self) -> Vec<HelpEntry> {
+        self.schemas
+            .iter()
+            .flat_map(TrueSchema::input_and_output)
+            .filter_map(Root::as_enum)
+            .flat_map(|root| root.variants.iter())
+            .map(|variant| self.entry_for_root_variant(variant))
+            .collect()
+    }
 
-impl HelpCatalogBuilder {
-    fn empty() -> Self {
-        Self {
-            roots: Vec::new(),
-            nodes: Vec::new(),
+    fn entry_named(&self, target: &Name) -> Option<HelpEntry> {
+        self.root_variant_named(target)
+            .map(|variant| self.entry_for_root_variant(variant))
+            .or_else(|| {
+                self.root_named(target)
+                    .map(|root| self.entry_for_root(root))
+            })
+            .or_else(|| {
+                self.type_declaration_named(target)
+                    .map(|declaration| self.entry_for_type_declaration(target.clone(), declaration))
+            })
+            .or_else(|| {
+                self.stream_named(target)
+                    .map(|stream| HelpEntry::one(target.clone(), HelpBody::from_stream(stream)))
+            })
+            .or_else(|| {
+                self.family_named(target)
+                    .map(|family| HelpEntry::one(target.clone(), HelpBody::from_family(family)))
+            })
+    }
+
+    fn entry_for_root(&self, root: &Root) -> HelpEntry {
+        match root {
+            Root::Enum(root) => HelpEntry::one(root.name.clone(), HelpBody::from_enum(root)),
+            Root::Application(application) => HelpEntry::one(
+                application.name().clone(),
+                HelpBody::from_type_reference(&TypeReference::from(application.as_ref())),
+            ),
         }
     }
 
-    fn into_catalog(self) -> HelpCatalog {
-        HelpCatalog {
-            roots: self.roots,
-            nodes: self.nodes,
-        }
+    fn entry_for_root_variant(&self, variant: &EnumVariant) -> HelpEntry {
+        let rows = variant
+            .payload
+            .as_ref()
+            .map(|payload| self.rows_for_root_payload(payload))
+            .unwrap_or_else(|| {
+                vec![HelpBody::from_type_reference(&TypeReference::Plain(
+                    variant.name.clone(),
+                ))]
+            });
+        HelpEntry::new(variant.name.clone(), rows)
     }
 
-    fn insert_schema(&mut self, schema: &SpecifiedSchema) {
-        self.insert_root(schema.input(), schema);
-        self.insert_root(schema.output(), schema);
-        for declaration in schema.declarations() {
-            self.insert_declaration(declaration);
-        }
-        for stream in schema.streams() {
-            self.insert_node(HelpEntry::new(
-                stream.name.clone(),
-                Some(HelpBody::from_source_declaration_value(
-                    SourceDeclarationValue::from(stream),
-                )),
-            ));
-        }
-        for family in schema.families() {
-            self.insert_node(HelpEntry::new(
-                family.name.clone(),
-                Some(HelpBody::from_source_declaration_value(
-                    SourceDeclarationValue::from(family),
-                )),
-            ));
-        }
+    fn entry_for_type_declaration(&self, name: Name, declaration: &TypeDeclaration) -> HelpEntry {
+        HelpEntry::new(name, self.rows_for_type_declaration(declaration))
     }
 
-    fn insert_declaration(&mut self, declaration: &SpecifiedDeclaration) {
-        self.insert_node(HelpEntry::new(
-            declaration.name().clone(),
-            Some(HelpBody::from_source_declaration_value(
-                declaration.body().to_source_declaration_value(),
-            )),
-        ));
-    }
-
-    fn insert_root(&mut self, root: &SpecifiedRoot, schema: &SpecifiedSchema) {
-        if let Some(root) = root.as_enum() {
-            self.insert_root_enum(root, schema);
-        }
-    }
-
-    fn insert_root_enum(&mut self, root: &SpecifiedRootEnum, schema: &SpecifiedSchema) {
-        for variant in root.variants() {
-            let root = HelpEntry::new(
-                variant.name().clone(),
-                variant.payload().map(|payload| {
-                    HelpBody::from_source_declaration_value(
-                        payload.to_help_source_declaration_value(schema),
-                    )
-                }),
+    fn rows_for_type_declaration(&self, declaration: &TypeDeclaration) -> Vec<HelpBody> {
+        let mut rows = vec![HelpBody::from_type_declaration(declaration)];
+        if let TypeDeclaration::Struct(declaration) = declaration {
+            rows.extend(
+                declaration
+                    .fields
+                    .iter()
+                    .map(|field| self.body_for_reference(&field.reference)),
             );
-            self.roots.push(root);
+        }
+        rows
+    }
+
+    fn rows_for_root_payload(&self, reference: &TypeReference) -> Vec<HelpBody> {
+        match reference
+            .plain_name()
+            .and_then(|name| self.type_declaration_named(name))
+        {
+            Some(TypeDeclaration::Newtype(declaration)) => {
+                self.rows_for_root_wrapper_reference(&declaration.reference)
+            }
+            Some(declaration) => self.rows_for_type_declaration(declaration),
+            None => vec![HelpBody::from_type_reference(reference)],
         }
     }
 
-    fn insert_node(&mut self, node: HelpEntry) {
-        if let Some(existing) = self
-            .nodes
-            .iter_mut()
-            .find(|existing| existing.name() == node.name())
+    fn rows_for_root_wrapper_reference(&self, reference: &TypeReference) -> Vec<HelpBody> {
+        match reference
+            .plain_name()
+            .and_then(|name| self.type_declaration_named(name))
         {
-            *existing = node;
-        } else {
-            self.nodes.push(node);
+            Some(TypeDeclaration::Struct(declaration)) => {
+                let mut rows = vec![HelpBody::from_struct(declaration)];
+                rows.extend(
+                    declaration
+                        .fields
+                        .iter()
+                        .map(|field| self.body_for_reference(&field.reference)),
+                );
+                rows
+            }
+            Some(TypeDeclaration::Enum(declaration)) => vec![HelpBody::from_enum(declaration)],
+            Some(TypeDeclaration::Newtype(_)) | None => {
+                vec![HelpBody::from_type_reference(reference)]
+            }
         }
+    }
+
+    fn body_for_reference(&self, reference: &TypeReference) -> HelpBody {
+        reference
+            .plain_name()
+            .and_then(|name| self.type_declaration_named(name))
+            .map(HelpBody::from_type_declaration)
+            .unwrap_or_else(|| HelpBody::from_type_reference(reference))
+    }
+
+    fn root_named(&self, target: &Name) -> Option<&'schema Root> {
+        self.schemas
+            .iter()
+            .find_map(|schema| schema.root_named(target.as_str()))
+    }
+
+    fn root_variant_named(&self, target: &Name) -> Option<&'schema EnumVariant> {
+        self.schemas
+            .iter()
+            .flat_map(TrueSchema::input_and_output)
+            .filter_map(Root::as_enum)
+            .flat_map(|root| root.variants.iter())
+            .find(|variant| variant.name == *target)
+    }
+
+    fn type_declaration_named(&self, target: &Name) -> Option<&'schema TypeDeclaration> {
+        self.schemas
+            .iter()
+            .find_map(|schema| schema.type_named(target.as_str()))
+    }
+
+    fn stream_named(&self, target: &Name) -> Option<&'schema StreamDeclaration> {
+        self.schemas
+            .iter()
+            .flat_map(TrueSchema::streams)
+            .find(|stream| stream.name == *target)
+    }
+
+    fn family_named(&self, target: &Name) -> Option<&'schema FamilyDeclaration> {
+        self.schemas
+            .iter()
+            .flat_map(TrueSchema::families)
+            .find(|family| family.name == *target)
     }
 }
 
-/// A single help entry: a re-headed schema declaration projected from
-/// `SpecifiedSchema` for schema text encoding and decoding.
+/// A single named help subject with positional rows. The name is navigation
+/// metadata; rendering emits rows only.
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
 #[rkyv(
     bytecheck(bounds(
@@ -338,48 +380,39 @@ impl HelpCatalogBuilder {
 )]
 pub struct HelpEntry {
     name: Name,
-    body: Option<HelpBody>,
+    rows: Vec<HelpBody>,
 }
 
 impl HelpEntry {
-    fn new(name: Name, body: Option<HelpBody>) -> Self {
-        Self { name, body }
+    fn new(name: Name, rows: Vec<HelpBody>) -> Self {
+        Self { name, rows }
     }
 
-    fn from_source_declaration(declaration: &SourceDeclaration) -> Self {
-        Self::new(
-            declaration.name().clone(),
-            declaration
-                .value()
-                .cloned()
-                .map(HelpBody::from_source_declaration_value),
-        )
+    fn one(name: Name, body: HelpBody) -> Self {
+        Self::new(name, vec![body])
     }
 
     pub fn name(&self) -> &Name {
         &self.name
     }
 
-    /// The schema declaration body projected from the stored `SpecifiedSchema`.
+    /// The first positional row projected for this help subject.
     pub fn body(&self) -> Option<&HelpBody> {
-        self.body.as_ref()
+        self.rows.first()
     }
 
-    /// Re-head the projected body over the entry name as a source declaration
-    /// so the schema encoder produces `(Head <body-schema-text>)`.
-    fn to_source_declaration(&self) -> SourceDeclaration {
-        SourceDeclaration::new(
-            self.name.clone(),
-            self.body
-                .as_ref()
-                .map(HelpBody::to_source_declaration_value),
-        )
+    pub fn rows(&self) -> &[HelpBody] {
+        &self.rows
     }
 
-    /// Encode this entry as canonical schema text through schema's
-    /// declaration encoder.
+    /// Encode this entry as positional schema rows through schema's body
+    /// encoder.
     pub fn to_schema_text(&self) -> String {
-        self.to_source_declaration().to_schema_text()
+        self.rows
+            .iter()
+            .map(HelpBody::to_schema_text)
+            .collect::<Vec<_>>()
+            .join("\n")
     }
 }
 
@@ -389,10 +422,11 @@ impl fmt::Display for HelpEntry {
     }
 }
 
-/// A Help response body owned by `signal-spirit`.
+/// A Help response row owned by `signal-spirit`.
 ///
-/// The schema-codec value is kept private so clients do not consume
-/// schema source nouns as the public Help API.
+/// The schema-codec value is kept private so clients do not consume schema
+/// source nouns as the public Help API. It is typed declaration-body data, not a
+/// rendered string.
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
 #[rkyv(
     bytecheck(bounds(
@@ -411,12 +445,75 @@ pub struct HelpBody {
 }
 
 impl HelpBody {
-    fn from_source_declaration_value(value: SourceDeclarationValue) -> Self {
+    fn new(value: SourceDeclarationValue) -> Self {
         Self { value }
     }
 
-    fn to_source_declaration_value(&self) -> SourceDeclarationValue {
-        self.value.clone()
+    fn from_block(block: &Block) -> Result<Self, HelpError> {
+        Ok(Self::new(SourceDeclarationValue::from_block(block)?))
+    }
+
+    fn from_type_declaration(declaration: &TypeDeclaration) -> Self {
+        match declaration {
+            TypeDeclaration::Struct(declaration) => Self::from_struct(declaration),
+            TypeDeclaration::Enum(declaration) => Self::from_enum(declaration),
+            TypeDeclaration::Newtype(declaration) => {
+                Self::from_type_reference(&declaration.reference)
+            }
+        }
+    }
+
+    fn from_struct(declaration: &::schema::StructDeclaration) -> Self {
+        Self::new(SourceDeclarationValue::Struct(SourceStructBody::new(
+            declaration
+                .fields
+                .iter()
+                .map(|field| SourceField::from_type_reference(field.name.clone(), &field.reference))
+                .collect(),
+        )))
+    }
+
+    fn from_enum(declaration: &EnumDeclaration) -> Self {
+        Self::new(SourceDeclarationValue::Enum(SourceEnumBody::new(
+            declaration
+                .variants
+                .iter()
+                .map(Self::source_variant_from_enum_variant)
+                .collect(),
+        )))
+    }
+
+    fn from_stream(stream: &StreamDeclaration) -> Self {
+        Self::new(SourceDeclarationValue::Stream(SourceStreamBody::new(
+            SourceReference::from_type_reference(&stream.token),
+            SourceReference::from_type_reference(&stream.opened),
+            SourceReference::from_type_reference(&stream.event),
+            SourceReference::from_type_reference(&stream.close),
+        )))
+    }
+
+    fn from_family(family: &FamilyDeclaration) -> Self {
+        Self::new(SourceDeclarationValue::Family(SourceFamilyBody::new(
+            family.record.clone(),
+            family.table.clone(),
+            family.key,
+        )))
+    }
+
+    fn from_type_reference(reference: &TypeReference) -> Self {
+        Self::new(SourceDeclarationValue::Reference(
+            SourceReference::from_type_reference(reference),
+        ))
+    }
+
+    fn source_variant_from_enum_variant(variant: &EnumVariant) -> SourceVariantSignature {
+        SourceVariantSignature::from_projected(
+            variant.name.clone(),
+            variant.payload.as_ref().map(|payload| {
+                SourceVariantPayload::Reference(SourceReference::from_type_reference(payload))
+            }),
+            variant.stream_relation.as_ref(),
+        )
     }
 
     pub fn to_schema_text(&self) -> String {

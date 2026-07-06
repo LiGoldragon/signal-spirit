@@ -10,8 +10,6 @@ pub type Boolean = bool;
 pub type Path = std::string::String;
 
 #[rustfmt::skip]
-pub use signal_domain::schema::domain::Domain as Domain;
-#[rustfmt::skip]
 pub use signal_domain::schema::domain::Health as Health;
 #[rustfmt::skip]
 pub use signal_domain::schema::domain::Food as Food;
@@ -85,12 +83,6 @@ pub use signal_domain::schema::domain::ObservabilityLeaf as ObservabilityLeaf;
 pub use signal_domain::schema::domain::SurfacesLeaf as SurfacesLeaf;
 #[rustfmt::skip]
 pub use signal_domain::schema::domain::EngineeringLeaf as EngineeringLeaf;
-#[rustfmt::skip]
-pub use signal_domain::schema::domain::DomainScope as DomainScope;
-#[rustfmt::skip]
-pub use signal_domain::schema::domain::DomainScopes as DomainScopes;
-#[rustfmt::skip]
-pub use signal_domain::schema::domain::ScopeSet as ScopeSet;
 
 #[rustfmt::skip]
 #[cfg(feature = "nota-text")]
@@ -152,6 +144,90 @@ pub struct SignalReuse {
     pub import: Import,
     pub export: Export,
 }
+
+#[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub enum Domain {
+    All,
+    Health(Health),
+    Food(Food),
+    Home(Home),
+    Finance(Finance),
+    Work(Work),
+    Craft(Craft),
+    Knowledge(Knowledge),
+    Education(Education),
+    Language(Language),
+    Art(Art),
+    Kinship(Kinship),
+    Selfhood(Selfhood),
+    Spirituality(Spirituality),
+    Governance(Governance),
+    Law(Law),
+    Community(Community),
+    Nature(Nature),
+    Travel(Travel),
+    Commerce(Commerce),
+    Leisure(Leisure),
+    Appearance(Appearance),
+    Safety(Safety),
+    Information(Information),
+    Technology(Technology),
+}
+
+#[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub enum DomainScope {
+    All,
+    Health(Health),
+    Food(Food),
+    Home(Home),
+    Finance(Finance),
+    Work(Work),
+    Craft(Craft),
+    Knowledge(Knowledge),
+    Education(Education),
+    Language(Language),
+    Art(Art),
+    Kinship(Kinship),
+    Selfhood(Selfhood),
+    Spirituality(Spirituality),
+    Governance(Governance),
+    Law(Law),
+    Community(Community),
+    Nature(Nature),
+    Travel(Travel),
+    Commerce(Commerce),
+    Leisure(Leisure),
+    Appearance(Appearance),
+    Safety(Safety),
+    Information(Information),
+    Technology(Technology),
+}
+
+#[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct DomainScopes(Vec<DomainScope>);
+
+#[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct ScopeSet(Vec<DomainScope>);
 
 #[rustfmt::skip]
 #[cfg_attr(
@@ -544,6 +620,14 @@ pub struct Referent(String);
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct Referents(Vec<Referent>);
+
+#[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct Aliases(Referents);
 
 #[rustfmt::skip]
 #[cfg_attr(
@@ -954,7 +1038,7 @@ pub struct Proposal {
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct ReferentRegistration {
     pub referent: Referent,
-    pub aliases: Referents,
+    pub aliases: Aliases,
     pub justification: Justification,
 }
 
@@ -974,7 +1058,7 @@ pub struct ReferentRegistrationReceipt(Referent);
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct RegisteredReferent {
     pub referent: Referent,
-    pub aliases: Referents,
+    pub aliases: Aliases,
 }
 
 #[rustfmt::skip]
@@ -1088,6 +1172,14 @@ pub enum ValidationError {
     derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub(crate) struct AgentSocketPath(ConfigurationPath);
+
+#[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub(crate) struct ProviderName(Option<SpiritGuardianProviderName>);
 
 #[rustfmt::skip]
@@ -1104,6 +1196,14 @@ pub(crate) struct ModelName(Option<SpiritGuardianModelName>);
     derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub(crate) struct TimeoutMilliseconds(SpiritGuardianTimeoutMilliseconds);
+
+#[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub(crate) struct MaximumOutputTokens(Option<SpiritGuardianMaximumOutputTokens>);
 
 #[rustfmt::skip]
@@ -1113,10 +1213,10 @@ pub(crate) struct MaximumOutputTokens(Option<SpiritGuardianMaximumOutputTokens>)
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct SpiritGuardianAgentConfiguration {
-    pub agent_socket_path: ConfigurationPath,
+    pub(crate) agent_socket_path: AgentSocketPath,
     pub(crate) provider_name: ProviderName,
     pub(crate) model_name: ModelName,
-    pub timeout_milliseconds: SpiritGuardianTimeoutMilliseconds,
+    pub(crate) timeout_milliseconds: TimeoutMilliseconds,
     pub(crate) maximum_output_tokens: MaximumOutputTokens,
 }
 
@@ -1146,22 +1246,6 @@ pub enum AuthorizationMode {
     derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub(crate) struct MetaSocketPath(Option<ConfigurationPath>);
-
-#[rustfmt::skip]
-#[cfg_attr(
-    feature = "nota-text",
-    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
-)]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub(crate) struct TraceSocketPath(Option<ConfigurationPath>);
-
-#[rustfmt::skip]
-#[cfg_attr(
-    feature = "nota-text",
-    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
-)]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub(crate) struct GuardianAgentConfiguration(Option<SpiritGuardianAgentConfiguration>);
 
 #[rustfmt::skip]
@@ -1172,9 +1256,9 @@ pub(crate) struct GuardianAgentConfiguration(Option<SpiritGuardianAgentConfigura
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct SpiritDaemonConfiguration {
     pub socket_path: ConfigurationPath,
-    pub(crate) meta_socket_path: MetaSocketPath,
+    pub meta_socket_path: Option<ConfigurationPath>,
     pub database_path: ConfigurationPath,
-    pub(crate) trace_socket_path: TraceSocketPath,
+    pub trace_socket_path: Option<ConfigurationPath>,
     pub authorization_mode: AuthorizationMode,
     pub(crate) guardian_agent_configuration: GuardianAgentConfiguration,
 }
@@ -2171,6 +2255,44 @@ impl From<String> for PublicPath {
 }
 
 #[rustfmt::skip]
+impl DomainScopes {
+    pub fn new(payload: Vec<DomainScope>) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &Vec<DomainScope> {
+        &self.0
+    }
+    pub fn into_payload(self) -> Vec<DomainScope> {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<Vec<DomainScope>> for DomainScopes {
+    fn from(payload: Vec<DomainScope>) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl ScopeSet {
+    pub fn new(payload: Vec<DomainScope>) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &Vec<DomainScope> {
+        &self.0
+    }
+    pub fn into_payload(self) -> Vec<DomainScope> {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<Vec<DomainScope>> for ScopeSet {
+    fn from(payload: Vec<DomainScope>) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
 impl State {
     pub fn new(payload: Statement) -> Self {
         Self(payload)
@@ -3102,6 +3224,25 @@ impl From<Vec<Referent>> for Referents {
 }
 
 #[rustfmt::skip]
+impl Aliases {
+    pub fn new(payload: Referents) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &Referents {
+        &self.0
+    }
+    pub fn into_payload(self) -> Referents {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<Referents> for Aliases {
+    fn from(payload: Referents) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
 impl Description {
     pub fn new(payload: impl Into<String>) -> Self {
         Self(payload.into())
@@ -3805,6 +3946,25 @@ impl From<RecordIdentifier> for IntentRetired {
 }
 
 #[rustfmt::skip]
+impl AgentSocketPath {
+    pub fn new(payload: ConfigurationPath) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &ConfigurationPath {
+        &self.0
+    }
+    pub fn into_payload(self) -> ConfigurationPath {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<ConfigurationPath> for AgentSocketPath {
+    fn from(payload: ConfigurationPath) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
 impl ProviderName {
     pub fn new(payload: Option<SpiritGuardianProviderName>) -> Self {
         Self(payload)
@@ -3843,6 +4003,25 @@ impl From<Option<SpiritGuardianModelName>> for ModelName {
 }
 
 #[rustfmt::skip]
+impl TimeoutMilliseconds {
+    pub fn new(payload: SpiritGuardianTimeoutMilliseconds) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &SpiritGuardianTimeoutMilliseconds {
+        &self.0
+    }
+    pub fn into_payload(self) -> SpiritGuardianTimeoutMilliseconds {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<SpiritGuardianTimeoutMilliseconds> for TimeoutMilliseconds {
+    fn from(payload: SpiritGuardianTimeoutMilliseconds) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
 impl MaximumOutputTokens {
     pub fn new(payload: Option<SpiritGuardianMaximumOutputTokens>) -> Self {
         Self(payload)
@@ -3857,44 +4036,6 @@ impl MaximumOutputTokens {
 #[rustfmt::skip]
 impl From<Option<SpiritGuardianMaximumOutputTokens>> for MaximumOutputTokens {
     fn from(payload: Option<SpiritGuardianMaximumOutputTokens>) -> Self {
-        Self::new(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl MetaSocketPath {
-    pub fn new(payload: Option<ConfigurationPath>) -> Self {
-        Self(payload)
-    }
-    pub fn payload(&self) -> &Option<ConfigurationPath> {
-        &self.0
-    }
-    pub fn into_payload(self) -> Option<ConfigurationPath> {
-        self.0
-    }
-}
-#[rustfmt::skip]
-impl From<Option<ConfigurationPath>> for MetaSocketPath {
-    fn from(payload: Option<ConfigurationPath>) -> Self {
-        Self::new(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl TraceSocketPath {
-    pub fn new(payload: Option<ConfigurationPath>) -> Self {
-        Self(payload)
-    }
-    pub fn payload(&self) -> &Option<ConfigurationPath> {
-        &self.0
-    }
-    pub fn into_payload(self) -> Option<ConfigurationPath> {
-        self.0
-    }
-}
-#[rustfmt::skip]
-impl From<Option<ConfigurationPath>> for TraceSocketPath {
-    fn from(payload: Option<ConfigurationPath>) -> Self {
         Self::new(payload)
     }
 }
@@ -4679,6 +4820,158 @@ impl From<Vec<ObservedRecord>> for RecordSet {
 }
 
 #[rustfmt::skip]
+impl Domain {
+    pub fn health(payload: Health) -> Self {
+        Self::Health(payload)
+    }
+    pub fn food(payload: Food) -> Self {
+        Self::Food(payload)
+    }
+    pub fn home(payload: Home) -> Self {
+        Self::Home(payload)
+    }
+    pub fn finance(payload: Finance) -> Self {
+        Self::Finance(payload)
+    }
+    pub fn work(payload: Work) -> Self {
+        Self::Work(payload)
+    }
+    pub fn craft(payload: Craft) -> Self {
+        Self::Craft(payload)
+    }
+    pub fn knowledge(payload: Knowledge) -> Self {
+        Self::Knowledge(payload)
+    }
+    pub fn education(payload: Education) -> Self {
+        Self::Education(payload)
+    }
+    pub fn language(payload: Language) -> Self {
+        Self::Language(payload)
+    }
+    pub fn art(payload: Art) -> Self {
+        Self::Art(payload)
+    }
+    pub fn kinship(payload: Kinship) -> Self {
+        Self::Kinship(payload)
+    }
+    pub fn selfhood(payload: Selfhood) -> Self {
+        Self::Selfhood(payload)
+    }
+    pub fn spirituality(payload: Spirituality) -> Self {
+        Self::Spirituality(payload)
+    }
+    pub fn governance(payload: Governance) -> Self {
+        Self::Governance(payload)
+    }
+    pub fn law(payload: Law) -> Self {
+        Self::Law(payload)
+    }
+    pub fn community(payload: Community) -> Self {
+        Self::Community(payload)
+    }
+    pub fn nature(payload: Nature) -> Self {
+        Self::Nature(payload)
+    }
+    pub fn travel(payload: Travel) -> Self {
+        Self::Travel(payload)
+    }
+    pub fn commerce(payload: Commerce) -> Self {
+        Self::Commerce(payload)
+    }
+    pub fn leisure(payload: Leisure) -> Self {
+        Self::Leisure(payload)
+    }
+    pub fn appearance(payload: Appearance) -> Self {
+        Self::Appearance(payload)
+    }
+    pub fn safety(payload: Safety) -> Self {
+        Self::Safety(payload)
+    }
+    pub fn information(payload: Information) -> Self {
+        Self::Information(payload)
+    }
+    pub fn technology(payload: Technology) -> Self {
+        Self::Technology(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl DomainScope {
+    pub fn health(payload: Health) -> Self {
+        Self::Health(payload)
+    }
+    pub fn food(payload: Food) -> Self {
+        Self::Food(payload)
+    }
+    pub fn home(payload: Home) -> Self {
+        Self::Home(payload)
+    }
+    pub fn finance(payload: Finance) -> Self {
+        Self::Finance(payload)
+    }
+    pub fn work(payload: Work) -> Self {
+        Self::Work(payload)
+    }
+    pub fn craft(payload: Craft) -> Self {
+        Self::Craft(payload)
+    }
+    pub fn knowledge(payload: Knowledge) -> Self {
+        Self::Knowledge(payload)
+    }
+    pub fn education(payload: Education) -> Self {
+        Self::Education(payload)
+    }
+    pub fn language(payload: Language) -> Self {
+        Self::Language(payload)
+    }
+    pub fn art(payload: Art) -> Self {
+        Self::Art(payload)
+    }
+    pub fn kinship(payload: Kinship) -> Self {
+        Self::Kinship(payload)
+    }
+    pub fn selfhood(payload: Selfhood) -> Self {
+        Self::Selfhood(payload)
+    }
+    pub fn spirituality(payload: Spirituality) -> Self {
+        Self::Spirituality(payload)
+    }
+    pub fn governance(payload: Governance) -> Self {
+        Self::Governance(payload)
+    }
+    pub fn law(payload: Law) -> Self {
+        Self::Law(payload)
+    }
+    pub fn community(payload: Community) -> Self {
+        Self::Community(payload)
+    }
+    pub fn nature(payload: Nature) -> Self {
+        Self::Nature(payload)
+    }
+    pub fn travel(payload: Travel) -> Self {
+        Self::Travel(payload)
+    }
+    pub fn commerce(payload: Commerce) -> Self {
+        Self::Commerce(payload)
+    }
+    pub fn leisure(payload: Leisure) -> Self {
+        Self::Leisure(payload)
+    }
+    pub fn appearance(payload: Appearance) -> Self {
+        Self::Appearance(payload)
+    }
+    pub fn safety(payload: Safety) -> Self {
+        Self::Safety(payload)
+    }
+    pub fn information(payload: Information) -> Self {
+        Self::Information(payload)
+    }
+    pub fn technology(payload: Technology) -> Self {
+        Self::Technology(payload)
+    }
+}
+
+#[rustfmt::skip]
 impl IntentEvent {
     pub fn intent_recorded(payload: IntentRecorded) -> Self {
         Self::IntentRecorded(payload)
@@ -4919,6 +5212,342 @@ impl Output {
     }
     pub fn rejected(payload: SignalRejection) -> Self {
         Self::Rejected(Rejected::new(payload))
+    }
+}
+
+#[rustfmt::skip]
+impl From<Health> for Domain {
+    fn from(payload: Health) -> Self {
+        Self::Health(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Food> for Domain {
+    fn from(payload: Food) -> Self {
+        Self::Food(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Home> for Domain {
+    fn from(payload: Home) -> Self {
+        Self::Home(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Finance> for Domain {
+    fn from(payload: Finance) -> Self {
+        Self::Finance(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Work> for Domain {
+    fn from(payload: Work) -> Self {
+        Self::Work(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Craft> for Domain {
+    fn from(payload: Craft) -> Self {
+        Self::Craft(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Knowledge> for Domain {
+    fn from(payload: Knowledge) -> Self {
+        Self::Knowledge(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Education> for Domain {
+    fn from(payload: Education) -> Self {
+        Self::Education(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Language> for Domain {
+    fn from(payload: Language) -> Self {
+        Self::Language(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Art> for Domain {
+    fn from(payload: Art) -> Self {
+        Self::Art(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Kinship> for Domain {
+    fn from(payload: Kinship) -> Self {
+        Self::Kinship(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Selfhood> for Domain {
+    fn from(payload: Selfhood) -> Self {
+        Self::Selfhood(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Spirituality> for Domain {
+    fn from(payload: Spirituality) -> Self {
+        Self::Spirituality(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Governance> for Domain {
+    fn from(payload: Governance) -> Self {
+        Self::Governance(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Law> for Domain {
+    fn from(payload: Law) -> Self {
+        Self::Law(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Community> for Domain {
+    fn from(payload: Community) -> Self {
+        Self::Community(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Nature> for Domain {
+    fn from(payload: Nature) -> Self {
+        Self::Nature(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Travel> for Domain {
+    fn from(payload: Travel) -> Self {
+        Self::Travel(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Commerce> for Domain {
+    fn from(payload: Commerce) -> Self {
+        Self::Commerce(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Leisure> for Domain {
+    fn from(payload: Leisure) -> Self {
+        Self::Leisure(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Appearance> for Domain {
+    fn from(payload: Appearance) -> Self {
+        Self::Appearance(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Safety> for Domain {
+    fn from(payload: Safety) -> Self {
+        Self::Safety(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Information> for Domain {
+    fn from(payload: Information) -> Self {
+        Self::Information(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Technology> for Domain {
+    fn from(payload: Technology) -> Self {
+        Self::Technology(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Health> for DomainScope {
+    fn from(payload: Health) -> Self {
+        Self::Health(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Food> for DomainScope {
+    fn from(payload: Food) -> Self {
+        Self::Food(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Home> for DomainScope {
+    fn from(payload: Home) -> Self {
+        Self::Home(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Finance> for DomainScope {
+    fn from(payload: Finance) -> Self {
+        Self::Finance(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Work> for DomainScope {
+    fn from(payload: Work) -> Self {
+        Self::Work(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Craft> for DomainScope {
+    fn from(payload: Craft) -> Self {
+        Self::Craft(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Knowledge> for DomainScope {
+    fn from(payload: Knowledge) -> Self {
+        Self::Knowledge(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Education> for DomainScope {
+    fn from(payload: Education) -> Self {
+        Self::Education(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Language> for DomainScope {
+    fn from(payload: Language) -> Self {
+        Self::Language(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Art> for DomainScope {
+    fn from(payload: Art) -> Self {
+        Self::Art(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Kinship> for DomainScope {
+    fn from(payload: Kinship) -> Self {
+        Self::Kinship(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Selfhood> for DomainScope {
+    fn from(payload: Selfhood) -> Self {
+        Self::Selfhood(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Spirituality> for DomainScope {
+    fn from(payload: Spirituality) -> Self {
+        Self::Spirituality(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Governance> for DomainScope {
+    fn from(payload: Governance) -> Self {
+        Self::Governance(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Law> for DomainScope {
+    fn from(payload: Law) -> Self {
+        Self::Law(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Community> for DomainScope {
+    fn from(payload: Community) -> Self {
+        Self::Community(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Nature> for DomainScope {
+    fn from(payload: Nature) -> Self {
+        Self::Nature(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Travel> for DomainScope {
+    fn from(payload: Travel) -> Self {
+        Self::Travel(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Commerce> for DomainScope {
+    fn from(payload: Commerce) -> Self {
+        Self::Commerce(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Leisure> for DomainScope {
+    fn from(payload: Leisure) -> Self {
+        Self::Leisure(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Appearance> for DomainScope {
+    fn from(payload: Appearance) -> Self {
+        Self::Appearance(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Safety> for DomainScope {
+    fn from(payload: Safety) -> Self {
+        Self::Safety(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Information> for DomainScope {
+    fn from(payload: Information) -> Self {
+        Self::Information(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl From<Technology> for DomainScope {
+    fn from(payload: Technology) -> Self {
+        Self::Technology(payload)
     }
 }
 

@@ -80,10 +80,10 @@ impl SpiritGuardianAgentConfiguration {
         maximum_output_tokens: Option<SpiritGuardianMaximumOutputTokens>,
     ) -> Self {
         Self {
-            agent_socket_path,
+            agent_socket_path: AgentSocketPath::new(agent_socket_path),
             provider_name: ProviderName::new(provider_name),
             model_name: ModelName::new(model_name),
-            timeout_milliseconds,
+            timeout_milliseconds: TimeoutMilliseconds::new(timeout_milliseconds),
             maximum_output_tokens: MaximumOutputTokens::new(maximum_output_tokens),
         }
     }
@@ -107,7 +107,7 @@ impl SpiritGuardianAgentConfiguration {
     }
 
     pub fn timeout_milliseconds(&self) -> u64 {
-        self.timeout_milliseconds.clone().into_u64()
+        self.timeout_milliseconds.payload().clone().into_u64()
     }
 
     pub fn maximum_output_tokens(&self) -> Option<u64> {
@@ -122,16 +122,16 @@ impl SpiritDaemonConfiguration {
     pub fn new(socket_path: ConfigurationPath, database_path: ConfigurationPath) -> Self {
         Self {
             socket_path,
-            meta_socket_path: MetaSocketPath::new(None),
+            meta_socket_path: None,
             database_path,
-            trace_socket_path: TraceSocketPath::new(None),
+            trace_socket_path: None,
             authorization_mode: AuthorizationMode::Gating,
             guardian_agent_configuration: GuardianAgentConfiguration::new(None),
         }
     }
 
     pub fn with_meta_socket_path(mut self, meta_socket_path: ConfigurationPath) -> Self {
-        self.meta_socket_path = MetaSocketPath::new(Some(meta_socket_path));
+        self.meta_socket_path = Some(meta_socket_path);
         self
     }
 
@@ -145,7 +145,7 @@ impl SpiritDaemonConfiguration {
     }
 
     pub fn with_trace_socket_path(mut self, trace_socket_path: ConfigurationPath) -> Self {
-        self.trace_socket_path = TraceSocketPath::new(Some(trace_socket_path));
+        self.trace_socket_path = Some(trace_socket_path);
         self
     }
 
@@ -160,7 +160,6 @@ impl SpiritDaemonConfiguration {
 
     pub fn meta_socket_path(&self) -> Option<&str> {
         self.meta_socket_path
-            .payload()
             .as_ref()
             .map(ConfigurationPath::as_str)
     }
@@ -171,7 +170,6 @@ impl SpiritDaemonConfiguration {
 
     pub fn trace_socket_path(&self) -> Option<&str> {
         self.trace_socket_path
-            .payload()
             .as_ref()
             .map(ConfigurationPath::as_str)
     }
@@ -327,6 +325,12 @@ impl Referents {
             return Err(ValidationError::EmptyQueryReferent);
         }
         Ok(())
+    }
+}
+
+impl Aliases {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        self.payload().validate()
     }
 }
 
@@ -549,13 +553,12 @@ impl DomainMatch {
     pub fn matches(&self, entry_domains: &Domains) -> bool {
         match self {
             Self::Any => true,
-            Self::Partial(partial) => partial
-                .payload()
-                .matches_any_domain(entry_domains.payload()),
-            Self::Full(full) => full
-                .payload()
-                .iter()
-                .all(|scope| scope.expand().matches_any_domain(entry_domains.payload())),
+            Self::Partial(partial) => partial.payload().matches_any_domain(entry_domains),
+            Self::Full(full) => full.payload().iter().all(|scope| {
+                entry_domains
+                    .iter()
+                    .any(|domain| scope.matches_domain(domain))
+            }),
         }
     }
 }
@@ -853,7 +856,7 @@ impl Domains {
     pub fn from_strings(labels: Vec<String>) -> Self {
         let mut domains = Vec::new();
         for label in labels {
-            DomainLabel::new(label.as_str()).push_classified_domains(&mut domains);
+            Domain::push_from_label(&label, &mut domains);
         }
         Self::new(domains)
     }
@@ -867,157 +870,313 @@ impl Domains {
     }
 
     pub fn matches_scope_set(&self, scope_set: &ScopeSet) -> bool {
-        scope_set.matches_any_domain(self.payload())
+        self.iter().any(|domain| scope_set.matches_domain(domain))
     }
 }
 
-struct DomainLabel {
-    normalized: String,
+impl DomainScopes {
+    pub fn from_strings(labels: Vec<String>) -> Self {
+        Self::from_domains(&Domains::from_strings(labels))
+    }
+
+    pub fn from_domains(domains: &Domains) -> Self {
+        Self::new(domains.iter().cloned().map(DomainScope::from).collect())
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.payload().is_empty()
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &DomainScope> {
+        self.payload().iter()
+    }
+
+    pub fn matches_any_domain(&self, domains: &Domains) -> bool {
+        self.iter()
+            .any(|scope| domains.iter().any(|domain| scope.matches_domain(domain)))
+    }
 }
 
-impl DomainLabel {
-    fn new(original: &str) -> Self {
-        Self {
-            normalized: original.trim().to_ascii_lowercase(),
+impl DomainScope {
+    pub fn contains_domain(&self, domain: &Domain) -> bool {
+        match (
+            self.as_signal_domain_scope(),
+            domain.as_signal_domain_domain(),
+        ) {
+            (None, _) | (_, None) => true,
+            (Some(scope), Some(domain)) => scope.contains_domain(&domain),
         }
     }
 
-    fn push_classified_domains(&self, domains: &mut Vec<Domain>) {
-        if self.normalized.is_empty() {
+    pub fn matches_domain(&self, domain: &Domain) -> bool {
+        self.contains_domain(domain)
+    }
+
+    fn as_signal_domain_scope(&self) -> Option<signal_domain::DomainScope> {
+        let domain = match self {
+            Self::All => return None,
+            Self::Health(payload) => signal_domain::Domain::Health(*payload),
+            Self::Food(payload) => signal_domain::Domain::Food(*payload),
+            Self::Home(payload) => signal_domain::Domain::Home(*payload),
+            Self::Finance(payload) => signal_domain::Domain::Finance(*payload),
+            Self::Work(payload) => signal_domain::Domain::Work(*payload),
+            Self::Craft(payload) => signal_domain::Domain::Craft(*payload),
+            Self::Knowledge(payload) => signal_domain::Domain::Knowledge(*payload),
+            Self::Education(payload) => signal_domain::Domain::Education(*payload),
+            Self::Language(payload) => signal_domain::Domain::Language(*payload),
+            Self::Art(payload) => signal_domain::Domain::Art(*payload),
+            Self::Kinship(payload) => signal_domain::Domain::Kinship(*payload),
+            Self::Selfhood(payload) => signal_domain::Domain::Selfhood(*payload),
+            Self::Spirituality(payload) => signal_domain::Domain::Spirituality(*payload),
+            Self::Governance(payload) => signal_domain::Domain::Governance(*payload),
+            Self::Law(payload) => signal_domain::Domain::Law(*payload),
+            Self::Community(payload) => signal_domain::Domain::Community(*payload),
+            Self::Nature(payload) => signal_domain::Domain::Nature(*payload),
+            Self::Travel(payload) => signal_domain::Domain::Travel(*payload),
+            Self::Commerce(payload) => signal_domain::Domain::Commerce(*payload),
+            Self::Leisure(payload) => signal_domain::Domain::Leisure(*payload),
+            Self::Appearance(payload) => signal_domain::Domain::Appearance(*payload),
+            Self::Safety(payload) => signal_domain::Domain::Safety(*payload),
+            Self::Information(payload) => signal_domain::Domain::Information(*payload),
+            Self::Technology(payload) => signal_domain::Domain::Technology(payload.clone()),
+        };
+        Some(signal_domain::DomainScope::from(domain))
+    }
+}
+
+impl Domain {
+    fn as_signal_domain_domain(&self) -> Option<signal_domain::Domain> {
+        match self {
+            Self::All => None,
+            Self::Health(payload) => Some(signal_domain::Domain::Health(*payload)),
+            Self::Food(payload) => Some(signal_domain::Domain::Food(*payload)),
+            Self::Home(payload) => Some(signal_domain::Domain::Home(*payload)),
+            Self::Finance(payload) => Some(signal_domain::Domain::Finance(*payload)),
+            Self::Work(payload) => Some(signal_domain::Domain::Work(*payload)),
+            Self::Craft(payload) => Some(signal_domain::Domain::Craft(*payload)),
+            Self::Knowledge(payload) => Some(signal_domain::Domain::Knowledge(*payload)),
+            Self::Education(payload) => Some(signal_domain::Domain::Education(*payload)),
+            Self::Language(payload) => Some(signal_domain::Domain::Language(*payload)),
+            Self::Art(payload) => Some(signal_domain::Domain::Art(*payload)),
+            Self::Kinship(payload) => Some(signal_domain::Domain::Kinship(*payload)),
+            Self::Selfhood(payload) => Some(signal_domain::Domain::Selfhood(*payload)),
+            Self::Spirituality(payload) => Some(signal_domain::Domain::Spirituality(*payload)),
+            Self::Governance(payload) => Some(signal_domain::Domain::Governance(*payload)),
+            Self::Law(payload) => Some(signal_domain::Domain::Law(*payload)),
+            Self::Community(payload) => Some(signal_domain::Domain::Community(*payload)),
+            Self::Nature(payload) => Some(signal_domain::Domain::Nature(*payload)),
+            Self::Travel(payload) => Some(signal_domain::Domain::Travel(*payload)),
+            Self::Commerce(payload) => Some(signal_domain::Domain::Commerce(*payload)),
+            Self::Leisure(payload) => Some(signal_domain::Domain::Leisure(*payload)),
+            Self::Appearance(payload) => Some(signal_domain::Domain::Appearance(*payload)),
+            Self::Safety(payload) => Some(signal_domain::Domain::Safety(*payload)),
+            Self::Information(payload) => Some(signal_domain::Domain::Information(*payload)),
+            Self::Technology(payload) => Some(signal_domain::Domain::Technology(payload.clone())),
+        }
+    }
+}
+
+impl From<Domain> for DomainScope {
+    fn from(domain: Domain) -> Self {
+        match domain {
+            Domain::All => Self::All,
+            Domain::Health(payload) => Self::Health(payload),
+            Domain::Food(payload) => Self::Food(payload),
+            Domain::Home(payload) => Self::Home(payload),
+            Domain::Finance(payload) => Self::Finance(payload),
+            Domain::Work(payload) => Self::Work(payload),
+            Domain::Craft(payload) => Self::Craft(payload),
+            Domain::Knowledge(payload) => Self::Knowledge(payload),
+            Domain::Education(payload) => Self::Education(payload),
+            Domain::Language(payload) => Self::Language(payload),
+            Domain::Art(payload) => Self::Art(payload),
+            Domain::Kinship(payload) => Self::Kinship(payload),
+            Domain::Selfhood(payload) => Self::Selfhood(payload),
+            Domain::Spirituality(payload) => Self::Spirituality(payload),
+            Domain::Governance(payload) => Self::Governance(payload),
+            Domain::Law(payload) => Self::Law(payload),
+            Domain::Community(payload) => Self::Community(payload),
+            Domain::Nature(payload) => Self::Nature(payload),
+            Domain::Travel(payload) => Self::Travel(payload),
+            Domain::Commerce(payload) => Self::Commerce(payload),
+            Domain::Leisure(payload) => Self::Leisure(payload),
+            Domain::Appearance(payload) => Self::Appearance(payload),
+            Domain::Safety(payload) => Self::Safety(payload),
+            Domain::Information(payload) => Self::Information(payload),
+            Domain::Technology(payload) => Self::Technology(payload),
+        }
+    }
+}
+
+impl ScopeSet {
+    pub fn iter(&self) -> impl Iterator<Item = &DomainScope> {
+        self.payload().iter()
+    }
+
+    pub fn matches_domain(&self, domain: &Domain) -> bool {
+        self.iter().any(|scope| scope.matches_domain(domain))
+    }
+
+    pub fn matches_any_domain(&self, domains: &Domains) -> bool {
+        domains.matches_scope_set(self)
+    }
+}
+
+impl Domain {
+    pub fn matches_scope(&self, scope: &DomainScope) -> bool {
+        scope.matches_domain(self)
+    }
+
+    fn software(payload: Software) -> Self {
+        Self::Technology(Technology::Software(payload))
+    }
+
+    fn push_from_label(label: &str, domains: &mut Vec<Self>) {
+        let label = label.trim().to_ascii_lowercase();
+        if label.is_empty() {
             return;
         }
-        if self.contains_any(&["schema", "record-shape", "type-definition", "data-model"]) {
-            self.push_unique(domains, Self::schema());
+        if Self::contains_any(
+            &label,
+            &["schema", "record-shape", "type-definition", "data-model"],
+        ) {
+            Self::push_unique(domains, Self::schema());
         }
-        if self.contains_any(&["nota", "syntax", "delimiter", "parser"]) {
-            self.push_unique(domains, Self::notation());
+        if Self::contains_any(&label, &["nota", "syntax", "delimiter", "parser"]) {
+            Self::push_unique(domains, Self::notation());
         }
-        if self.contains_any(&["language", "naming", "vocabulary"]) {
-            self.push_unique(domains, Self::terminology());
+        if Self::contains_any(&label, &["language", "naming", "vocabulary"]) {
+            Self::push_unique(domains, Self::terminology());
         }
-        if self.contains_any(&["rust", "code", "program", "programming"]) {
-            self.push_unique(domains, Self::programming());
+        if Self::contains_any(&label, &["rust", "code", "program", "programming"]) {
+            Self::push_unique(domains, Self::programming());
         }
-        if self.contains_any(&["test", "fixture", "trace", "verification"]) {
-            self.push_unique(domains, Self::testing());
+        if Self::contains_any(&label, &["test", "fixture", "trace", "verification"]) {
+            Self::push_unique(domains, Self::testing());
         }
-        if self.contains_any(&[
-            "signal",
-            "nexus",
-            "sema",
-            "component",
-            "daemon",
-            "runtime",
-            "architecture",
-            "build",
-            "forge",
-        ]) {
-            self.push_unique(domains, Self::architecture());
+        if Self::contains_any(
+            &label,
+            &[
+                "signal",
+                "nexus",
+                "sema",
+                "component",
+                "daemon",
+                "runtime",
+                "architecture",
+                "build",
+                "forge",
+            ],
+        ) {
+            Self::push_unique(domains, Self::architecture());
         }
-        if self.contains_any(&[
-            "workspace",
-            "orchestrate",
-            "workflow",
-            "role",
-            "report",
-            "bead",
-            "discipline",
-            "intent",
-            "privacy",
-            "capture",
-        ]) {
-            self.push_unique(domains, Self::documentation());
+        if Self::contains_any(
+            &label,
+            &[
+                "workspace",
+                "orchestrate",
+                "workflow",
+                "role",
+                "report",
+                "bead",
+                "discipline",
+                "intent",
+                "privacy",
+                "capture",
+            ],
+        ) {
+            Self::push_unique(domains, Self::documentation());
         }
-        if self.contains_any(&[
-            "agent", "persona", "llm", "harness", "subagent", "model", "mail",
-        ]) {
-            self.push_unique(domains, Self::intelligence());
+        if Self::contains_any(
+            &label,
+            &[
+                "agent", "persona", "llm", "harness", "subagent", "model", "mail",
+            ],
+        ) {
+            Self::push_unique(domains, Self::intelligence());
         }
-        if self.contains_any(&[
-            "cloud",
-            "deploy",
-            "nix",
-            "cluster",
-            "network",
-            "secret",
-            "production",
-            "upgrade",
-        ]) {
-            self.push_unique(domains, Self::infrastructure());
+        if Self::contains_any(
+            &label,
+            &[
+                "cloud",
+                "deploy",
+                "nix",
+                "cluster",
+                "network",
+                "secret",
+                "production",
+                "upgrade",
+            ],
+        ) {
+            Self::push_unique(domains, Self::infrastructure());
         }
-        if self.contains_any(&["assistant", "counselor", "personal", "health"]) {
-            self.push_unique(domains, Self::wellbeing());
+        if Self::contains_any(&label, &["assistant", "counselor", "personal", "health"]) {
+            Self::push_unique(domains, Self::wellbeing());
         }
-        if self.contains_any(&["governing", "governance", "policy"]) {
-            self.push_unique(domains, Self::policy());
+        if Self::contains_any(&label, &["governing", "governance", "policy"]) {
+            Self::push_unique(domains, Self::policy());
         }
-        if self.contains_any(&["relating", "relationship", "friendship"]) {
-            self.push_unique(domains, Self::rapport());
+        if Self::contains_any(&label, &["relating", "relationship", "friendship"]) {
+            Self::push_unique(domains, Self::rapport());
         }
         if domains.is_empty() {
-            self.push_unique(domains, Self::documentation());
+            Self::push_unique(domains, Self::documentation());
         }
     }
 
-    fn software(payload: Software) -> Domain {
-        Domain::Technology(Technology::Software(payload))
-    }
-
-    fn schema() -> Domain {
+    fn schema() -> Self {
         Self::software(Software::Data(DataLeaf::SchemaEvolution))
     }
 
-    fn notation() -> Domain {
-        Domain::Language(Language::Notation)
+    fn notation() -> Self {
+        Self::Language(Language::Notation)
     }
 
-    fn terminology() -> Domain {
-        Domain::Language(Language::Terminology)
+    fn terminology() -> Self {
+        Self::Language(Language::Terminology)
     }
 
-    fn programming() -> Domain {
+    fn programming() -> Self {
         Self::software(Software::Programming(ProgrammingLeaf::All))
     }
 
-    fn testing() -> Domain {
+    fn testing() -> Self {
         Self::software(Software::Quality(QualityLeaf::Testing))
     }
 
-    fn architecture() -> Domain {
+    fn architecture() -> Self {
         Self::software(Software::Engineering(EngineeringLeaf::Architecture))
     }
 
-    fn documentation() -> Domain {
-        Domain::Information(Information::Documentation)
+    fn documentation() -> Self {
+        Self::Information(Information::Documentation)
     }
 
-    fn intelligence() -> Domain {
+    fn intelligence() -> Self {
         Self::software(Software::Intelligence(IntelligenceLeaf::AgentSystems))
     }
 
-    fn infrastructure() -> Domain {
+    fn infrastructure() -> Self {
         Self::software(Software::Operations(OperationsLeaf::Deployment))
     }
 
-    fn wellbeing() -> Domain {
-        Domain::Selfhood(Selfhood::Wellbeing)
+    fn wellbeing() -> Self {
+        Self::Selfhood(Selfhood::Wellbeing)
     }
 
-    fn policy() -> Domain {
-        Domain::Governance(Governance::Policy)
+    fn policy() -> Self {
+        Self::Governance(Governance::Policy)
     }
 
-    fn rapport() -> Domain {
-        Domain::Kinship(Kinship::Rapport)
+    fn rapport() -> Self {
+        Self::Kinship(Kinship::Rapport)
     }
 
-    fn contains_any(&self, needles: &[&str]) -> bool {
-        needles
-            .iter()
-            .any(|needle| self.normalized.contains(needle))
+    fn contains_any(label: &str, needles: &[&str]) -> bool {
+        needles.iter().any(|needle| label.contains(needle))
     }
 
-    fn push_unique(&self, domains: &mut Vec<Domain>, domain: Domain) {
+    fn push_unique(domains: &mut Vec<Self>, domain: Self) {
         if !domains.contains(&domain) {
             domains.push(domain);
         }

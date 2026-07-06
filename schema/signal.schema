@@ -1,5 +1,4 @@
 {
-  Domain signal-domain:domain:Domain
   Health signal-domain:domain:Health
   Food signal-domain:domain:Food
   Home signal-domain:domain:Home
@@ -37,9 +36,6 @@
   ObservabilityLeaf signal-domain:domain:ObservabilityLeaf
   SurfacesLeaf signal-domain:domain:SurfacesLeaf
   EngineeringLeaf signal-domain:domain:EngineeringLeaf
-  DomainScope signal-domain:domain:DomainScope
-  DomainScopes signal-domain:domain:DomainScopes
-  ScopeSet signal-domain:domain:ScopeSet
 }
 [State Record Propose Clarify Supersede Retire ResolveClarification Observe PublicTextSearch PublicRecords PrivateRecords Lookup Count ChangeCertainty BumpImportance ChangeRecord RegisterReferent LookupStash Tap Untap ApplyAuthorizedRecord (SubscribeIntent SubscribeIntent opens IntentEventStream) Version Marker]
 [RecordAccepted Proposed Clarified Superseded Retired ClarificationResolved GuardianRejected ReferentGuardianRejected RecordsObserved RecordsStashed RecordFound RecordsCounted CertaintyChanged ImportanceBumped RecordChanged ReferentRegistered ObservationTapped ObservationUntapped SubscriptionStarted VersionReported MarkerReported RecordApplied ApplyRefused (Event IntentEvent) Error Rejected]
@@ -50,6 +46,63 @@
   Import { SourcePath LocalPath }
   Export { LocalPath PublicPath }
   SignalReuse { Import Export }
+
+  Domain [
+    All
+    (Health Health)
+    (Food Food)
+    (Home Home)
+    (Finance Finance)
+    (Work Work)
+    (Craft Craft)
+    (Knowledge Knowledge)
+    (Education Education)
+    (Language Language)
+    (Art Art)
+    (Kinship Kinship)
+    (Selfhood Selfhood)
+    (Spirituality Spirituality)
+    (Governance Governance)
+    (Law Law)
+    (Community Community)
+    (Nature Nature)
+    (Travel Travel)
+    (Commerce Commerce)
+    (Leisure Leisure)
+    (Appearance Appearance)
+    (Safety Safety)
+    (Information Information)
+    (Technology Technology)
+  ]
+  DomainScope [
+    All
+    (Health Health)
+    (Food Food)
+    (Home Home)
+    (Finance Finance)
+    (Work Work)
+    (Craft Craft)
+    (Knowledge Knowledge)
+    (Education Education)
+    (Language Language)
+    (Art Art)
+    (Kinship Kinship)
+    (Selfhood Selfhood)
+    (Spirituality Spirituality)
+    (Governance Governance)
+    (Law Law)
+    (Community Community)
+    (Nature Nature)
+    (Travel Travel)
+    (Commerce Commerce)
+    (Leisure Leisure)
+    (Appearance Appearance)
+    (Safety Safety)
+    (Information Information)
+    (Technology Technology)
+  ]
+  DomainScopes (Vector DomainScope)
+  ScopeSet (Vector DomainScope)
 
   State Statement
   Record RecordRequest
@@ -102,6 +155,7 @@
   Domains (Vector Domain)
   Referent String
   Referents (Vector Referent)
+  Aliases Referents
   Description String
   Keyword String
   Keywords (Vector Keyword)
@@ -146,9 +200,9 @@
   Justification { Testimony Reasoning }
   RecordRequest { Entry Justification }
   Proposal { Entry Justification }
-  ReferentRegistration { Referent aliases.Referents Justification }
+  ReferentRegistration { Referent Aliases Justification }
   ReferentRegistrationReceipt { Referent }
-  RegisteredReferent { Referent aliases.Referents }
+  RegisteredReferent { Referent Aliases }
   RegisteredReferents (Vector RegisteredReferent)
   VersionReported VersionReport
   VersionReport { VersionText }
@@ -160,18 +214,18 @@
   IntentEventStream (Stream { token.SubscriptionToken opened.SubscriptionStarted event.IntentEvent close.SubscriptionToken })
   ValidationError [EmptyDomain EmptyDescription EmptyQueryDomain EmptyKeyword EmptySearchText EmptyQueryReferent StashHandleNotFound EmptyReferents]
   SpiritGuardianAgentConfiguration {
-    agent_socket_path.ConfigurationPath
+    AgentSocketPath.ConfigurationPath
     ProviderName.(Optional SpiritGuardianProviderName)
     ModelName.(Optional SpiritGuardianModelName)
-    timeout_milliseconds.SpiritGuardianTimeoutMilliseconds
+    TimeoutMilliseconds.SpiritGuardianTimeoutMilliseconds
     MaximumOutputTokens.(Optional SpiritGuardianMaximumOutputTokens)
   }
   AuthorizationMode [Gating Observing]
   SpiritDaemonConfiguration {
     socket_path.ConfigurationPath
-    MetaSocketPath.(Optional ConfigurationPath)
+    meta_socket_path.(Optional ConfigurationPath)
     database_path.ConfigurationPath
-    TraceSocketPath.(Optional ConfigurationPath)
+    trace_socket_path.(Optional ConfigurationPath)
     AuthorizationMode
     GuardianAgentConfiguration.(Optional SpiritGuardianAgentConfiguration)
   }
