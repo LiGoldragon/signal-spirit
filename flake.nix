@@ -32,13 +32,20 @@
           inherit src cargoVendorDirectory;
           strictDeps = true;
         };
+        notaTextArguments = commonArguments // {
+          cargoExtraArgs = "--features nota-text";
+        };
         cargoArtifacts = craneLib.buildDepsOnly commonArguments;
+        notaTextCargoArtifacts = craneLib.buildDepsOnly notaTextArguments;
       in
       {
         packages.default = craneLib.buildPackage (commonArguments // { inherit cargoArtifacts; });
         checks = {
           build = craneLib.cargoBuild (commonArguments // { inherit cargoArtifacts; });
           test = craneLib.cargoTest (commonArguments // { inherit cargoArtifacts; });
+          test-nota-text = craneLib.cargoTest (notaTextArguments // {
+            cargoArtifacts = notaTextCargoArtifacts;
+          });
           doc = craneLib.cargoDoc (commonArguments // {
             inherit cargoArtifacts;
             RUSTDOCFLAGS = "-D warnings";
