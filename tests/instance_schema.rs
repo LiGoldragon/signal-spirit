@@ -15,7 +15,7 @@
 
 use nota::{InstanceSchema, InstanceSchemaBody, NotaDecodeTraced, NotaSource, TypeReference};
 use schema::{InstanceSchemaText, SourceReference};
-use signal_spirit::{Certainty, Domain, DomainMatch, Entry, Input, Kind, Magnitude};
+use signal_spirit::{Domain, DomainMatch, Entry, Input, Kind};
 
 fn schema_of<Value>(source: &str) -> (Value, InstanceSchema)
 where
@@ -62,32 +62,15 @@ fn kind_value_renders_the_enum_name() {
 }
 
 #[test]
-fn certainty_newtype_preserves_wrapper_then_magnitude() {
-    let (value, schema) = schema_of::<Certainty>("High");
-    assert_eq!(value, Certainty::new(Magnitude::High));
-    assert_eq!(named(schema.expected()), "Certainty");
-    let InstanceSchemaBody::Newtype(inner) = schema.body() else {
-        panic!("certainty must carry a Newtype body");
-    };
-    assert_eq!(named(inner.expected()), "Magnitude");
-    assert_eq!(
-        InstanceSchemaText::new(&schema).expanded(),
-        "(Certainty Magnitude)"
-    );
-    round_trips_as_reference("(Certainty Magnitude)");
-}
-
-#[test]
 fn entry_renders_its_field_type_names_in_declared_order() {
-    let source = "([(Technology (Software (Programming CodeGeneration)))] Decision [a description] High Low Zero [spirit])";
+    let source = "([(Technology (Software (Programming CodeGeneration)))] Decision [a description] Low Zero)";
     let (value, schema) = schema_of::<Entry>(source);
     assert_eq!(value.kind, Kind::Decision);
-    assert_eq!(value.certainty, Certainty::new(Magnitude::High));
 
     assert_eq!(named(schema.expected()), "Entry");
     assert_eq!(
         InstanceSchemaText::new(&schema).aligned(),
-        "{ Domains Kind Description Certainty Importance Privacy Referents }"
+        "{ Domains Kind Description Importance Privacy }"
     );
 }
 
@@ -169,7 +152,7 @@ fn domain_match_partial_renders_enum_name_with_payload_reference() {
 
 #[test]
 fn root_input_record_renders_the_endorsed_root_form() {
-    let source = "(Record (([(Technology (Software (Programming CodeGeneration)))] Decision [a description] Medium Medium Zero [spirit]) ([([a quote] None)] [the reasoning])))";
+    let source = "(Record (([(Technology (Software (Programming CodeGeneration)))] Decision [a description] Medium Zero) ([([a quote] None)] [the reasoning])))";
     let (value, schema) = schema_of::<Input>(source);
     assert!(matches!(value, Input::Record(_)));
 
@@ -177,7 +160,7 @@ fn root_input_record_renders_the_endorsed_root_form() {
     assert_eq!(named(schema.expected()), "Input");
     assert_eq!(
         InstanceSchemaText::new(&schema).aligned(),
-        "(Input ({ Domains Kind Description Certainty Importance Privacy Referents } { Testimony Reasoning }))"
+        "(Input ({ Domains Kind Description Importance Privacy } { Testimony Reasoning }))"
     );
 }
 

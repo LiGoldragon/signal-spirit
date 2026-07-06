@@ -41,8 +41,8 @@
   DomainScopes signal-spirit:domain:DomainScopes
   ScopeSet signal-spirit:domain:ScopeSet
 }
-[State Record Propose Clarify Supersede Retire ResolveClarification Observe PublicTextSearch PublicRecords PrivateRecords Lookup Count ChangeCertainty BumpImportance ChangeRecord RegisterReferent LookupStash Tap Untap ApplyAuthorizedRecord (SubscribeIntent SubscribeIntent opens IntentEventStream) Version Marker]
-[RecordAccepted Proposed Clarified Superseded Retired ClarificationResolved GuardianRejected ReferentGuardianRejected RecordsObserved RecordsStashed RecordFound RecordsCounted CertaintyChanged ImportanceBumped RecordChanged ReferentRegistered ObservationTapped ObservationUntapped SubscriptionStarted VersionReported MarkerReported RecordApplied ApplyRefused (Event IntentEvent) Error Rejected]
+[State Record Propose Clarify Supersede Retire ResolveClarification Observe PublicIntent PublicTextSearch PublicRecords PrivateRecords Lookup Count BumpImportance ChangeRecord RegisterReferent LookupStash Tap Untap ApplyAuthorizedRecord (SubscribeIntent SubscribeIntent opens IntentEventStream) Version Marker]
+[RecordAccepted Proposed Clarified Superseded Retired ClarificationResolved GuardianRejected ReferentGuardianRejected RecordsObserved RecordsStashed RecordFound RecordsCounted ImportanceBumped RecordChanged ReferentRegistered ObservationTapped ObservationUntapped SubscriptionStarted VersionReported MarkerReported RecordApplied ApplyRefused (Event IntentEvent) Error Rejected]
 {
   SourcePath String
   LocalPath String
@@ -59,12 +59,12 @@
   Retire Retirement
   ResolveClarification ClarificationResolution
   Observe Query
+  PublicIntent DomainScopes
   PublicTextSearch SearchText
   PublicRecords RecordSelection
   PrivateRecords RecordSelection
   Lookup RecordIdentifier
   Count Query
-  ChangeCertainty CertaintyChange
   BumpImportance ImportanceBump
   ChangeRecord RecordChange
   RegisterReferent ReferentRegistration
@@ -86,7 +86,6 @@
   RecordsStashed StashedObservation
   RecordFound FoundRecord
   RecordsCounted CountedRecords
-  CertaintyChanged CertaintyChangeReceipt
   ImportanceBumped ImportanceBumpReceipt
   RecordChanged RecordChangeReceipt
   ReferentRegistered ReferentRegistrationReceipt
@@ -158,7 +157,7 @@
   IntentRetired { RecordIdentifier }
   IntentEvent [(IntentRecorded IntentRecorded belongs IntentEventStream) (IntentClarified IntentClarified belongs IntentEventStream) (IntentSuperseded IntentSuperseded belongs IntentEventStream) (IntentRetired IntentRetired belongs IntentEventStream)]
   IntentEventStream (Stream { token.SubscriptionToken opened.SubscriptionStarted event.IntentEvent close.SubscriptionToken })
-  ValidationError [EmptyDomain EmptyDescription EmptyQueryDomain EmptyKeyword EmptySearchText EmptyQueryReferent StashHandleNotFound EmptyReferents]
+  ValidationError [EmptyDomain EmptyDescription EmptyQueryDomain EmptyKeyword EmptySearchText EmptyQueryReferent StashHandleNotFound]
   SpiritGuardianAgentConfiguration {
     agent_socket_path.ConfigurationPath
     ProviderName.(Optional SpiritGuardianProviderName)
@@ -179,25 +178,17 @@
   DomainMatch [Any (Partial) (Full)]
   Partial DomainScopes
   Full DomainScopes
-  ReferentSelection [Any (AnyReferent) (AllReferents)]
-  AnyReferent Referents
-  AllReferents Referents
   KeywordMatch [Any (AnyKeyword) (AllKeywords)]
   AnyKeyword Keywords
   AllKeywords Keywords
   TextMatch [Any (ContainsText)]
   ContainsText SearchText
   Privacy Magnitude
-  Certainty Magnitude
   Importance Magnitude
   PrivacySelection [Any (Exact) (AtMost) (AtLeast)]
   Exact Privacy
   AtMost Privacy
   AtLeast Privacy
-  CertaintySelection [Any (ExactCertainty) (AtMostCertainty) (AtLeastCertainty)]
-  ExactCertainty Certainty
-  AtMostCertainty Certainty
-  AtLeastCertainty Certainty
   ImportanceSelection [Any (ExactImportance) (AtMostImportance) (AtLeastImportance)]
   ExactImportance Importance
   AtMostImportance Importance
@@ -217,14 +208,12 @@
   ObserverFilter [All OperationsOnly EffectsOnly]
   ObserverSubscription { SubscriptionToken ObserverFilter ObservedOperations }
   ObserverRetraction { SubscriptionToken ObservedOperations }
-  OperationKind [State Record Propose Clarify Supersede Retire ResolveClarification Observe PublicTextSearch PublicRecords PrivateRecords Lookup Count ChangeCertainty BumpImportance ChangeRecord RegisterReferent LookupStash Tap Untap ApplyAuthorizedRecord SubscribeIntent Version Marker]
+  OperationKind [State Record Propose Clarify Supersede Retire ResolveClarification Observe PublicIntent PublicTextSearch PublicRecords PrivateRecords Lookup Count BumpImportance ChangeRecord RegisterReferent LookupStash Tap Untap ApplyAuthorizedRecord SubscribeIntent Version Marker]
   ObservedOperation { OperationKind }
   ObservedOperations (Vector ObservedOperation)
 
-  Entry { Domains Kind Description Certainty Importance Privacy Referents }
+  Entry { Domains Kind Description Importance Privacy }
   Statement { StatementText }
-  CertaintyChange { RecordIdentifier Certainty }
-  CertaintyChangeReceipt { RecordIdentifier Certainty }
   ImportanceBump { RecordIdentifier }
   ImportanceBumpReceipt { RecordIdentifier Importance }
   RecordChange { RecordIdentifier Entry Justification }
@@ -250,7 +239,7 @@
   ReferentGuardianRejection { ReferentGuardianRejectionReason RegisteredReferents Explanation }
   SelectedKind (Optional Kind)
   RecordSelection { DomainMatch SelectedKind }
-  Query { DomainMatch KeywordMatch TextMatch ReferentSelection SelectedKind PrivacySelection CertaintySelection ImportanceSelection }
+  Query { DomainMatch KeywordMatch TextMatch SelectedKind PrivacySelection ImportanceSelection }
   Records (Vector ObservedRecord)
   RecordSet (Vector ObservedRecord)
   Kind [Decision Principle Correction Clarification Constraint]

@@ -223,6 +223,14 @@ pub struct Observe(Query);
     derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct PublicIntent(DomainScopes);
+
+#[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct PublicTextSearch(SearchText);
 
 #[rustfmt::skip]
@@ -256,14 +264,6 @@ pub struct Lookup(RecordIdentifier);
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct Count(Query);
-
-#[rustfmt::skip]
-#[cfg_attr(
-    feature = "nota-text",
-    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
-)]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub struct ChangeCertainty(CertaintyChange);
 
 #[rustfmt::skip]
 #[cfg_attr(
@@ -424,14 +424,6 @@ pub struct RecordFound(FoundRecord);
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct RecordsCounted(CountedRecords);
-
-#[rustfmt::skip]
-#[cfg_attr(
-    feature = "nota-text",
-    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
-)]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub struct CertaintyChanged(CertaintyChangeReceipt);
 
 #[rustfmt::skip]
 #[cfg_attr(
@@ -1079,7 +1071,6 @@ pub enum ValidationError {
     EmptySearchText,
     EmptyQueryReferent,
     StashHandleNotFound,
-    EmptyReferents,
 }
 
 #[rustfmt::skip]
@@ -1213,34 +1204,6 @@ pub struct Full(DomainScopes);
     derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub enum ReferentSelection {
-    Any,
-    AnyReferent(AnyReferent),
-    AllReferents(AllReferents),
-}
-
-#[rustfmt::skip]
-#[cfg_attr(
-    feature = "nota-text",
-    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
-)]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub struct AnyReferent(Referents);
-
-#[rustfmt::skip]
-#[cfg_attr(
-    feature = "nota-text",
-    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
-)]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub struct AllReferents(Referents);
-
-#[rustfmt::skip]
-#[cfg_attr(
-    feature = "nota-text",
-    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
-)]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum KeywordMatch {
     Any,
     AnyKeyword(AnyKeyword),
@@ -1296,14 +1259,6 @@ pub struct Privacy(Magnitude);
     derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub struct Certainty(Magnitude);
-
-#[rustfmt::skip]
-#[cfg_attr(
-    feature = "nota-text",
-    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
-)]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct Importance(Magnitude);
 
 #[rustfmt::skip]
@@ -1342,43 +1297,6 @@ pub struct AtMost(Privacy);
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct AtLeast(Privacy);
-
-#[rustfmt::skip]
-#[cfg_attr(
-    feature = "nota-text",
-    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
-)]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub enum CertaintySelection {
-    Any,
-    ExactCertainty(ExactCertainty),
-    AtMostCertainty(AtMostCertainty),
-    AtLeastCertainty(AtLeastCertainty),
-}
-
-#[rustfmt::skip]
-#[cfg_attr(
-    feature = "nota-text",
-    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
-)]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub struct ExactCertainty(Certainty);
-
-#[rustfmt::skip]
-#[cfg_attr(
-    feature = "nota-text",
-    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
-)]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub struct AtMostCertainty(Certainty);
-
-#[rustfmt::skip]
-#[cfg_attr(
-    feature = "nota-text",
-    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
-)]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub struct AtLeastCertainty(Certainty);
 
 #[rustfmt::skip]
 #[cfg_attr(
@@ -1592,12 +1510,12 @@ pub enum OperationKind {
     Retire,
     ResolveClarification,
     Observe,
+    PublicIntent,
     PublicTextSearch,
     PublicRecords,
     PrivateRecords,
     Lookup,
     Count,
-    ChangeCertainty,
     BumpImportance,
     ChangeRecord,
     RegisterReferent,
@@ -1636,10 +1554,8 @@ pub struct Entry {
     pub domains: Domains,
     pub kind: Kind,
     pub description: Description,
-    pub certainty: Certainty,
     pub importance: Importance,
     pub privacy: Privacy,
-    pub referents: Referents,
 }
 
 #[rustfmt::skip]
@@ -1649,28 +1565,6 @@ pub struct Entry {
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct Statement(StatementText);
-
-#[rustfmt::skip]
-#[cfg_attr(
-    feature = "nota-text",
-    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
-)]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub struct CertaintyChange {
-    pub record_identifier: RecordIdentifier,
-    pub certainty: Certainty,
-}
-
-#[rustfmt::skip]
-#[cfg_attr(
-    feature = "nota-text",
-    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
-)]
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
-pub struct CertaintyChangeReceipt {
-    pub record_identifier: RecordIdentifier,
-    pub certainty: Certainty,
-}
 
 #[rustfmt::skip]
 #[cfg_attr(
@@ -1973,10 +1867,8 @@ pub struct Query {
     pub domain_match: DomainMatch,
     pub keyword_match: KeywordMatch,
     pub text_match: TextMatch,
-    pub referent_selection: ReferentSelection,
     pub selected_kind: SelectedKind,
     pub privacy_selection: PrivacySelection,
-    pub certainty_selection: CertaintySelection,
     pub importance_selection: ImportanceSelection,
 }
 
@@ -2060,12 +1952,12 @@ pub enum Input {
     Retire(Retire),
     ResolveClarification(ResolveClarification),
     Observe(Observe),
+    PublicIntent(PublicIntent),
     PublicTextSearch(PublicTextSearch),
     PublicRecords(PublicRecords),
     PrivateRecords(PrivateRecords),
     Lookup(Lookup),
     Count(Count),
-    ChangeCertainty(ChangeCertainty),
     BumpImportance(BumpImportance),
     ChangeRecord(ChangeRecord),
     RegisterReferent(RegisterReferent),
@@ -2097,7 +1989,6 @@ pub enum Output {
     RecordsStashed(RecordsStashed),
     RecordFound(RecordFound),
     RecordsCounted(RecordsCounted),
-    CertaintyChanged(CertaintyChanged),
     ImportanceBumped(ImportanceBumped),
     RecordChanged(RecordChanged),
     ReferentRegistered(ReferentRegistered),
@@ -2323,6 +2214,25 @@ impl From<Query> for Observe {
 }
 
 #[rustfmt::skip]
+impl PublicIntent {
+    pub fn new(payload: DomainScopes) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &DomainScopes {
+        &self.0
+    }
+    pub fn into_payload(self) -> DomainScopes {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<DomainScopes> for PublicIntent {
+    fn from(payload: DomainScopes) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
 impl PublicTextSearch {
     pub fn new(payload: SearchText) -> Self {
         Self(payload)
@@ -2413,25 +2323,6 @@ impl Count {
 #[rustfmt::skip]
 impl From<Query> for Count {
     fn from(payload: Query) -> Self {
-        Self::new(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl ChangeCertainty {
-    pub fn new(payload: CertaintyChange) -> Self {
-        Self(payload)
-    }
-    pub fn payload(&self) -> &CertaintyChange {
-        &self.0
-    }
-    pub fn into_payload(self) -> CertaintyChange {
-        self.0
-    }
-}
-#[rustfmt::skip]
-impl From<CertaintyChange> for ChangeCertainty {
-    fn from(payload: CertaintyChange) -> Self {
         Self::new(payload)
     }
 }
@@ -2812,25 +2703,6 @@ impl RecordsCounted {
 #[rustfmt::skip]
 impl From<CountedRecords> for RecordsCounted {
     fn from(payload: CountedRecords) -> Self {
-        Self::new(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl CertaintyChanged {
-    pub fn new(payload: CertaintyChangeReceipt) -> Self {
-        Self(payload)
-    }
-    pub fn payload(&self) -> &CertaintyChangeReceipt {
-        &self.0
-    }
-    pub fn into_payload(self) -> CertaintyChangeReceipt {
-        self.0
-    }
-}
-#[rustfmt::skip]
-impl From<CertaintyChangeReceipt> for CertaintyChanged {
-    fn from(payload: CertaintyChangeReceipt) -> Self {
         Self::new(payload)
     }
 }
@@ -3957,44 +3829,6 @@ impl From<DomainScopes> for Full {
 }
 
 #[rustfmt::skip]
-impl AnyReferent {
-    pub fn new(payload: Referents) -> Self {
-        Self(payload)
-    }
-    pub fn payload(&self) -> &Referents {
-        &self.0
-    }
-    pub fn into_payload(self) -> Referents {
-        self.0
-    }
-}
-#[rustfmt::skip]
-impl From<Referents> for AnyReferent {
-    fn from(payload: Referents) -> Self {
-        Self::new(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl AllReferents {
-    pub fn new(payload: Referents) -> Self {
-        Self(payload)
-    }
-    pub fn payload(&self) -> &Referents {
-        &self.0
-    }
-    pub fn into_payload(self) -> Referents {
-        self.0
-    }
-}
-#[rustfmt::skip]
-impl From<Referents> for AllReferents {
-    fn from(payload: Referents) -> Self {
-        Self::new(payload)
-    }
-}
-
-#[rustfmt::skip]
 impl AnyKeyword {
     pub fn new(payload: Keywords) -> Self {
         Self(payload)
@@ -4065,25 +3899,6 @@ impl Privacy {
 }
 #[rustfmt::skip]
 impl From<Magnitude> for Privacy {
-    fn from(payload: Magnitude) -> Self {
-        Self::new(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl Certainty {
-    pub fn new(payload: Magnitude) -> Self {
-        Self(payload)
-    }
-    pub fn payload(&self) -> &Magnitude {
-        &self.0
-    }
-    pub fn into_payload(self) -> Magnitude {
-        self.0
-    }
-}
-#[rustfmt::skip]
-impl From<Magnitude> for Certainty {
     fn from(payload: Magnitude) -> Self {
         Self::new(payload)
     }
@@ -4161,63 +3976,6 @@ impl AtLeast {
 #[rustfmt::skip]
 impl From<Privacy> for AtLeast {
     fn from(payload: Privacy) -> Self {
-        Self::new(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl ExactCertainty {
-    pub fn new(payload: Certainty) -> Self {
-        Self(payload)
-    }
-    pub fn payload(&self) -> &Certainty {
-        &self.0
-    }
-    pub fn into_payload(self) -> Certainty {
-        self.0
-    }
-}
-#[rustfmt::skip]
-impl From<Certainty> for ExactCertainty {
-    fn from(payload: Certainty) -> Self {
-        Self::new(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl AtMostCertainty {
-    pub fn new(payload: Certainty) -> Self {
-        Self(payload)
-    }
-    pub fn payload(&self) -> &Certainty {
-        &self.0
-    }
-    pub fn into_payload(self) -> Certainty {
-        self.0
-    }
-}
-#[rustfmt::skip]
-impl From<Certainty> for AtMostCertainty {
-    fn from(payload: Certainty) -> Self {
-        Self::new(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl AtLeastCertainty {
-    pub fn new(payload: Certainty) -> Self {
-        Self(payload)
-    }
-    pub fn payload(&self) -> &Certainty {
-        &self.0
-    }
-    pub fn into_payload(self) -> Certainty {
-        self.0
-    }
-}
-#[rustfmt::skip]
-impl From<Certainty> for AtLeastCertainty {
-    fn from(payload: Certainty) -> Self {
         Self::new(payload)
     }
 }
@@ -4705,16 +4463,6 @@ impl DomainMatch {
 }
 
 #[rustfmt::skip]
-impl ReferentSelection {
-    pub fn any_referent(payload: Referents) -> Self {
-        Self::AnyReferent(AnyReferent::new(payload))
-    }
-    pub fn all_referents(payload: Referents) -> Self {
-        Self::AllReferents(AllReferents::new(payload))
-    }
-}
-
-#[rustfmt::skip]
 impl KeywordMatch {
     pub fn any_keyword(payload: Keywords) -> Self {
         Self::AnyKeyword(AnyKeyword::new(payload))
@@ -4741,19 +4489,6 @@ impl PrivacySelection {
     }
     pub fn at_least(payload: Privacy) -> Self {
         Self::AtLeast(AtLeast::new(payload))
-    }
-}
-
-#[rustfmt::skip]
-impl CertaintySelection {
-    pub fn exact_certainty(payload: Certainty) -> Self {
-        Self::ExactCertainty(ExactCertainty::new(payload))
-    }
-    pub fn at_most_certainty(payload: Certainty) -> Self {
-        Self::AtMostCertainty(AtMostCertainty::new(payload))
-    }
-    pub fn at_least_certainty(payload: Certainty) -> Self {
-        Self::AtLeastCertainty(AtLeastCertainty::new(payload))
     }
 }
 
@@ -4796,6 +4531,9 @@ impl Input {
     pub fn observe(payload: Query) -> Self {
         Self::Observe(Observe::new(payload))
     }
+    pub fn public_intent(payload: DomainScopes) -> Self {
+        Self::PublicIntent(PublicIntent::new(payload))
+    }
     pub fn public_text_search(payload: SearchText) -> Self {
         Self::PublicTextSearch(PublicTextSearch::new(payload))
     }
@@ -4810,9 +4548,6 @@ impl Input {
     }
     pub fn count(payload: Query) -> Self {
         Self::Count(Count::new(payload))
-    }
-    pub fn change_certainty(payload: CertaintyChange) -> Self {
-        Self::ChangeCertainty(ChangeCertainty::new(payload))
     }
     pub fn bump_importance(payload: ImportanceBump) -> Self {
         Self::BumpImportance(BumpImportance::new(payload))
@@ -4877,9 +4612,6 @@ impl Output {
     }
     pub fn records_counted(payload: CountedRecords) -> Self {
         Self::RecordsCounted(RecordsCounted::new(payload))
-    }
-    pub fn certainty_changed(payload: CertaintyChangeReceipt) -> Self {
-        Self::CertaintyChanged(CertaintyChanged::new(payload))
     }
     pub fn importance_bumped(payload: ImportanceBumpReceipt) -> Self {
         Self::ImportanceBumped(ImportanceBumped::new(payload))
@@ -4965,20 +4697,6 @@ impl From<Full> for DomainMatch {
 }
 
 #[rustfmt::skip]
-impl From<AnyReferent> for ReferentSelection {
-    fn from(payload: AnyReferent) -> Self {
-        Self::AnyReferent(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl From<AllReferents> for ReferentSelection {
-    fn from(payload: AllReferents) -> Self {
-        Self::AllReferents(payload)
-    }
-}
-
-#[rustfmt::skip]
 impl From<AnyKeyword> for KeywordMatch {
     fn from(payload: AnyKeyword) -> Self {
         Self::AnyKeyword(payload)
@@ -5017,27 +4735,6 @@ impl From<AtMost> for PrivacySelection {
 impl From<AtLeast> for PrivacySelection {
     fn from(payload: AtLeast) -> Self {
         Self::AtLeast(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl From<ExactCertainty> for CertaintySelection {
-    fn from(payload: ExactCertainty) -> Self {
-        Self::ExactCertainty(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl From<AtMostCertainty> for CertaintySelection {
-    fn from(payload: AtMostCertainty) -> Self {
-        Self::AtMostCertainty(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl From<AtLeastCertainty> for CertaintySelection {
-    fn from(payload: AtLeastCertainty) -> Self {
-        Self::AtLeastCertainty(payload)
     }
 }
 
@@ -5119,6 +4816,13 @@ impl From<Observe> for Input {
 }
 
 #[rustfmt::skip]
+impl From<PublicIntent> for Input {
+    fn from(payload: PublicIntent) -> Self {
+        Self::PublicIntent(payload)
+    }
+}
+
+#[rustfmt::skip]
 impl From<PublicTextSearch> for Input {
     fn from(payload: PublicTextSearch) -> Self {
         Self::PublicTextSearch(payload)
@@ -5150,13 +4854,6 @@ impl From<Lookup> for Input {
 impl From<Count> for Input {
     fn from(payload: Count) -> Self {
         Self::Count(payload)
-    }
-}
-
-#[rustfmt::skip]
-impl From<ChangeCertainty> for Input {
-    fn from(payload: ChangeCertainty) -> Self {
-        Self::ChangeCertainty(payload)
     }
 }
 
@@ -5301,13 +4998,6 @@ impl From<RecordsCounted> for Output {
 }
 
 #[rustfmt::skip]
-impl From<CertaintyChanged> for Output {
-    fn from(payload: CertaintyChanged) -> Self {
-        Self::CertaintyChanged(payload)
-    }
-}
-
-#[rustfmt::skip]
 impl From<ImportanceBumped> for Output {
     fn from(payload: ImportanceBumped) -> Self {
         Self::ImportanceBumped(payload)
@@ -5440,12 +5130,12 @@ pub mod short_header {
     pub const INPUT_RETIRE: u64 = 0x0005000000000000;
     pub const INPUT_RESOLVE_CLARIFICATION: u64 = 0x0006000000000000;
     pub const INPUT_OBSERVE: u64 = 0x0007000000000000;
-    pub const INPUT_PUBLIC_TEXT_SEARCH: u64 = 0x0008000000000000;
-    pub const INPUT_PUBLIC_RECORDS: u64 = 0x0009000000000000;
-    pub const INPUT_PRIVATE_RECORDS: u64 = 0x000A000000000000;
-    pub const INPUT_LOOKUP: u64 = 0x000B000000000000;
-    pub const INPUT_COUNT: u64 = 0x000C000000000000;
-    pub const INPUT_CHANGE_CERTAINTY: u64 = 0x000D000000000000;
+    pub const INPUT_PUBLIC_INTENT: u64 = 0x0008000000000000;
+    pub const INPUT_PUBLIC_TEXT_SEARCH: u64 = 0x0009000000000000;
+    pub const INPUT_PUBLIC_RECORDS: u64 = 0x000A000000000000;
+    pub const INPUT_PRIVATE_RECORDS: u64 = 0x000B000000000000;
+    pub const INPUT_LOOKUP: u64 = 0x000C000000000000;
+    pub const INPUT_COUNT: u64 = 0x000D000000000000;
     pub const INPUT_BUMP_IMPORTANCE: u64 = 0x000E000000000000;
     pub const INPUT_CHANGE_RECORD: u64 = 0x000F000000000000;
     pub const INPUT_REGISTER_REFERENT: u64 = 0x0010000000000000;
@@ -5468,20 +5158,19 @@ pub mod short_header {
     pub const OUTPUT_RECORDS_STASHED: u64 = 0x0109000000000000;
     pub const OUTPUT_RECORD_FOUND: u64 = 0x010A000000000000;
     pub const OUTPUT_RECORDS_COUNTED: u64 = 0x010B000000000000;
-    pub const OUTPUT_CERTAINTY_CHANGED: u64 = 0x010C000000000000;
-    pub const OUTPUT_IMPORTANCE_BUMPED: u64 = 0x010D000000000000;
-    pub const OUTPUT_RECORD_CHANGED: u64 = 0x010E000000000000;
-    pub const OUTPUT_REFERENT_REGISTERED: u64 = 0x010F000000000000;
-    pub const OUTPUT_OBSERVATION_TAPPED: u64 = 0x0110000000000000;
-    pub const OUTPUT_OBSERVATION_UNTAPPED: u64 = 0x0111000000000000;
-    pub const OUTPUT_SUBSCRIPTION_STARTED: u64 = 0x0112000000000000;
-    pub const OUTPUT_VERSION_REPORTED: u64 = 0x0113000000000000;
-    pub const OUTPUT_MARKER_REPORTED: u64 = 0x0114000000000000;
-    pub const OUTPUT_RECORD_APPLIED: u64 = 0x0115000000000000;
-    pub const OUTPUT_APPLY_REFUSED: u64 = 0x0116000000000000;
-    pub const OUTPUT_EVENT: u64 = 0x0117000000000000;
-    pub const OUTPUT_ERROR: u64 = 0x0118000000000000;
-    pub const OUTPUT_REJECTED: u64 = 0x0119000000000000;
+    pub const OUTPUT_IMPORTANCE_BUMPED: u64 = 0x010C000000000000;
+    pub const OUTPUT_RECORD_CHANGED: u64 = 0x010D000000000000;
+    pub const OUTPUT_REFERENT_REGISTERED: u64 = 0x010E000000000000;
+    pub const OUTPUT_OBSERVATION_TAPPED: u64 = 0x010F000000000000;
+    pub const OUTPUT_OBSERVATION_UNTAPPED: u64 = 0x0110000000000000;
+    pub const OUTPUT_SUBSCRIPTION_STARTED: u64 = 0x0111000000000000;
+    pub const OUTPUT_VERSION_REPORTED: u64 = 0x0112000000000000;
+    pub const OUTPUT_MARKER_REPORTED: u64 = 0x0113000000000000;
+    pub const OUTPUT_RECORD_APPLIED: u64 = 0x0114000000000000;
+    pub const OUTPUT_APPLY_REFUSED: u64 = 0x0115000000000000;
+    pub const OUTPUT_EVENT: u64 = 0x0116000000000000;
+    pub const OUTPUT_ERROR: u64 = 0x0117000000000000;
+    pub const OUTPUT_REJECTED: u64 = 0x0118000000000000;
 }
 
 #[rustfmt::skip]
@@ -5543,12 +5232,12 @@ pub enum InputRoute {
     Retire,
     ResolveClarification,
     Observe,
+    PublicIntent,
     PublicTextSearch,
     PublicRecords,
     PrivateRecords,
     Lookup,
     Count,
-    ChangeCertainty,
     BumpImportance,
     ChangeRecord,
     RegisterReferent,
@@ -5589,7 +5278,6 @@ pub enum OutputRoute {
     RecordsStashed,
     RecordFound,
     RecordsCounted,
-    CertaintyChanged,
     ImportanceBumped,
     RecordChanged,
     ReferentRegistered,
@@ -5617,12 +5305,12 @@ impl Input {
             Self::Retire(_) => InputRoute::Retire,
             Self::ResolveClarification(_) => InputRoute::ResolveClarification,
             Self::Observe(_) => InputRoute::Observe,
+            Self::PublicIntent(_) => InputRoute::PublicIntent,
             Self::PublicTextSearch(_) => InputRoute::PublicTextSearch,
             Self::PublicRecords(_) => InputRoute::PublicRecords,
             Self::PrivateRecords(_) => InputRoute::PrivateRecords,
             Self::Lookup(_) => InputRoute::Lookup,
             Self::Count(_) => InputRoute::Count,
-            Self::ChangeCertainty(_) => InputRoute::ChangeCertainty,
             Self::BumpImportance(_) => InputRoute::BumpImportance,
             Self::ChangeRecord(_) => InputRoute::ChangeRecord,
             Self::RegisterReferent(_) => InputRoute::RegisterReferent,
@@ -5645,12 +5333,12 @@ impl Input {
             Self::Retire(_) => short_header::INPUT_RETIRE,
             Self::ResolveClarification(_) => short_header::INPUT_RESOLVE_CLARIFICATION,
             Self::Observe(_) => short_header::INPUT_OBSERVE,
+            Self::PublicIntent(_) => short_header::INPUT_PUBLIC_INTENT,
             Self::PublicTextSearch(_) => short_header::INPUT_PUBLIC_TEXT_SEARCH,
             Self::PublicRecords(_) => short_header::INPUT_PUBLIC_RECORDS,
             Self::PrivateRecords(_) => short_header::INPUT_PRIVATE_RECORDS,
             Self::Lookup(_) => short_header::INPUT_LOOKUP,
             Self::Count(_) => short_header::INPUT_COUNT,
-            Self::ChangeCertainty(_) => short_header::INPUT_CHANGE_CERTAINTY,
             Self::BumpImportance(_) => short_header::INPUT_BUMP_IMPORTANCE,
             Self::ChangeRecord(_) => short_header::INPUT_CHANGE_RECORD,
             Self::RegisterReferent(_) => short_header::INPUT_REGISTER_REFERENT,
@@ -5675,12 +5363,12 @@ impl Input {
                 Ok(InputRoute::ResolveClarification)
             }
             short_header::INPUT_OBSERVE => Ok(InputRoute::Observe),
+            short_header::INPUT_PUBLIC_INTENT => Ok(InputRoute::PublicIntent),
             short_header::INPUT_PUBLIC_TEXT_SEARCH => Ok(InputRoute::PublicTextSearch),
             short_header::INPUT_PUBLIC_RECORDS => Ok(InputRoute::PublicRecords),
             short_header::INPUT_PRIVATE_RECORDS => Ok(InputRoute::PrivateRecords),
             short_header::INPUT_LOOKUP => Ok(InputRoute::Lookup),
             short_header::INPUT_COUNT => Ok(InputRoute::Count),
-            short_header::INPUT_CHANGE_CERTAINTY => Ok(InputRoute::ChangeCertainty),
             short_header::INPUT_BUMP_IMPORTANCE => Ok(InputRoute::BumpImportance),
             short_header::INPUT_CHANGE_RECORD => Ok(InputRoute::ChangeRecord),
             short_header::INPUT_REGISTER_REFERENT => Ok(InputRoute::RegisterReferent),
@@ -5755,7 +5443,6 @@ impl Output {
             Self::RecordsStashed(_) => OutputRoute::RecordsStashed,
             Self::RecordFound(_) => OutputRoute::RecordFound,
             Self::RecordsCounted(_) => OutputRoute::RecordsCounted,
-            Self::CertaintyChanged(_) => OutputRoute::CertaintyChanged,
             Self::ImportanceBumped(_) => OutputRoute::ImportanceBumped,
             Self::RecordChanged(_) => OutputRoute::RecordChanged,
             Self::ReferentRegistered(_) => OutputRoute::ReferentRegistered,
@@ -5787,7 +5474,6 @@ impl Output {
             Self::RecordsStashed(_) => short_header::OUTPUT_RECORDS_STASHED,
             Self::RecordFound(_) => short_header::OUTPUT_RECORD_FOUND,
             Self::RecordsCounted(_) => short_header::OUTPUT_RECORDS_COUNTED,
-            Self::CertaintyChanged(_) => short_header::OUTPUT_CERTAINTY_CHANGED,
             Self::ImportanceBumped(_) => short_header::OUTPUT_IMPORTANCE_BUMPED,
             Self::RecordChanged(_) => short_header::OUTPUT_RECORD_CHANGED,
             Self::ReferentRegistered(_) => short_header::OUTPUT_REFERENT_REGISTERED,
@@ -5823,7 +5509,6 @@ impl Output {
             short_header::OUTPUT_RECORDS_STASHED => Ok(OutputRoute::RecordsStashed),
             short_header::OUTPUT_RECORD_FOUND => Ok(OutputRoute::RecordFound),
             short_header::OUTPUT_RECORDS_COUNTED => Ok(OutputRoute::RecordsCounted),
-            short_header::OUTPUT_CERTAINTY_CHANGED => Ok(OutputRoute::CertaintyChanged),
             short_header::OUTPUT_IMPORTANCE_BUMPED => Ok(OutputRoute::ImportanceBumped),
             short_header::OUTPUT_RECORD_CHANGED => Ok(OutputRoute::RecordChanged),
             short_header::OUTPUT_REFERENT_REGISTERED => {
@@ -5902,12 +5587,12 @@ impl signal_frame::SignalOperationHeads for Input {
         "Retire",
         "ResolveClarification",
         "Observe",
+        "PublicIntent",
         "PublicTextSearch",
         "PublicRecords",
         "PrivateRecords",
         "Lookup",
         "Count",
-        "ChangeCertainty",
         "BumpImportance",
         "ChangeRecord",
         "RegisterReferent",

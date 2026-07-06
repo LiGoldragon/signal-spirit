@@ -161,7 +161,7 @@ fn generated_help_model_renders_spirit_one_level_shapes() {
             .render(&signal_spirit::HelpRequest::for_name("Entry"))
             .expect("render Entry help")
             .to_string(),
-        "(Entry { Domains Kind Description Certainty Importance Privacy Referents })"
+        "(Entry { Domains Kind Description Importance Privacy })"
     );
     assert_eq!(
         model
@@ -280,7 +280,7 @@ fn generated_help_round_trips_through_the_schema_codec() {
         ("Record", "(Record { Entry Justification })"),
         (
             "Entry",
-            "(Entry { Domains Kind Description Certainty Importance Privacy Referents })",
+            "(Entry { Domains Kind Description Importance Privacy })",
         ),
         ("Domains", "(Domains (Vector Domain))"),
         ("RecordAccepted", "(RecordAccepted RecordIdentifier)"),
