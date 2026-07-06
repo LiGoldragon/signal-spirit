@@ -1,6 +1,8 @@
 use std::{env, path::PathBuf};
 
-use schema_rust::build::{CargoSchemaMetadata, GenerationDriver, GenerationPlan, ModuleEmission};
+use schema_rust::build::{
+    CargoSchemaMetadata, DependencySchema, GenerationDriver, GenerationPlan, ModuleEmission,
+};
 
 fn main() {
     SchemaBuild::from_environment().run();
@@ -18,13 +20,15 @@ impl SchemaBuild {
     }
 
     fn run(&self) {
-        println!("cargo:rerun-if-changed=schema/domain.schema");
         println!("cargo:rerun-if-changed=schema/signal.schema");
-        println!("cargo:rerun-if-changed=src/schema/domain.rs");
         println!("cargo:rerun-if-changed=src/schema/signal.rs");
 
+        let signal_domain_schema =
+            DependencySchema::from_cargo_metadata("signal-domain", "signal-domain", "0.1.0")
+                .expect("read signal-domain schema metadata");
+
         let plan = GenerationPlan::new(&self.crate_root, "signal-spirit", "0.9.0")
-            .with_module(ModuleEmission::declaration_module("domain"))
+            .with_optional_dependency_schema(signal_domain_schema)
             .with_module(ModuleEmission::wire_contract_module("signal"));
 
         GenerationDriver::new(plan)

@@ -168,9 +168,9 @@ impl HelpModel {
     pub fn from_signal_schema_source() -> Result<Self, HelpError> {
         let engine = SchemaEngine::default();
         let resolver = ImportResolver::new().with_module_source(
-            "signal-spirit",
+            "signal-domain",
             "domain",
-            env!("CARGO_PKG_VERSION"),
+            "0.1.0",
             DOMAIN_SCHEMA_SOURCE,
         );
         let signal_source = SchemaSource::from_schema_text(SIGNAL_SCHEMA_SOURCE)?;
@@ -182,7 +182,7 @@ impl HelpModel {
         let domain_source = SchemaSource::from_schema_text(DOMAIN_SCHEMA_SOURCE)?;
         let domain_schema = engine.lower_schema_source(
             &domain_source,
-            SchemaIdentity::new("signal-spirit:domain", env!("CARGO_PKG_VERSION")),
+            SchemaIdentity::new("signal-domain:domain", "0.1.0"),
         )?;
         let signal_schema = SpecifiedSchema::from(&signal_schema);
         let domain_schema = SpecifiedSchema::from(&domain_schema);

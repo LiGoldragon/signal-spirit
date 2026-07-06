@@ -108,6 +108,48 @@ fn generated_signal_contract_exports_domain_tree() {
     assert!(matches!(domain, Domain::Technology(_)));
 }
 
+#[test]
+fn public_domain_paths_are_signal_domain_types() {
+    let top_level: Domain = signal_domain::Domain::Technology(signal_domain::Technology::Software(
+        signal_domain::Software::Data(signal_domain::DataLeaf::SchemaEvolution),
+    ));
+    let schema_path: signal_spirit::schema::domain::Domain = top_level;
+    let signal_schema_path: signal_spirit::schema::signal::Domain = schema_path;
+
+    assert_signal_domain_domain(signal_schema_path);
+}
+
+#[test]
+fn public_domain_path_round_trips_through_rkyv() {
+    let domain = signal_spirit::Domain::Technology(signal_spirit::Technology::Software(
+        signal_spirit::Software::Data(signal_spirit::DataLeaf::SchemaEvolution),
+    ));
+
+    let bytes = rkyv::to_bytes::<rkyv::rancor::Error>(&domain).expect("encode domain");
+    let decoded = rkyv::from_bytes::<signal_spirit::Domain, rkyv::rancor::Error>(&bytes)
+        .expect("decode domain");
+
+    assert_eq!(decoded, domain);
+}
+
+#[cfg(feature = "nota-text")]
+#[test]
+fn public_domain_path_round_trips_through_nota() {
+    let domain = signal_spirit::Domain::Technology(signal_spirit::Technology::Software(
+        signal_spirit::Software::Data(signal_spirit::DataLeaf::SchemaEvolution),
+    ));
+    let rendered = domain.to_nota();
+
+    assert_eq!(
+        NotaSource::new(&rendered)
+            .parse::<signal_spirit::Domain>()
+            .expect("parse domain"),
+        domain
+    );
+}
+
+fn assert_signal_domain_domain(_domain: signal_domain::Domain) {}
+
 #[cfg(feature = "nota-text")]
 #[test]
 fn generated_help_request_recognizes_top_level_and_named_forms() {

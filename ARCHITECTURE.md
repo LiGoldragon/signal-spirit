@@ -22,6 +22,8 @@ forwarding live in `spirit`.
 
 The record shape enforces **description-only discipline**: one agent-clarified `Description`, a `Kind`, required certainty, daemon-stamped time, and user-creatable topic strings. Daemon-stamped timestamps only — clients never supply capture time. Wire replies are terse; no verbatim echo of submitted content.
 
+Domain taxonomy types are consumed from the shared `signal-domain` contract and re-exported through `signal_spirit::Domain`, `signal_spirit::schema::domain::*`, and `signal_spirit::schema::signal::*` compatibility paths. `signal-spirit` does not own or regenerate the taxonomy.
+
 Privacy is a second directional `Magnitude` axis, not a named tier enum: `Zero` means open/public, higher magnitudes narrow the audience. The mandatory `Tap`/`Untap` observable surface is injected by `signal_channel!`; the domain-specific `Watch`/`Unwatch` pairs for psyche-state and intent-record streams coexist without collision.
 
 Daemon startup carries `AuthorizationMode`: `Gating` keeps criome verdicts fail-closed for fan-out; `Observing` emits criome authorization requests and lets the local head proceed for monitoring.
@@ -138,14 +140,15 @@ or dependencies of this crate.
 | Record identifiers are output-only. | `RecordIdentifier` appears in descriptions/provenance replies, not in `Entry`; `spirit` mints it from randomness, not from row position. |
 | Database classification is daemon-side only; no Sema payloads appear on the wire. | `EffectEmitted` carries contract-owned `operation` and `outcome` fields, and `spirit_contract_has_no_sema_classification_dependency_or_roots` guards the dependency and head set. |
 | Default consumers stay binary-only. | `default_dependency_tree_does_not_pull_text_or_legacy_signal_crates` proves the default normal dependency graph has no `nota`, `nota-codec`, or `signal-core`; `nota_text_feature_is_the_only_text_projection_opt_in` proves `nota` appears only when requested. |
+| Domain taxonomy is shared, not duplicated. | `public_domain_paths_are_signal_domain_types` proves the public `signal-spirit` domain paths are the `signal-domain` types, and `public_domain_path_round_trips_through_rkyv` / `public_domain_path_round_trips_through_nota` keep representative codec compatibility covered. |
 | This crate contains no runtime. | Source has no Kameo, Tokio, sockets, database engine, or sema-engine code. |
 
 ## Code Map
 
 ```text
-src/lib.rs              — request/reply/event records and explicit signal_channel! declaration
-src/migration.rs        — historical contract shapes and projection bridges for store migrations
-examples/canonical.nota — canonical NOTA examples
-tests/round_trip.rs     — rkyv frame, NOTA, verb, and stream witnesses
-tests/migration.rs      — prior-version projection witnesses
+src/lib.rs              — request/reply/event records, signal-domain re-exports, and explicit signal_channel! declaration
+src/schema/domain.rs    — compatibility shim re-exporting signal-domain schema types
+schema/signal.schema    — Spirit wire schema importing signal-domain taxonomy types
+tests/generated_contract.rs — rkyv frame, domain compatibility, and NOTA witnesses
+tests/validation.rs     — contract validation witnesses
 ```

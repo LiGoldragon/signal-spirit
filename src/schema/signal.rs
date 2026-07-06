@@ -10,87 +10,87 @@ pub type Boolean = bool;
 pub type Path = std::string::String;
 
 #[rustfmt::skip]
-pub use crate::schema::domain::Domain as Domain;
+pub use signal_domain::schema::domain::Domain as Domain;
 #[rustfmt::skip]
-pub use crate::schema::domain::Health as Health;
+pub use signal_domain::schema::domain::Health as Health;
 #[rustfmt::skip]
-pub use crate::schema::domain::Food as Food;
+pub use signal_domain::schema::domain::Food as Food;
 #[rustfmt::skip]
-pub use crate::schema::domain::Home as Home;
+pub use signal_domain::schema::domain::Home as Home;
 #[rustfmt::skip]
-pub use crate::schema::domain::Finance as Finance;
+pub use signal_domain::schema::domain::Finance as Finance;
 #[rustfmt::skip]
-pub use crate::schema::domain::Work as Work;
+pub use signal_domain::schema::domain::Work as Work;
 #[rustfmt::skip]
-pub use crate::schema::domain::Craft as Craft;
+pub use signal_domain::schema::domain::Craft as Craft;
 #[rustfmt::skip]
-pub use crate::schema::domain::Knowledge as Knowledge;
+pub use signal_domain::schema::domain::Knowledge as Knowledge;
 #[rustfmt::skip]
-pub use crate::schema::domain::Education as Education;
+pub use signal_domain::schema::domain::Education as Education;
 #[rustfmt::skip]
-pub use crate::schema::domain::Language as Language;
+pub use signal_domain::schema::domain::Language as Language;
 #[rustfmt::skip]
-pub use crate::schema::domain::Art as Art;
+pub use signal_domain::schema::domain::Art as Art;
 #[rustfmt::skip]
-pub use crate::schema::domain::Kinship as Kinship;
+pub use signal_domain::schema::domain::Kinship as Kinship;
 #[rustfmt::skip]
-pub use crate::schema::domain::Selfhood as Selfhood;
+pub use signal_domain::schema::domain::Selfhood as Selfhood;
 #[rustfmt::skip]
-pub use crate::schema::domain::Spirituality as Spirituality;
+pub use signal_domain::schema::domain::Spirituality as Spirituality;
 #[rustfmt::skip]
-pub use crate::schema::domain::Governance as Governance;
+pub use signal_domain::schema::domain::Governance as Governance;
 #[rustfmt::skip]
-pub use crate::schema::domain::Law as Law;
+pub use signal_domain::schema::domain::Law as Law;
 #[rustfmt::skip]
-pub use crate::schema::domain::Community as Community;
+pub use signal_domain::schema::domain::Community as Community;
 #[rustfmt::skip]
-pub use crate::schema::domain::Nature as Nature;
+pub use signal_domain::schema::domain::Nature as Nature;
 #[rustfmt::skip]
-pub use crate::schema::domain::Travel as Travel;
+pub use signal_domain::schema::domain::Travel as Travel;
 #[rustfmt::skip]
-pub use crate::schema::domain::Commerce as Commerce;
+pub use signal_domain::schema::domain::Commerce as Commerce;
 #[rustfmt::skip]
-pub use crate::schema::domain::Leisure as Leisure;
+pub use signal_domain::schema::domain::Leisure as Leisure;
 #[rustfmt::skip]
-pub use crate::schema::domain::Appearance as Appearance;
+pub use signal_domain::schema::domain::Appearance as Appearance;
 #[rustfmt::skip]
-pub use crate::schema::domain::Safety as Safety;
+pub use signal_domain::schema::domain::Safety as Safety;
 #[rustfmt::skip]
-pub use crate::schema::domain::Information as Information;
+pub use signal_domain::schema::domain::Information as Information;
 #[rustfmt::skip]
-pub use crate::schema::domain::Technology as Technology;
+pub use signal_domain::schema::domain::Technology as Technology;
 #[rustfmt::skip]
-pub use crate::schema::domain::HardwareLeaf as HardwareLeaf;
+pub use signal_domain::schema::domain::HardwareLeaf as HardwareLeaf;
 #[rustfmt::skip]
-pub use crate::schema::domain::Software as Software;
+pub use signal_domain::schema::domain::Software as Software;
 #[rustfmt::skip]
-pub use crate::schema::domain::ProgrammingLeaf as ProgrammingLeaf;
+pub use signal_domain::schema::domain::ProgrammingLeaf as ProgrammingLeaf;
 #[rustfmt::skip]
-pub use crate::schema::domain::SystemsLeaf as SystemsLeaf;
+pub use signal_domain::schema::domain::SystemsLeaf as SystemsLeaf;
 #[rustfmt::skip]
-pub use crate::schema::domain::DistributedLeaf as DistributedLeaf;
+pub use signal_domain::schema::domain::DistributedLeaf as DistributedLeaf;
 #[rustfmt::skip]
-pub use crate::schema::domain::DataLeaf as DataLeaf;
+pub use signal_domain::schema::domain::DataLeaf as DataLeaf;
 #[rustfmt::skip]
-pub use crate::schema::domain::IntelligenceLeaf as IntelligenceLeaf;
+pub use signal_domain::schema::domain::IntelligenceLeaf as IntelligenceLeaf;
 #[rustfmt::skip]
-pub use crate::schema::domain::SecurityLeaf as SecurityLeaf;
+pub use signal_domain::schema::domain::SecurityLeaf as SecurityLeaf;
 #[rustfmt::skip]
-pub use crate::schema::domain::QualityLeaf as QualityLeaf;
+pub use signal_domain::schema::domain::QualityLeaf as QualityLeaf;
 #[rustfmt::skip]
-pub use crate::schema::domain::OperationsLeaf as OperationsLeaf;
+pub use signal_domain::schema::domain::OperationsLeaf as OperationsLeaf;
 #[rustfmt::skip]
-pub use crate::schema::domain::ObservabilityLeaf as ObservabilityLeaf;
+pub use signal_domain::schema::domain::ObservabilityLeaf as ObservabilityLeaf;
 #[rustfmt::skip]
-pub use crate::schema::domain::SurfacesLeaf as SurfacesLeaf;
+pub use signal_domain::schema::domain::SurfacesLeaf as SurfacesLeaf;
 #[rustfmt::skip]
-pub use crate::schema::domain::EngineeringLeaf as EngineeringLeaf;
+pub use signal_domain::schema::domain::EngineeringLeaf as EngineeringLeaf;
 #[rustfmt::skip]
-pub use crate::schema::domain::DomainScope as DomainScope;
+pub use signal_domain::schema::domain::DomainScope as DomainScope;
 #[rustfmt::skip]
-pub use crate::schema::domain::DomainScopes as DomainScopes;
+pub use signal_domain::schema::domain::DomainScopes as DomainScopes;
 #[rustfmt::skip]
-pub use crate::schema::domain::ScopeSet as ScopeSet;
+pub use signal_domain::schema::domain::ScopeSet as ScopeSet;
 
 #[rustfmt::skip]
 #[cfg(feature = "nota-text")]
