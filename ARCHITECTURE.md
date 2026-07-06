@@ -46,6 +46,8 @@ The ordinary contract uses contract-local verbs:
   payload `Entry`),
 - `Observe` (the read side — payload is a closed `Observation` enum
   naming `State`, `Records`, `Topics`, `QuestionsPending`, etc.),
+- `PublicIntent` (agent-facing public intent lookup by schema-backed
+  `DomainScope` selections),
 - `Watch` / `Unwatch` (domain-specific subscriptions — payload names
   which stream class to open).
 - `Remove` (intent-store maintenance — payload is the `RecordIdentifier`
@@ -106,6 +108,7 @@ an executable daemon effect record or database-classification payload.
 | `State` | `Statement` |
 | `Record` | `Entry` without date/time |
 | `Observe` | closed `Observation` enum |
+| `PublicIntent` | `DomainScopes` |
 | `Watch` | `Subscription` stream selector |
 | `Unwatch` | `SubscriptionToken` |
 | `Remove` | `RecordIdentifier` |
@@ -128,6 +131,7 @@ or dependencies of this crate.
 | Retract-shaped close variants have typed close acknowledgements. | `SubscriptionRetracted` carries the typed `SubscriptionToken` sum and round-trips through RKYV and NOTA. |
 | Intent queries return compact summaries unless provenance is requested. | `ObservationMode::SummaryOnly` is the explicit query mode used in canonical examples. |
 | Intent record queries support the agent-useful filters needed for intent work. | `PublicRecordQuery` carries `TopicSelection` (`Any`, `Partial`, `Full`), optional `kind`, `CertaintySelection` (`Any`, `Exact`, `AtMost`, `AtLeast`), `RecordedTimeSelection` (`Any`, `Between`, `Since`, `Until`, `Recent`, `Shallow`, `Deep`, `VeryDeep`), and description/provenance mode; it has no privacy field and means exact-`Zero` privacy. `RecordIdentifierQuery` selects one opaque identifier exactly; identifier ranges are intentionally absent because random identifiers do not carry recency or ordinal meaning. `PrivacyScopedRecordQuery` and `PrivacyScopedRecordIdentifierQuery` are explicit elevated read shapes carrying `PrivacySelection` (`Any`, `Exact`, `AtMost`, `AtLeast`). `RecordQuery` remains the full maintenance/internal query shape for candidate collection and daemon projection. |
+| Agent-facing public intent lookup hides low-level query plumbing. | `PublicIntent(DomainScopes)` carries schema-backed domain selections and validates them with the same non-empty `DomainScopes` rule used by domain matches. |
 | Intent entries can be removed explicitly by identifier. | `Remove(RecordIdentifier)` round-trips through RKYV and NOTA and returns `RecordRemoved`; production identifiers are opaque lowercase base36 codes minted by `spirit`, normally rendered at the shortest collision-free four-to-seven-character length while the wire type remains wide enough to decode older long codes. |
 | Intent entries can be nominated for removal without deletion. | `ChangeCertainty(CertaintyChange)` round-trips through RKYV and NOTA and returns `CertaintyChanged`; setting certainty to `Zero` makes the record visible to removal-candidate review. |
 | Intent entries can be corrected in place without remove-and-recreate. | `ChangeRecord(RecordChange)` round-trips through RKYV and NOTA and returns `RecordMutationApplied`; the daemon replaces the user-authored `Entry` fields under the same `RecordIdentifier` while preserving daemon-owned provenance. |

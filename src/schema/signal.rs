@@ -299,6 +299,14 @@ pub struct Observe(Query);
     derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct PublicIntent(DomainScopes);
+
+#[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct PublicTextSearch(SearchText);
 
 #[rustfmt::skip]
@@ -1692,6 +1700,7 @@ pub enum OperationKind {
     SubscribeIntent,
     Version,
     Marker,
+    PublicIntent,
 }
 
 #[rustfmt::skip]
@@ -2160,6 +2169,7 @@ pub enum Input {
     SubscribeIntent(SubscribeIntent),
     Version,
     Marker,
+    PublicIntent(PublicIntent),
 }
 
 #[rustfmt::skip]
@@ -2440,6 +2450,25 @@ impl Observe {
 #[rustfmt::skip]
 impl From<Query> for Observe {
     fn from(payload: Query) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl PublicIntent {
+    pub fn new(payload: DomainScopes) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &DomainScopes {
+        &self.0
+    }
+    pub fn into_payload(self) -> DomainScopes {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<DomainScopes> for PublicIntent {
+    fn from(payload: DomainScopes) -> Self {
         Self::new(payload)
     }
 }
@@ -5131,6 +5160,9 @@ impl Input {
     pub fn subscribe_intent(payload: Query) -> Self {
         Self::SubscribeIntent(SubscribeIntent::new(payload))
     }
+    pub fn public_intent(payload: DomainScopes) -> Self {
+        Self::PublicIntent(PublicIntent::new(payload))
+    }
 }
 
 #[rustfmt::skip]
@@ -5846,6 +5878,13 @@ impl From<SubscribeIntent> for Input {
 }
 
 #[rustfmt::skip]
+impl From<PublicIntent> for Input {
+    fn from(payload: PublicIntent) -> Self {
+        Self::PublicIntent(payload)
+    }
+}
+
+#[rustfmt::skip]
 impl From<RecordAccepted> for Output {
     fn from(payload: RecordAccepted) -> Self {
         Self::RecordAccepted(payload)
@@ -6085,6 +6124,7 @@ pub mod short_header {
     pub const INPUT_SUBSCRIBE_INTENT: u64 = 0x0015000000000000;
     pub const INPUT_VERSION: u64 = 0x0016000000000000;
     pub const INPUT_MARKER: u64 = 0x0017000000000000;
+    pub const INPUT_PUBLIC_INTENT: u64 = 0x0018000000000000;
     pub const OUTPUT_RECORD_ACCEPTED: u64 = 0x0100000000000000;
     pub const OUTPUT_PROPOSED: u64 = 0x0101000000000000;
     pub const OUTPUT_CLARIFIED: u64 = 0x0102000000000000;
@@ -6188,6 +6228,7 @@ pub enum InputRoute {
     SubscribeIntent,
     Version,
     Marker,
+    PublicIntent,
 }
 
 #[rustfmt::skip]
@@ -6262,6 +6303,7 @@ impl Input {
             Self::SubscribeIntent(_) => InputRoute::SubscribeIntent,
             Self::Version => InputRoute::Version,
             Self::Marker => InputRoute::Marker,
+            Self::PublicIntent(_) => InputRoute::PublicIntent,
         }
     }
     pub fn short_header(&self) -> u64 {
@@ -6290,6 +6332,7 @@ impl Input {
             Self::SubscribeIntent(_) => short_header::INPUT_SUBSCRIBE_INTENT,
             Self::Version => short_header::INPUT_VERSION,
             Self::Marker => short_header::INPUT_MARKER,
+            Self::PublicIntent(_) => short_header::INPUT_PUBLIC_INTENT,
         }
     }
     pub fn route_from_short_header(header: u64) -> Result<InputRoute, SignalFrameError> {
@@ -6322,6 +6365,7 @@ impl Input {
             short_header::INPUT_SUBSCRIBE_INTENT => Ok(InputRoute::SubscribeIntent),
             short_header::INPUT_VERSION => Ok(InputRoute::Version),
             short_header::INPUT_MARKER => Ok(InputRoute::Marker),
+            short_header::INPUT_PUBLIC_INTENT => Ok(InputRoute::PublicIntent),
             _ => {
                 Err(SignalFrameError::UnknownHeader {
                     root_enum: "Input",
@@ -6547,6 +6591,7 @@ impl signal_frame::SignalOperationHeads for Input {
         "SubscribeIntent",
         "Version",
         "Marker",
+        "PublicIntent",
     ];
 }
 #[rustfmt::skip]

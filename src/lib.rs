@@ -213,6 +213,7 @@ impl Input {
             Self::Supersede(supersede) => supersede.payload().validate(),
             Self::ResolveClarification(resolution) => resolution.payload().validate(),
             Self::Observe(observe) => observe.payload().validate(),
+            Self::PublicIntent(public_intent) => public_intent.payload().validate(),
             Self::PublicTextSearch(search) => search.payload().validate(),
             Self::PublicRecords(selection) => selection.payload().validate(),
             Self::PrivateRecords(selection) => selection.payload().validate(),
@@ -511,6 +512,7 @@ impl OperationKind {
             Input::Retire(_) => Self::Retire,
             Input::ResolveClarification(_) => Self::ResolveClarification,
             Input::Observe(_) => Self::Observe,
+            Input::PublicIntent(_) => Self::PublicIntent,
             Input::PublicTextSearch(_) => Self::PublicTextSearch,
             Input::PublicRecords(_) => Self::PublicRecords,
             Input::PrivateRecords(_) => Self::PrivateRecords,
@@ -535,18 +537,8 @@ impl DomainMatch {
     pub fn validate(&self) -> Result<(), ValidationError> {
         match self {
             Self::Any => Ok(()),
-            Self::Partial(scopes) => {
-                if scopes.payload().payload().is_empty() {
-                    return Err(ValidationError::EmptyQueryDomain);
-                }
-                Ok(())
-            }
-            Self::Full(scopes) => {
-                if scopes.payload().payload().is_empty() {
-                    return Err(ValidationError::EmptyQueryDomain);
-                }
-                Ok(())
-            }
+            Self::Partial(scopes) => scopes.payload().validate(),
+            Self::Full(scopes) => scopes.payload().validate(),
         }
     }
 
@@ -875,6 +867,13 @@ impl Domains {
 }
 
 impl DomainScopes {
+    pub fn validate(&self) -> Result<(), ValidationError> {
+        if self.is_empty() {
+            return Err(ValidationError::EmptyQueryDomain);
+        }
+        Ok(())
+    }
+
     pub fn from_strings(labels: Vec<String>) -> Self {
         Self::from_domains(&Domains::from_strings(labels))
     }

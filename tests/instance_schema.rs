@@ -182,6 +182,20 @@ fn root_input_record_renders_the_endorsed_root_form() {
 }
 
 #[test]
+fn root_input_public_intent_renders_domain_scopes_payload() {
+    let source = "(PublicIntent [All])";
+    let (value, schema) = schema_of::<Input>(source);
+    assert!(matches!(value, Input::PublicIntent(_)));
+
+    assert_eq!(named(schema.expected()), "Input");
+    assert_eq!(
+        InstanceSchemaText::new(&schema).aligned(),
+        "(Input DomainScopes)"
+    );
+    round_trips_as_reference("(Input DomainScopes)");
+}
+
+#[test]
 fn unit_root_variant_is_a_scalar_terminal() {
     let (value, schema) = schema_of::<Input>("Version");
     assert_eq!(value, Input::Version);

@@ -1,7 +1,22 @@
 use signal_spirit::{
-    Certainty, DataLeaf, Description, Domain, Domains, Entry, Importance, Kind, Magnitude, Privacy,
-    Referent, Referents, Software, Technology, ValidationError,
+    Certainty, DataLeaf, Description, Domain, DomainScope, DomainScopes, Domains, Entry,
+    Importance, Input, Kind, Magnitude, Privacy, Referent, Referents, Software, Technology,
+    ValidationError,
 };
+
+#[test]
+fn public_intent_accepts_non_empty_domain_scopes() {
+    let input = Input::public_intent(DomainScopes::new(vec![DomainScope::All]));
+
+    assert_eq!(input.validate(), Ok(()));
+}
+
+#[test]
+fn public_intent_rejects_empty_domain_scopes() {
+    let input = Input::public_intent(DomainScopes::new(Vec::new()));
+
+    assert_eq!(input.validate(), Err(ValidationError::EmptyQueryDomain));
+}
 
 #[test]
 fn entry_rejects_empty_domains() {

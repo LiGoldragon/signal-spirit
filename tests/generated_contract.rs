@@ -1,9 +1,9 @@
 use signal_spirit::{
     ClarificationRecordIdentifier, ClarificationResolution, ClarificationResolutionReceipt,
     DataLeaf, Description, Domain, DomainMatch, DomainScope, DomainScopes, Domains, Input,
-    InputRoute, Justification, Output, OutputRoute, QuoteText, Reasoning, RecordIdentifier,
-    RecordIdentifiers, ScopeSet, Software, TargetClarification, TargetClarifications, Technology,
-    Testimony, VerbatimQuote, VersionReport, VersionText,
+    InputRoute, Justification, OperationKind, Output, OutputRoute, QuoteText, Reasoning,
+    RecordIdentifier, RecordIdentifiers, ScopeSet, Software, TargetClarification,
+    TargetClarifications, Technology, Testimony, VerbatimQuote, VersionReport, VersionText,
 };
 #[cfg(feature = "nota-text")]
 use std::collections::BTreeSet;
@@ -22,6 +22,35 @@ fn generated_input_frame_round_trips() {
 
     assert_eq!(route, InputRoute::Version);
     assert_eq!(decoded, input);
+}
+
+#[test]
+fn generated_public_intent_frame_round_trips_without_moving_existing_routes() {
+    let input = Input::public_intent(DomainScopes::new(vec![DomainScope::All]));
+    let bytes = input.encode_signal_frame().expect("encode input frame");
+    let (route, decoded) = Input::decode_signal_frame(&bytes).expect("decode input frame");
+
+    assert_eq!(route, InputRoute::PublicIntent);
+    assert_eq!(decoded, input);
+    assert_eq!(
+        OperationKind::from_input(&input),
+        OperationKind::PublicIntent
+    );
+    assert_eq!(
+        input.short_header(),
+        0x0018_0000_0000_0000,
+        "new PublicIntent route is appended after the existing route range"
+    );
+    assert_eq!(
+        signal_spirit::schema::signal::short_header::INPUT_PUBLIC_TEXT_SEARCH,
+        0x0008_0000_0000_0000,
+        "existing PublicTextSearch route must keep its short header"
+    );
+    assert_eq!(
+        signal_spirit::schema::signal::short_header::INPUT_MARKER,
+        0x0017_0000_0000_0000,
+        "existing Marker route must keep its short header when PublicIntent is added"
+    );
 }
 
 #[test]
