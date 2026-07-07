@@ -482,31 +482,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
 
 [[package]]
-name = "schema"
-version = "0.2.0"
-source = "git+https://github.com/LiGoldragon/schema-next.git?branch=main#92bed64ad644ce4caa2827398ada5b7b79221165"
-dependencies = [
- "blake3",
- "nota",
- "rkyv",
- "schema-cc",
- "thiserror",
-]
-
-[[package]]
-name = "schema-cc"
-version = "0.1.0"
-source = "git+https://github.com/LiGoldragon/schema-next.git?branch=main#92bed64ad644ce4caa2827398ada5b7b79221165"
-dependencies = [
- "nota",
- "prettyplease",
- "proc-macro2",
- "quote",
- "syn",
- "thiserror",
-]
-
-[[package]]
 name = "schema-language"
 version = "0.2.0"
 source = "git+https://github.com/LiGoldragon/schema-language.git?rev=6aae825d668e3f607a2754afa6b7d94e9f246c41#6aae825d668e3f607a2754afa6b7d94e9f246c41"
@@ -529,21 +504,6 @@ dependencies = [
  "quote",
  "syn",
  "thiserror",
-]
-
-[[package]]
-name = "schema-rust"
-version = "0.6.0"
-source = "git+https://github.com/LiGoldragon/schema-rust-next.git?branch=main#3278fbc6e6593c044437b3ee5ca1fe71cac344c1"
-dependencies = [
- "nota",
- "prettyplease",
- "proc-macro2",
- "quote",
- "schema-language",
- "syn",
- "thiserror",
- "triad-runtime",
 ]
 
 [[package]]
@@ -600,12 +560,12 @@ checksum = "f8fadd59c855ef2080decdef8ff161eb6661b86933c9d82e5ba29dc602a55aba"
 [[package]]
 name = "signal-domain"
 version = "0.1.0"
-source = "git+https://github.com/LiGoldragon/signal-domain.git?rev=3a1692693f7b842c024994b16523395732780f0a#3a1692693f7b842c024994b16523395732780f0a"
+source = "git+https://github.com/LiGoldragon/signal-domain.git?rev=801e1c5bcc824c9760e246205826e3c8e962d005#801e1c5bcc824c9760e246205826e3c8e962d005"
 dependencies = [
  "nota",
  "rkyv",
- "schema",
- "schema-rust 0.6.0 (git+https://github.com/LiGoldragon/schema-rust-next.git?branch=main)",
+ "schema-language",
+ "schema-rust",
 ]
 
 [[package]]
@@ -637,7 +597,7 @@ dependencies = [
  "nota",
  "rkyv",
  "schema-language",
- "schema-rust 0.6.0 (git+https://github.com/LiGoldragon/schema-rust.git?rev=3278fbc6e6593c044437b3ee5ca1fe71cac344c1)",
+ "schema-rust",
  "signal-domain",
  "signal-frame",
  "thiserror",
