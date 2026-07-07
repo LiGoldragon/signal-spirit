@@ -11,7 +11,7 @@ use nota::{Document, NotaDecode, NotaEncode};
 use schema_language::{ImportResolver, SchemaEngine, SchemaIdentity, SchemaSource, TrueSchema};
 use signal_spirit::{DOMAIN_SCHEMA_SOURCE, HelpModel, HelpRequest, SIGNAL_SCHEMA_SOURCE};
 
-const DOMAIN_HELP_ROW: &str = "[All (Health) (Food) (Home) (Finance) (Work) (Craft) (Knowledge) (Education) (Language) (Art) (Kinship) (Selfhood) (Spirituality) (Governance) (Law) (Community) (Nature) (Travel) (Commerce) (Leisure) (Appearance) (Safety) (Information) (Technology)]";
+const DOMAIN_HELP_ROW: &str = "[All (Health Health) (Food Food) (Home Home) (Finance Finance) (Work Work) (Craft Craft) (Knowledge Knowledge) (Education Education) (Language Language) (Art Art) (Kinship Kinship) (Selfhood Selfhood) (Spirituality Spirituality) (Governance Governance) (Law Law) (Community Community) (Nature Nature) (Travel Travel) (Commerce Commerce) (Leisure Leisure) (Appearance Appearance) (Safety Safety) (Information Information) (Technology Technology)]";
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct DecodedSpiritSchemas {

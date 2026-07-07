@@ -12,7 +12,7 @@ use std::collections::BTreeSet;
 use nota::{NotaEncode, NotaSource};
 
 #[cfg(feature = "nota-text")]
-const DOMAIN_HELP_ROW: &str = "[All (Health) (Food) (Home) (Finance) (Work) (Craft) (Knowledge) (Education) (Language) (Art) (Kinship) (Selfhood) (Spirituality) (Governance) (Law) (Community) (Nature) (Travel) (Commerce) (Leisure) (Appearance) (Safety) (Information) (Technology)]";
+const DOMAIN_HELP_ROW: &str = "[All (Health Health) (Food Food) (Home Home) (Finance Finance) (Work Work) (Craft Craft) (Knowledge Knowledge) (Education Education) (Language Language) (Art Art) (Kinship Kinship) (Selfhood Selfhood) (Spirituality Spirituality) (Governance Governance) (Law Law) (Community Community) (Nature Nature) (Travel Travel) (Commerce Commerce) (Leisure Leisure) (Appearance Appearance) (Safety Safety) (Information Information) (Technology Technology)]";
 
 #[test]
 fn generated_input_frame_round_trips() {
@@ -352,11 +352,18 @@ fn generated_help_model_renders_every_decoded_schema_target() {
             .render(&signal_spirit::HelpRequest::for_name("Domain"))
             .expect("render imported Domain help")
             .to_string(),
-        // Help renders the positional body only. Same-named payload variants
-        // are encoded in schema-language's self-tagged form, so each Domain
-        // arm is one navigable step away from its nested enum body. Top-level
-        // All is the explicit payload-free universal domain.
+        // Help renders the positional body only while keeping same-named
+        // payloads explicit, so each Domain arm exposes its nested enum body.
+        // Top-level All is the explicit payload-free universal domain.
         DOMAIN_HELP_ROW
+    );
+    assert_eq!(
+        model
+            .render(&signal_spirit::HelpRequest::for_name("Technology"))
+            .expect("render Technology help")
+            .to_string(),
+        "[(Hardware HardwareLeaf) (Software Software)]",
+        "Technology Help should expose the same-named Software payload from TrueSchema"
     );
     assert_eq!(
         model
@@ -417,10 +424,14 @@ fn generated_help_round_trips_through_the_schema_codec() {
         ),
         ("Domains", "(Vector Domain)"),
         ("RecordAccepted", "RecordIdentifier"),
-        // Same-named payload variants project to schema-language's self-tagged
-        // form and round trip without leaking a duplicate payload name.
+        // Same-named payload variants stay explicit in Help so navigation does
+        // not hide payload declarations from the typed schema.
         ("Domain", DOMAIN_HELP_ROW),
-        ("DomainMatch", "[Any (Partial) (Full)]"),
+        (
+            "Technology",
+            "[(Hardware HardwareLeaf) (Software Software)]",
+        ),
+        ("DomainMatch", "[Any (Partial Partial) (Full Full)]"),
         (
             "IntentEventStream",
             "(Stream { token.SubscriptionToken opened.SubscriptionStarted event.IntentEvent close.SubscriptionToken })",

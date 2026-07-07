@@ -507,13 +507,20 @@ impl HelpBody {
     }
 
     fn source_variant_from_enum_variant(variant: &EnumVariant) -> SourceVariantSignature {
-        SourceVariantSignature::from_projected(
-            variant.name.clone(),
-            variant.payload.as_ref().map(|payload| {
-                SourceVariantPayload::Reference(SourceReference::from_type_reference(payload))
-            }),
-            variant.stream_relation.as_ref(),
-        )
+        let payload = variant.payload.as_ref().map(|payload| {
+            SourceVariantPayload::Reference(SourceReference::from_type_reference(payload))
+        });
+
+        match (payload, variant.stream_relation.as_ref()) {
+            (Some(payload), None) => {
+                SourceVariantSignature::from_payload(variant.name.clone(), payload)
+            }
+            (payload, stream_relation) => SourceVariantSignature::from_projected(
+                variant.name.clone(),
+                payload,
+                stream_relation,
+            ),
+        }
     }
 
     pub fn to_schema_text(&self) -> String {
