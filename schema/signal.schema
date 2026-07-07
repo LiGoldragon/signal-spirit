@@ -42,7 +42,7 @@
   EngineeringLeaf signal-domain:domain:EngineeringLeaf
 }
 [State Record Propose Clarify Supersede Retire ResolveClarification Observe PublicTextSearch PublicRecords PrivateRecords Lookup Count ChangeCertainty BumpImportance ChangeRecord RegisterReferent LookupStash Tap Untap ApplyAuthorizedRecord (SubscribeIntent SubscribeIntent opens IntentEventStream) Version Marker PublicIntent]
-[RecordAccepted Proposed Clarified Superseded Retired ClarificationResolved GuardianRejected ReferentGuardianRejected RecordsObserved RecordsStashed RecordFound RecordsCounted CertaintyChanged ImportanceBumped RecordChanged ReferentRegistered ObservationTapped ObservationUntapped SubscriptionStarted VersionReported MarkerReported RecordApplied ApplyRefused (Event IntentEvent) Error Rejected]
+[RecordAccepted Proposed Clarified Superseded Retired ClarificationResolved GuardianRejected ReferentGuardianRejected RecordsObserved RecordsStashed RecordFound RecordsCounted CertaintyChanged ImportanceBumped RecordChanged ReferentRegistered ObservationTapped ObservationUntapped SubscriptionStarted VersionReported MarkerReported RecordApplied ApplyRefused (Event IntentEvent) Error Rejected AdvanceRefused]
 {
   SourcePath String
   LocalPath String
@@ -98,6 +98,7 @@
   MarkerReported DatabaseMarker
   RecordApplied RecordApplicationReceipt
   ApplyRefused ApplyRefusal
+  AdvanceRefused AdvanceRefusal
   Error ErrorReport
   Rejected SignalRejection
 
@@ -133,6 +134,8 @@
   RecordApplicationReceipt { RecordIdentifier DatabaseMarker }
   ApplyRefusalReason [MalformedRecord RehashMismatch AuthorizationDenied AuthorizationUnavailable]
   ApplyRefusal { ApplyRefusalReason }
+  AdvanceRefusalReason [Denied Expired Unavailable Unreachable]
+  AdvanceRefusal { AdvanceRefusalReason }
   ObservedRecords { RecordSet }
   ObservedRecord { RecordIdentifier Entry }
   FoundRecord { RecordIdentifier Entry }

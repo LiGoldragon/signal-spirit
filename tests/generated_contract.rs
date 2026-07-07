@@ -1,9 +1,10 @@
 use signal_spirit::{
-    ClarificationRecordIdentifier, ClarificationResolution, ClarificationResolutionReceipt,
-    DataLeaf, Description, Domain, DomainMatch, DomainScope, DomainScopes, Domains, Input,
-    InputRoute, Justification, OperationKind, Output, OutputRoute, QuoteText, Reasoning,
-    RecordIdentifier, RecordIdentifiers, ScopeSet, Software, TargetClarification,
-    TargetClarifications, Technology, Testimony, VerbatimQuote, VersionReport, VersionText,
+    AdvanceRefusal, AdvanceRefusalReason, ClarificationRecordIdentifier, ClarificationResolution,
+    ClarificationResolutionReceipt, DataLeaf, Description, Domain, DomainMatch, DomainScope,
+    DomainScopes, Domains, Input, InputRoute, Justification, OperationKind, Output, OutputRoute,
+    QuoteText, Reasoning, RecordIdentifier, RecordIdentifiers, ScopeSet, Software,
+    TargetClarification, TargetClarifications, Technology, Testimony, VerbatimQuote, VersionReport,
+    VersionText,
 };
 #[cfg(feature = "nota-text")]
 use std::collections::BTreeSet;
@@ -101,6 +102,38 @@ fn generated_clarification_resolved_frame_round_trips() {
 
     assert_eq!(route, OutputRoute::ClarificationResolved);
     assert_eq!(decoded, output);
+}
+
+#[test]
+fn generated_advance_refused_frame_round_trips_without_moving_existing_routes() {
+    for reason in [
+        AdvanceRefusalReason::Denied,
+        AdvanceRefusalReason::Expired,
+        AdvanceRefusalReason::Unavailable,
+        AdvanceRefusalReason::Unreachable,
+    ] {
+        let output = Output::advance_refused(AdvanceRefusal::new(reason));
+        let bytes = output.encode_signal_frame().expect("encode output frame");
+        let (route, decoded) = Output::decode_signal_frame(&bytes).expect("decode output frame");
+
+        assert_eq!(route, OutputRoute::AdvanceRefused);
+        assert_eq!(decoded, output);
+        assert_eq!(
+            output.short_header(),
+            0x011A_0000_0000_0000,
+            "new AdvanceRefused route is appended after the existing route range"
+        );
+    }
+    assert_eq!(
+        signal_spirit::schema::signal::short_header::OUTPUT_APPLY_REFUSED,
+        0x0116_0000_0000_0000,
+        "existing ApplyRefused route must keep its short header"
+    );
+    assert_eq!(
+        signal_spirit::schema::signal::short_header::OUTPUT_REJECTED,
+        0x0119_0000_0000_0000,
+        "existing Rejected route must keep its short header when AdvanceRefused is added"
+    );
 }
 
 #[cfg(feature = "nota-text")]

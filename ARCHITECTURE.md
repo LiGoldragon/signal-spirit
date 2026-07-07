@@ -28,6 +28,8 @@ Privacy is a second directional `Magnitude` axis, not a named tier enum: `Zero` 
 
 Daemon startup carries `AuthorizationMode`: `Gating` keeps criome verdicts fail-closed for fan-out; `Observing` emits criome authorization requests and lets the local head proceed for monitoring.
 
+Under cluster authorization, a head-advancing operation the cluster does not grant is refused to the caller as `AdvanceRefused(AdvanceRefusal)` with a closed `AdvanceRefusalReason`: `Denied` — criome reached a terminal deny; `Expired` — the authorization window closed before the quorum completed; `Unavailable` — no operational quorum contract exists (the unfounded-criome loud refusal); `Unreachable` — the local criome could not be reached or its session went dead. The schema language carries no comment syntax, so these reason meanings live here. `AdvanceRefusal` is the intake-gate vocabulary and is distinct from the peer-apply ingress `ApplyRefusal`; the two contact points keep their own closed types.
+
 ## Contract/Daemon Boundary
 
 This contract owns only the ordinary public wire vocabulary. The
@@ -145,6 +147,7 @@ or dependencies of this crate.
 | Database classification is daemon-side only; no Sema payloads appear on the wire. | `EffectEmitted` carries contract-owned `operation` and `outcome` fields, and `spirit_contract_has_no_sema_classification_dependency_or_roots` guards the dependency and head set. |
 | Default consumers stay binary-only. | `default_dependency_tree_does_not_pull_text_or_legacy_signal_crates` proves the default normal dependency graph has no `nota`, `nota-codec`, or `signal-core`; `nota_text_feature_is_the_only_text_projection_opt_in` proves `nota` appears only when requested. |
 | Domain taxonomy is shared, not duplicated. | `public_domain_paths_are_signal_domain_types` proves the public `signal-spirit` domain paths are the `signal-domain` types, and `public_domain_path_round_trips_through_rkyv` / `public_domain_path_round_trips_through_nota` keep representative codec compatibility covered. |
+| A refused head advance surfaces a typed reason and new routes never move existing ones. | `generated_advance_refused_frame_round_trips_without_moving_existing_routes` round-trips every `AdvanceRefusalReason` variant through the signal frame and pins the appended `OUTPUT_ADVANCE_REFUSED` short header beside the unchanged `ApplyRefused`/`Rejected` headers. |
 | This crate contains no runtime. | Source has no Kameo, Tokio, sockets, database engine, or sema-engine code. |
 
 ## Code Map

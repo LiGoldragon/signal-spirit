@@ -519,6 +519,14 @@ pub struct ApplyRefused(ApplyRefusal);
     derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct AdvanceRefused(AdvanceRefusal);
+
+#[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct Error(ErrorReport);
 
 #[rustfmt::skip]
@@ -803,6 +811,36 @@ pub enum ApplyRefusalReason {
 )]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct ApplyRefusal(ApplyRefusalReason);
+
+#[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
+#[derive(
+    rkyv::Archive,
+    rkyv::Serialize,
+    rkyv::Deserialize,
+    Clone,
+    Copy,
+    Debug,
+    PartialEq,
+    Eq,
+)]
+pub enum AdvanceRefusalReason {
+    Denied,
+    Expired,
+    Unavailable,
+    Unreachable,
+}
+
+#[rustfmt::skip]
+#[cfg_attr(
+    feature = "nota-text",
+    derive(nota::NotaDecode, nota::NotaDecodeTraced, nota::NotaEncode)
+)]
+#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq, Eq)]
+pub struct AdvanceRefusal(AdvanceRefusalReason);
 
 #[rustfmt::skip]
 #[cfg_attr(
@@ -2129,6 +2167,7 @@ pub enum Output {
     Event(IntentEvent),
     Error(Error),
     Rejected(Rejected),
+    AdvanceRefused(AdvanceRefused),
 }
 
 #[rustfmt::skip]
@@ -3044,6 +3083,25 @@ impl From<ApplyRefusal> for ApplyRefused {
 }
 
 #[rustfmt::skip]
+impl AdvanceRefused {
+    pub fn new(payload: AdvanceRefusal) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &AdvanceRefusal {
+        &self.0
+    }
+    pub fn into_payload(self) -> AdvanceRefusal {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<AdvanceRefusal> for AdvanceRefused {
+    fn from(payload: AdvanceRefusal) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
 impl Error {
     pub fn new(payload: ErrorReport) -> Self {
         Self(payload)
@@ -3571,6 +3629,25 @@ impl ApplyRefusal {
 #[rustfmt::skip]
 impl From<ApplyRefusalReason> for ApplyRefusal {
     fn from(payload: ApplyRefusalReason) -> Self {
+        Self::new(payload)
+    }
+}
+
+#[rustfmt::skip]
+impl AdvanceRefusal {
+    pub fn new(payload: AdvanceRefusalReason) -> Self {
+        Self(payload)
+    }
+    pub fn payload(&self) -> &AdvanceRefusalReason {
+        &self.0
+    }
+    pub fn into_payload(self) -> AdvanceRefusalReason {
+        self.0
+    }
+}
+#[rustfmt::skip]
+impl From<AdvanceRefusalReason> for AdvanceRefusal {
+    fn from(payload: AdvanceRefusalReason) -> Self {
         Self::new(payload)
     }
 }
@@ -4979,6 +5056,9 @@ impl Output {
     pub fn rejected(payload: SignalRejection) -> Self {
         Self::Rejected(Rejected::new(payload))
     }
+    pub fn advance_refused(payload: AdvanceRefusal) -> Self {
+        Self::AdvanceRefused(AdvanceRefused::new(payload))
+    }
 }
 
 #[rustfmt::skip]
@@ -5465,6 +5545,13 @@ impl From<Rejected> for Output {
 }
 
 #[rustfmt::skip]
+impl From<AdvanceRefused> for Output {
+    fn from(payload: AdvanceRefused) -> Self {
+        Self::AdvanceRefused(payload)
+    }
+}
+
+#[rustfmt::skip]
 #[cfg(feature = "nota-text")]
 impl std::str::FromStr for Input {
     type Err = NotaDecodeError;
@@ -5549,6 +5636,7 @@ pub mod short_header {
     pub const OUTPUT_EVENT: u64 = 0x0117000000000000;
     pub const OUTPUT_ERROR: u64 = 0x0118000000000000;
     pub const OUTPUT_REJECTED: u64 = 0x0119000000000000;
+    pub const OUTPUT_ADVANCE_REFUSED: u64 = 0x011A000000000000;
 }
 
 #[rustfmt::skip]
@@ -5671,6 +5759,7 @@ pub enum OutputRoute {
     Event,
     Error,
     Rejected,
+    AdvanceRefused,
 }
 
 #[rustfmt::skip]
@@ -5840,6 +5929,7 @@ impl Output {
             Self::Event(_) => OutputRoute::Event,
             Self::Error(_) => OutputRoute::Error,
             Self::Rejected(_) => OutputRoute::Rejected,
+            Self::AdvanceRefused(_) => OutputRoute::AdvanceRefused,
         }
     }
     pub fn short_header(&self) -> u64 {
@@ -5872,6 +5962,7 @@ impl Output {
             Self::Event(_) => short_header::OUTPUT_EVENT,
             Self::Error(_) => short_header::OUTPUT_ERROR,
             Self::Rejected(_) => short_header::OUTPUT_REJECTED,
+            Self::AdvanceRefused(_) => short_header::OUTPUT_ADVANCE_REFUSED,
         }
     }
     pub fn route_from_short_header(
@@ -5914,6 +6005,7 @@ impl Output {
             short_header::OUTPUT_EVENT => Ok(OutputRoute::Event),
             short_header::OUTPUT_ERROR => Ok(OutputRoute::Error),
             short_header::OUTPUT_REJECTED => Ok(OutputRoute::Rejected),
+            short_header::OUTPUT_ADVANCE_REFUSED => Ok(OutputRoute::AdvanceRefused),
             _ => {
                 Err(SignalFrameError::UnknownHeader {
                     root_enum: "Output",

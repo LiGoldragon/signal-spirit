@@ -27,7 +27,7 @@ impl SchemaBuild {
             DependencySchema::from_cargo_metadata("signal-domain", "signal-domain", "0.1.0")
                 .expect("read signal-domain schema metadata");
 
-        let plan = GenerationPlan::new(&self.crate_root, "signal-spirit", "0.12.0")
+        let plan = GenerationPlan::new(&self.crate_root, "signal-spirit", "0.13.0")
             .with_optional_dependency_schema(signal_domain_schema)
             .with_module(ModuleEmission::wire_contract_module("signal"));
 
