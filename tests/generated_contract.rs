@@ -141,7 +141,16 @@ fn generated_signal_contract_exports_domain_tree() {
 }
 
 #[test]
-fn public_domain_paths_use_signal_domain_payload_types() {
+fn public_domain_paths_are_signal_domain_types() {
+    let shared_domain: signal_domain::Domain = signal_spirit::Domain::All;
+    let top_level: signal_spirit::Domain = shared_domain.clone();
+    let schema_path: signal_spirit::schema::domain::Domain = shared_domain.clone();
+    let signal_schema_path: signal_spirit::schema::signal::Domain = shared_domain;
+
+    assert_eq!(top_level, signal_domain::Domain::All);
+    assert_eq!(schema_path, signal_domain::Domain::All);
+    assert_eq!(signal_schema_path, signal_domain::Domain::All);
+
     let technology = signal_domain::Technology::Software(signal_domain::Software::Data(
         signal_domain::DataLeaf::SchemaEvolution,
     ));
@@ -149,7 +158,10 @@ fn public_domain_paths_use_signal_domain_payload_types() {
     let schema_path: signal_spirit::schema::domain::Domain = top_level.clone();
     let signal_schema_path: signal_spirit::schema::signal::Domain = schema_path;
 
-    assert!(matches!(signal_schema_path, Domain::Technology(_)));
+    assert!(matches!(
+        signal_schema_path,
+        signal_domain::Domain::Technology(_)
+    ));
 }
 
 #[test]
@@ -181,14 +193,43 @@ fn public_domain_path_round_trips_through_nota() {
     );
 }
 
+#[cfg(feature = "nota-text")]
 #[test]
-fn generated_signal_contract_exports_top_level_all_domain() {
-    let domain = Domain::All;
-    let bytes = rkyv::to_bytes::<rkyv::rancor::Error>(&domain).expect("archive Domain::All");
-    let decoded = rkyv::from_bytes::<Domain, rkyv::rancor::Error>(&bytes)
-        .expect("decode Domain::All archive");
+fn public_all_domain_and_scope_paths_round_trip_through_nota() {
+    let rendered_domain = signal_spirit::Domain::All.to_nota();
+    let rendered_scope = signal_spirit::DomainScope::All.to_nota();
 
-    assert_eq!(decoded, Domain::All);
+    assert_eq!(
+        NotaSource::new(&rendered_domain)
+            .parse::<signal_domain::Domain>()
+            .expect("parse Domain::All through shared type"),
+        signal_domain::Domain::All
+    );
+    assert_eq!(
+        NotaSource::new(&rendered_scope)
+            .parse::<signal_domain::DomainScope>()
+            .expect("parse DomainScope::All through shared type"),
+        signal_domain::DomainScope::All
+    );
+}
+
+#[test]
+fn public_all_domain_and_scope_paths_round_trip_through_rkyv() {
+    let domain = signal_spirit::Domain::All;
+    let domain_bytes = rkyv::to_bytes::<rkyv::rancor::Error>(&domain).expect("archive Domain::All");
+    let decoded_domain =
+        rkyv::from_bytes::<signal_domain::Domain, rkyv::rancor::Error>(&domain_bytes)
+            .expect("decode Domain::All archive through shared type");
+
+    let scope = signal_spirit::DomainScope::All;
+    let scope_bytes =
+        rkyv::to_bytes::<rkyv::rancor::Error>(&scope).expect("archive DomainScope::All");
+    let decoded_scope =
+        rkyv::from_bytes::<signal_domain::DomainScope, rkyv::rancor::Error>(&scope_bytes)
+            .expect("decode DomainScope::All archive through shared type");
+
+    assert_eq!(decoded_domain, signal_domain::Domain::All);
+    assert_eq!(decoded_scope, signal_domain::DomainScope::All);
 }
 
 #[cfg(feature = "nota-text")]
@@ -622,7 +663,7 @@ fn top_level_all_scope_matches_every_entry_domain() {
     assert!(all_scope.matches_domain(&data_domain));
     assert!(data_domain.matches_scope(&all_scope));
     assert!(ScopeSet::new(vec![all_scope.clone()]).matches_domain(&data_domain));
-    assert!(DomainScopes::new(vec![all_scope.clone()]).matches_any_domain(&domains));
+    assert!(DomainScopes::new(vec![all_scope.clone()]).matches_any_domain(domains.payload()));
     assert!(DomainMatch::partial(DomainScopes::new(vec![all_scope.clone()])).matches(&domains));
     assert!(DomainMatch::full(DomainScopes::new(vec![all_scope])).matches(&domains));
 }

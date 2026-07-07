@@ -1,4 +1,8 @@
 {
+  Domain signal-domain:domain:Domain
+  DomainScope signal-domain:domain:DomainScope
+  DomainScopes signal-domain:domain:DomainScopes
+  ScopeSet signal-domain:domain:ScopeSet
   Health signal-domain:domain:Health
   Food signal-domain:domain:Food
   Home signal-domain:domain:Home
@@ -47,62 +51,6 @@
   Export { LocalPath PublicPath }
   SignalReuse { Import Export }
 
-  Domain [
-    All
-    (Health Health)
-    (Food Food)
-    (Home Home)
-    (Finance Finance)
-    (Work Work)
-    (Craft Craft)
-    (Knowledge Knowledge)
-    (Education Education)
-    (Language Language)
-    (Art Art)
-    (Kinship Kinship)
-    (Selfhood Selfhood)
-    (Spirituality Spirituality)
-    (Governance Governance)
-    (Law Law)
-    (Community Community)
-    (Nature Nature)
-    (Travel Travel)
-    (Commerce Commerce)
-    (Leisure Leisure)
-    (Appearance Appearance)
-    (Safety Safety)
-    (Information Information)
-    (Technology Technology)
-  ]
-  DomainScope [
-    All
-    (Health Health)
-    (Food Food)
-    (Home Home)
-    (Finance Finance)
-    (Work Work)
-    (Craft Craft)
-    (Knowledge Knowledge)
-    (Education Education)
-    (Language Language)
-    (Art Art)
-    (Kinship Kinship)
-    (Selfhood Selfhood)
-    (Spirituality Spirituality)
-    (Governance Governance)
-    (Law Law)
-    (Community Community)
-    (Nature Nature)
-    (Travel Travel)
-    (Commerce Commerce)
-    (Leisure Leisure)
-    (Appearance Appearance)
-    (Safety Safety)
-    (Information Information)
-    (Technology Technology)
-  ]
-  DomainScopes (Vector DomainScope)
-  ScopeSet (Vector DomainScope)
 
   State Statement
   Record RecordRequest

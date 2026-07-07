@@ -59,7 +59,7 @@ fn decoded_spirit_signal_true_schema_projects_to_structured_nota() {
     let rendered = schemas.signal.to_nota();
 
     let expected_prefix = format!(
-        "((signal-spirit:signal {}) [(Health (Plain signal-domain:domain:Health))",
+        "((signal-spirit:signal {}) [(Domain (Plain signal-domain:domain:Domain)) (DomainScope (Plain signal-domain:domain:DomainScope)) (DomainScopes (Plain signal-domain:domain:DomainScopes)) (ScopeSet (Plain signal-domain:domain:ScopeSet))",
         env!("CARGO_PKG_VERSION")
     );
     let prefix_excerpt = rendered.chars().take(256).collect::<String>();
@@ -100,8 +100,12 @@ fn decoded_spirit_signal_true_schema_projects_to_structured_nota() {
     );
 
     assert!(
-        rendered.contains("(Public Domain [] (Enum (Domain [(All None None)"),
-        "structured signal TrueSchema NOTA should include the contract-local top-level All domain"
+        !rendered.contains("(Public Domain []"),
+        "structured signal TrueSchema NOTA should not include a contract-local domain taxonomy"
+    );
+    assert!(
+        rendered.contains("(PublicIntent (Some (Plain PublicIntent)) None)"),
+        "structured signal TrueSchema NOTA should keep PublicIntent while resolving its payload through the shared domain import"
     );
 
     let rendered_domain = schemas.domain.to_nota();

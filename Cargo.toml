@@ -25,7 +25,7 @@ nota-text = [
 ]
 
 [dependencies]
-signal-domain = { git = "https://github.com/LiGoldragon/signal-domain.git", branch = "main", default-features = false }
+signal-domain = { git = "https://github.com/LiGoldragon/signal-domain.git", rev = "3a1692693f7b842c024994b16523395732780f0a", default-features = false }
 signal-frame = { git = "https://github.com/LiGoldragon/signal-frame.git", branch = "main", default-features = false }
 nota    = { package = "nota", git = "https://github.com/LiGoldragon/nota.git", branch = "main", optional = true }
 schema  = { package = "schema", git = "https://github.com/LiGoldragon/schema.git", rev = "92bed64ad644ce4caa2827398ada5b7b79221165", optional = true }

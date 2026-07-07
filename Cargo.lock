@@ -560,7 +560,7 @@ checksum = "f8fadd59c855ef2080decdef8ff161eb6661b86933c9d82e5ba29dc602a55aba"
 [[package]]
 name = "signal-domain"
 version = "0.1.0"
-source = "git+https://github.com/LiGoldragon/signal-domain.git?branch=main#a6c726eccb529cde1fb429e3181326a4d28225b7"
+source = "git+https://github.com/LiGoldragon/signal-domain.git?rev=3a1692693f7b842c024994b16523395732780f0a#3a1692693f7b842c024994b16523395732780f0a"
 dependencies = [
  "nota",
  "rkyv",
