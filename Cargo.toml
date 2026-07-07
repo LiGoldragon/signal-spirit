@@ -18,7 +18,7 @@ path = "src/lib.rs"
 default = []
 nota-text = [
     "dep:nota",
-    "dep:schema",
+    "dep:schema-language",
     "signal-domain/nota-text",
     "signal-frame/nota-text",
     "version-projection/nota-text",
@@ -28,17 +28,17 @@ nota-text = [
 signal-domain = { git = "https://github.com/LiGoldragon/signal-domain.git", rev = "3a1692693f7b842c024994b16523395732780f0a", default-features = false }
 signal-frame = { git = "https://github.com/LiGoldragon/signal-frame.git", branch = "main", default-features = false }
 nota    = { package = "nota", git = "https://github.com/LiGoldragon/nota.git", branch = "main", optional = true }
-schema  = { package = "schema", git = "https://github.com/LiGoldragon/schema.git", rev = "92bed64ad644ce4caa2827398ada5b7b79221165", optional = true }
+schema-language = { git = "https://github.com/LiGoldragon/schema-language.git", rev = "6aae825d668e3f607a2754afa6b7d94e9f246c41", optional = true }
 rkyv         = { version = "0.8", default-features = false, features = ["std", "bytecheck", "little_endian", "pointer_width_32", "unaligned"] }
 thiserror    = "2"
 version-projection = { git = "https://github.com/LiGoldragon/version-projection.git", branch = "main", default-features = false }
 
 [build-dependencies]
-schema-rust = { package = "schema-rust", git = "https://github.com/LiGoldragon/schema-rust.git", rev = "a4b46ffffe5307eca3e1537539d0a70884955b4c" }
+schema-rust = { package = "schema-rust", git = "https://github.com/LiGoldragon/schema-rust.git", rev = "3278fbc6e6593c044437b3ee5ca1fe71cac344c1" }
 
 [dev-dependencies]
 nota = { package = "nota", git = "https://github.com/LiGoldragon/nota.git", branch = "main" }
-schema = { package = "schema", git = "https://github.com/LiGoldragon/schema.git", rev = "92bed64ad644ce4caa2827398ada5b7b79221165" }
+schema-language = { git = "https://github.com/LiGoldragon/schema-language.git", rev = "6aae825d668e3f607a2754afa6b7d94e9f246c41" }
 
 [lints.rust]
 unsafe_code = "forbid"
@@ -49,9 +49,3 @@ dead_code   = "warn"
 nota = { package = "nota", git = "https://github.com/LiGoldragon/nota.git", branch = "main" }
 nota-derive = { package = "nota-derive", git = "https://github.com/LiGoldragon/nota.git", branch = "main" }
 
-[patch."https://github.com/LiGoldragon/schema-next.git"]
-schema = { package = "schema", git = "https://github.com/LiGoldragon/schema.git", rev = "92bed64ad644ce4caa2827398ada5b7b79221165" }
-schema-cc = { package = "schema-cc", git = "https://github.com/LiGoldragon/schema.git", rev = "92bed64ad644ce4caa2827398ada5b7b79221165" }
-
-[patch."https://github.com/LiGoldragon/schema-rust-next.git"]
-schema-rust = { package = "schema-rust", git = "https://github.com/LiGoldragon/schema-rust.git", rev = "a4b46ffffe5307eca3e1537539d0a70884955b4c" }

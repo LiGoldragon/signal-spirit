@@ -11,7 +11,7 @@
 #![cfg(feature = "nota-text")]
 
 use nota::{InstanceSchema, NotaDecodeTraced, NotaSource};
-use schema::InstanceSchemaText;
+use schema_language::InstanceSchemaText;
 use signal_spirit::{Domains, HelpModel, HelpRequest};
 
 /// Decode a real value and capture its per-instance schema trace.

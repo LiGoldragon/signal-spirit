@@ -484,7 +484,7 @@ checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
 [[package]]
 name = "schema"
 version = "0.2.0"
-source = "git+https://github.com/LiGoldragon/schema.git?rev=92bed64ad644ce4caa2827398ada5b7b79221165#92bed64ad644ce4caa2827398ada5b7b79221165"
+source = "git+https://github.com/LiGoldragon/schema-next.git?branch=main#92bed64ad644ce4caa2827398ada5b7b79221165"
 dependencies = [
  "blake3",
  "nota",
@@ -496,7 +496,32 @@ dependencies = [
 [[package]]
 name = "schema-cc"
 version = "0.1.0"
-source = "git+https://github.com/LiGoldragon/schema.git?rev=92bed64ad644ce4caa2827398ada5b7b79221165#92bed64ad644ce4caa2827398ada5b7b79221165"
+source = "git+https://github.com/LiGoldragon/schema-next.git?branch=main#92bed64ad644ce4caa2827398ada5b7b79221165"
+dependencies = [
+ "nota",
+ "prettyplease",
+ "proc-macro2",
+ "quote",
+ "syn",
+ "thiserror",
+]
+
+[[package]]
+name = "schema-language"
+version = "0.2.0"
+source = "git+https://github.com/LiGoldragon/schema-language.git?rev=6aae825d668e3f607a2754afa6b7d94e9f246c41#6aae825d668e3f607a2754afa6b7d94e9f246c41"
+dependencies = [
+ "blake3",
+ "nota",
+ "rkyv",
+ "schema-language-cc",
+ "thiserror",
+]
+
+[[package]]
+name = "schema-language-cc"
+version = "0.1.0"
+source = "git+https://github.com/LiGoldragon/schema-language.git?rev=6aae825d668e3f607a2754afa6b7d94e9f246c41#6aae825d668e3f607a2754afa6b7d94e9f246c41"
 dependencies = [
  "nota",
  "prettyplease",
@@ -509,13 +534,28 @@ dependencies = [
 [[package]]
 name = "schema-rust"
 version = "0.6.0"
-source = "git+https://github.com/LiGoldragon/schema-rust.git?rev=a4b46ffffe5307eca3e1537539d0a70884955b4c#a4b46ffffe5307eca3e1537539d0a70884955b4c"
+source = "git+https://github.com/LiGoldragon/schema-rust-next.git?branch=main#3278fbc6e6593c044437b3ee5ca1fe71cac344c1"
 dependencies = [
  "nota",
  "prettyplease",
  "proc-macro2",
  "quote",
- "schema",
+ "schema-language",
+ "syn",
+ "thiserror",
+ "triad-runtime",
+]
+
+[[package]]
+name = "schema-rust"
+version = "0.6.0"
+source = "git+https://github.com/LiGoldragon/schema-rust.git?rev=3278fbc6e6593c044437b3ee5ca1fe71cac344c1#3278fbc6e6593c044437b3ee5ca1fe71cac344c1"
+dependencies = [
+ "nota",
+ "prettyplease",
+ "proc-macro2",
+ "quote",
+ "schema-language",
  "syn",
  "thiserror",
  "triad-runtime",
@@ -565,7 +605,7 @@ dependencies = [
  "nota",
  "rkyv",
  "schema",
- "schema-rust",
+ "schema-rust 0.6.0 (git+https://github.com/LiGoldragon/schema-rust-next.git?branch=main)",
 ]
 
 [[package]]
@@ -596,8 +636,8 @@ version = "0.12.0"
 dependencies = [
  "nota",
  "rkyv",
- "schema",
- "schema-rust",
+ "schema-language",
+ "schema-rust 0.6.0 (git+https://github.com/LiGoldragon/schema-rust.git?rev=3278fbc6e6593c044437b3ee5ca1fe71cac344c1)",
  "signal-domain",
  "signal-frame",
  "thiserror",

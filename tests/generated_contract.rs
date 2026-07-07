@@ -353,7 +353,7 @@ fn generated_help_model_renders_every_decoded_schema_target() {
             .expect("render imported Domain help")
             .to_string(),
         // Help renders the positional body only. Same-named payload variants
-        // are encoded in the schema codec's self-tagged form, so each Domain
+        // are encoded in schema-language's self-tagged form, so each Domain
         // arm is one navigable step away from its nested enum body. Top-level
         // All is the explicit payload-free universal domain.
         DOMAIN_HELP_ROW
@@ -392,10 +392,10 @@ fn generated_help_model_round_trips_through_rkyv() {
     );
 }
 
-/// The help text codec is schema's declaration-body codec, not a hand-rolled
+/// The help text codec is schema-language's declaration-body codec, not a hand-rolled
 /// or nota-derive one. For each representative target this asserts both the
 /// canonical rendered positional rows and a true row round trip through that
-/// same schema codec (`HelpResponse::to_schema_text` ->
+/// same schema-language codec (`HelpResponse::to_schema_text` ->
 /// `HelpResponse::from_schema_text` -> `to_schema_text`). Covered shapes: a
 /// root payload struct (`Record`), a struct of newtype roles (`Entry`), a vector
 /// reference rendered through TrueSchema as the canonical `(Vector Domain)`
@@ -417,7 +417,7 @@ fn generated_help_round_trips_through_the_schema_codec() {
         ),
         ("Domains", "(Vector Domain)"),
         ("RecordAccepted", "RecordIdentifier"),
-        // Same-named payload variants project to the schema codec's self-tagged
+        // Same-named payload variants project to schema-language's self-tagged
         // form and round trip without leaking a duplicate payload name.
         ("Domain", DOMAIN_HELP_ROW),
         ("DomainMatch", "[Any (Partial) (Full)]"),
@@ -438,7 +438,7 @@ fn generated_help_round_trips_through_the_schema_codec() {
         assert_eq!(
             response.to_string(),
             expected,
-            "{target} Display must delegate to the schema codec"
+            "{target} Display must delegate to the schema-language codec"
         );
 
         let decoded = signal_spirit::HelpResponse::from_schema_text(&encoded)
@@ -446,7 +446,7 @@ fn generated_help_round_trips_through_the_schema_codec() {
         assert_eq!(
             decoded.to_schema_text(),
             encoded,
-            "{target} must round trip positional rows through the schema codec"
+            "{target} must round trip positional rows through the schema-language codec"
         );
     }
 
@@ -471,10 +471,10 @@ struct DecodedHelpTargets {
 impl DecodedHelpTargets {
     fn from_deployed_schema_sources() -> Self {
         let signal_source =
-            schema::SchemaSource::from_schema_text(signal_spirit::SIGNAL_SCHEMA_SOURCE)
+            schema_language::SchemaSource::from_schema_text(signal_spirit::SIGNAL_SCHEMA_SOURCE)
                 .expect("signal schema source decodes");
         let domain_source =
-            schema::SchemaSource::from_schema_text(signal_spirit::DOMAIN_SCHEMA_SOURCE)
+            schema_language::SchemaSource::from_schema_text(signal_spirit::DOMAIN_SCHEMA_SOURCE)
                 .expect("domain schema source decodes");
         let mut targets = Self {
             root_names: BTreeSet::new(),
@@ -495,7 +495,7 @@ impl DecodedHelpTargets {
             .collect()
     }
 
-    fn insert_root_names(&mut self, root: &schema::SourceRootEnum) {
+    fn insert_root_names(&mut self, root: &schema_language::SourceRootEnum) {
         if let Some(body) = root.body().as_enum() {
             for variant in body.variants() {
                 self.root_names.insert(variant.name().as_str().to_owned());
@@ -503,7 +503,7 @@ impl DecodedHelpTargets {
         }
     }
 
-    fn insert_namespace_names(&mut self, namespace: &schema::SourceNamespace) {
+    fn insert_namespace_names(&mut self, namespace: &schema_language::SourceNamespace) {
         for entry in namespace.entries() {
             if let Some(value) = entry.value() {
                 self.declaration_names
@@ -516,16 +516,16 @@ impl DecodedHelpTargets {
         }
     }
 
-    fn insert_inline_declaration_names(&mut self, value: &schema::SourceDeclarationValue) {
+    fn insert_inline_declaration_names(&mut self, value: &schema_language::SourceDeclarationValue) {
         match value {
-            schema::SourceDeclarationValue::Struct(body) => {
+            schema_language::SourceDeclarationValue::Struct(body) => {
                 for field in body.fields() {
                     self.insert_field_declaration_name(field);
                 }
             }
-            schema::SourceDeclarationValue::Enum(body) => {
+            schema_language::SourceDeclarationValue::Enum(body) => {
                 for variant in body.variants() {
-                    if let Some(schema::SourceVariantPayload::Declaration(value)) =
+                    if let Some(schema_language::SourceVariantPayload::Declaration(value)) =
                         variant.payload_source()
                     {
                         self.declaration_names
@@ -534,20 +534,20 @@ impl DecodedHelpTargets {
                     }
                 }
             }
-            schema::SourceDeclarationValue::Reference(_)
-            | schema::SourceDeclarationValue::Text(_)
-            | schema::SourceDeclarationValue::Stream(_)
-            | schema::SourceDeclarationValue::Family(_) => {}
+            schema_language::SourceDeclarationValue::Reference(_)
+            | schema_language::SourceDeclarationValue::Text(_)
+            | schema_language::SourceDeclarationValue::Stream(_)
+            | schema_language::SourceDeclarationValue::Family(_) => {}
         }
     }
 
-    fn insert_field_declaration_name(&mut self, field: &schema::SourceField) {
+    fn insert_field_declaration_name(&mut self, field: &schema_language::SourceField) {
         if !Self::is_type_name(field.name().as_str()) {
             return;
         }
         self.declaration_names
             .insert(field.name().as_str().to_owned());
-        if let schema::SourceFieldValue::Declaration(value) = field.value() {
+        if let schema_language::SourceFieldValue::Declaration(value) = field.value() {
             self.insert_inline_declaration_names(value);
         }
     }

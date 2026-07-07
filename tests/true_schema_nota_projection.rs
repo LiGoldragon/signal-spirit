@@ -1,14 +1,14 @@
 //! Direct structured NOTA projection for the decoded Spirit signal TrueSchema.
 //!
-//! This proves the authored Spirit signal schema can lower to schema's semantic
-//! `TrueSchema`, render as structured NOTA, decode back from that NOTA, and
-//! feed the Help display projection without generated Rust being the source of
+//! This proves the authored Spirit signal schema can lower to schema-language's
+//! semantic `TrueSchema`, render as structured NOTA, decode back from that NOTA,
+//! and feed the Help display projection without generated Rust being the source of
 //! truth.
 
 #![cfg(feature = "nota-text")]
 
 use nota::{Document, NotaDecode, NotaEncode};
-use schema::{ImportResolver, SchemaEngine, SchemaIdentity, SchemaSource, TrueSchema};
+use schema_language::{ImportResolver, SchemaEngine, SchemaIdentity, SchemaSource, TrueSchema};
 use signal_spirit::{DOMAIN_SCHEMA_SOURCE, HelpModel, HelpRequest, SIGNAL_SCHEMA_SOURCE};
 
 const DOMAIN_HELP_ROW: &str = "[All (Health) (Food) (Home) (Finance) (Work) (Craft) (Knowledge) (Education) (Language) (Art) (Kinship) (Selfhood) (Spirituality) (Governance) (Law) (Community) (Nature) (Travel) (Commerce) (Leisure) (Appearance) (Safety) (Information) (Technology)]";

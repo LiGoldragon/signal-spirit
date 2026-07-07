@@ -4,7 +4,7 @@
 //! decoder-driven `NotaDecodeTraced` (the emitter puts the canonical derive
 //! on every type, including the whole `Domain` taxonomy whose value leaves now
 //! carry required payloads), then renders
-//! the captured trace through schema's encoder and asserts the endorsed
+//! the captured trace through schema-language's encoder and asserts the endorsed
 //! form. Both the decoded value and the captured `expected` types are checked,
 //! and the rendered reference tokens round-trip through
 //! `SourceReference::from_block`.
@@ -14,7 +14,7 @@
 #![cfg(feature = "nota-text")]
 
 use nota::{InstanceSchema, InstanceSchemaBody, NotaDecodeTraced, NotaSource, TypeReference};
-use schema::{InstanceSchemaText, SourceReference};
+use schema_language::{InstanceSchemaText, SourceReference};
 use signal_spirit::{Certainty, Domain, DomainMatch, Entry, Input, Kind, Magnitude};
 
 fn schema_of<Value>(source: &str) -> (Value, InstanceSchema)
@@ -44,7 +44,7 @@ fn enum_payload(schema: &InstanceSchema) -> &InstanceSchema {
 }
 
 /// Every parenthesised reference token the renderer emits must parse back
-/// through schema's own reference reader.
+/// through schema-language's own reference reader.
 fn round_trips_as_reference(text: &str) {
     let block = NotaSource::new(text)
         .parse_root()

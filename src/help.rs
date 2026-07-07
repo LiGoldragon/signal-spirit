@@ -1,20 +1,20 @@
-//! Help as a thin typed view over `schema`'s TrueSchema model.
+//! Help as a thin typed view over `schema-language`'s TrueSchema model.
 //!
 //! Help is not a separate language and carries no AST of its own. The model
 //! stores [`TrueSchema`] values — authored `.schema` sugar decoded into the
 //! canonical semantic data tree. Rendering is a final projection from that
-//! typed data into positional schema rows encoded by schema's declaration-body
-//! codec.
+//! typed data into positional schema rows encoded by schema-language's
+//! declaration-body codec.
 //!
-//! The text codec is schema's body codec end to end: each [`HelpBody`] encodes
-//! via [`SourceDeclarationValue::to_schema_text`] and decodes via
+//! The text codec is schema-language's body codec end to end: each [`HelpBody`]
+//! encodes via [`SourceDeclarationValue::to_schema_text`] and decodes via
 //! [`SourceDeclarationValue::from_block`]. No hand `format!` printer, no
 //! parallel decoder. The rkyv codec is the rkyv derive on the Help wrappers and
 //! on the stored [`TrueSchema`] values.
 
 use std::fmt;
 
-use ::schema::{
+use ::schema_language::{
     EnumDeclaration, EnumVariant, FamilyDeclaration, ImportResolver, Name, Root, SchemaEngine,
     SchemaError, SchemaIdentity, SchemaSource, SourceDeclarationValue, SourceEnumBody,
     SourceFamilyBody, SourceField, SourceReference, SourceStreamBody, SourceStructBody,
@@ -112,7 +112,7 @@ impl HelpResponse {
 
     /// Decode a displayed help response from positional schema rows — the
     /// inverse of [`Self::to_schema_text`]. Each row parses straight back into
-    /// schema declaration-body data through schema's own body decoder.
+    /// schema declaration-body data through schema-language's own body decoder.
     pub fn from_schema_text(source: &str) -> Result<Self, HelpError> {
         let document = Document::parse(source)?;
         let rows = document
@@ -123,7 +123,7 @@ impl HelpResponse {
         Ok(Self::new(vec![HelpEntry::new(Name::new("Help"), rows)]))
     }
 
-    /// Encode the response as positional schema rows through schema's body
+    /// Encode the response as positional schema rows through schema-language's body
     /// encoder. This is the final display boundary.
     pub fn to_schema_text(&self) -> String {
         self.entries
@@ -405,7 +405,7 @@ impl HelpEntry {
         &self.rows
     }
 
-    /// Encode this entry as positional schema rows through schema's body
+    /// Encode this entry as positional schema rows through schema-language's body
     /// encoder.
     pub fn to_schema_text(&self) -> String {
         self.rows
@@ -463,7 +463,7 @@ impl HelpBody {
         }
     }
 
-    fn from_struct(declaration: &::schema::StructDeclaration) -> Self {
+    fn from_struct(declaration: &::schema_language::StructDeclaration) -> Self {
         Self::new(SourceDeclarationValue::Struct(SourceStructBody::new(
             declaration
                 .fields
