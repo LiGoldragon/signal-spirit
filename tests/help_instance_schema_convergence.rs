@@ -3,7 +3,7 @@
 //!
 //! Help stores `TrueSchema` and displays label-free declaration-body rows;
 //! per-instance schema records the decoder's expected declaration reference.
-//! Both paths still render `(Vector Domain)` for the `Domains` newtype body
+//! Both paths still render `Vector.Domain` for the `Domains` newtype body
 //! through the one schema encoder.
 //!
 //! Gated behind `nota-text` like the rest of the text surface.
@@ -51,14 +51,14 @@ fn help_domains_renders_the_canonical_vector_reference() {
         .expect("render Domains help")
         .to_string();
     // The dropped `(Vec Domain)` alias is gone; Help projects the canonical
-    // `(Vector Domain)` through the one schema encoder.
-    assert_eq!(rendered, "(Vector Domain)");
+    // `Vector.Domain` through the one schema encoder.
+    assert_eq!(rendered, "Vector.Domain");
 }
 
 #[test]
 fn help_body_exposes_schema_text_without_schema_source_nouns() {
     let help_text = help_body_schema_text("Domains");
-    assert_eq!(help_text, "(Vector Domain)");
+    assert_eq!(help_text, "Vector.Domain");
 }
 
 #[test]
@@ -75,7 +75,7 @@ fn help_domains_reference_matches_instance_schema_expansion() {
     let schema = instance_schema_of::<Domains>("[]");
     let instance_expanded = InstanceSchemaText::new(&schema).expanded();
 
-    assert_eq!(help_rendered, "(Vector Domain)");
-    assert_eq!(help_body_schema_text("Domains"), "(Vector Domain)");
-    assert_eq!(instance_expanded, "(Domains (Vector Domain))");
+    assert_eq!(help_rendered, "Vector.Domain");
+    assert_eq!(help_body_schema_text("Domains"), "Vector.Domain");
+    assert_eq!(instance_expanded, "(Domains Vector.Domain)");
 }

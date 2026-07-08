@@ -11,7 +11,7 @@ use nota::{Document, NotaDecode, NotaEncode};
 use schema_language::{ImportResolver, SchemaEngine, SchemaIdentity, SchemaSource, TrueSchema};
 use signal_spirit::{DOMAIN_SCHEMA_SOURCE, HelpModel, HelpRequest, SIGNAL_SCHEMA_SOURCE};
 
-const DOMAIN_HELP_ROW: &str = "[All (Health Health) (Food Food) (Home Home) (Finance Finance) (Work Work) (Craft Craft) (Knowledge Knowledge) (Education Education) (Language Language) (Art Art) (Kinship Kinship) (Selfhood Selfhood) (Spirituality Spirituality) (Governance Governance) (Law Law) (Community Community) (Nature Nature) (Travel Travel) (Commerce Commerce) (Leisure Leisure) (Appearance Appearance) (Safety Safety) (Information Information) (Technology Technology)]";
+const DOMAIN_HELP_ROW: &str = "[All (Health HealthDomain) (Food FoodDomain) (Home HomeDomain) (Finance FinanceDomain) (Work WorkDomain) (Craft CraftDomain) (Knowledge KnowledgeDomain) (Education EducationDomain) (Language LanguageDomain) (Art ArtDomain) (Kinship KinshipDomain) (Selfhood SelfhoodDomain) (Spirituality SpiritualityDomain) (Governance GovernanceDomain) (Law LawDomain) (Community CommunityDomain) (Nature NatureDomain) (Travel TravelDomain) (Commerce CommerceDomain) (Leisure LeisureDomain) (Appearance AppearanceDomain) (Safety SafetyDomain) (Information InformationDomain) (Technology TechnologyDomain)]";
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct DecodedSpiritSchemas {
@@ -69,13 +69,13 @@ fn decoded_spirit_signal_true_schema_projects_to_structured_nota() {
     );
     assert!(
         rendered.contains(
-            "(Enum (Input [(State (Some (Plain State)) None) (Record (Some (Plain Record)) None)"
+            "(Enum (Input [(State (Some (Plain StateInput)) None) (Record (Some (Plain RecordInput)) None)"
         ),
-        "structured TrueSchema NOTA should expose the decoded Input root enum"
+        "structured TrueSchema NOTA should expose the decoded Input root enum with explicit root payload wrappers"
     );
     assert!(
         rendered.contains(
-            "(SubscribeIntent (Some (Plain SubscribeIntent)) (Some (Opens IntentEventStream)))"
+            "(SubscribeIntent (Some (Plain SubscribeIntentInput)) (Some (Opens IntentEventStream)))"
         ),
         "structured TrueSchema NOTA should preserve stream relations on root variants"
     );
@@ -104,8 +104,8 @@ fn decoded_spirit_signal_true_schema_projects_to_structured_nota() {
         "structured signal TrueSchema NOTA should not include a contract-local domain taxonomy"
     );
     assert!(
-        rendered.contains("(PublicIntent (Some (Plain PublicIntent)) None)"),
-        "structured signal TrueSchema NOTA should keep PublicIntent while resolving its payload through the shared domain import"
+        rendered.contains("(PublicIntent (Some (Plain PublicIntentInput)) None)"),
+        "structured signal TrueSchema NOTA should keep PublicIntent while routing through its explicit root payload wrapper"
     );
 
     let rendered_domain = schemas.domain.to_nota();
@@ -142,7 +142,7 @@ fn decoded_true_schema_feeds_label_free_help_rows() {
             .render(&HelpRequest::for_name("Entry"))
             .expect("render Entry help")
             .to_string(),
-        "{ Domains Kind Description Certainty Importance Privacy Referents }\n(Vector Domain)\n[Decision Principle Correction Clarification Constraint]\nString\nMagnitude\nMagnitude\nMagnitude\n(Vector Referent)",
+        "{ Domains Kind Description Certainty Importance Privacy Referents }\nVector.Domain\n[Decision Principle Correction Clarification Constraint]\nString\nMagnitude\nMagnitude\nMagnitude\nVector.Referent",
         "Entry Help should be projected from decoded TrueSchema rows"
     );
     assert_eq!(

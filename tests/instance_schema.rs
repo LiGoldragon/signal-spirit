@@ -6,7 +6,7 @@
 //! carry required payloads), then renders
 //! the captured trace through schema-language's encoder and asserts the endorsed
 //! form. Both the decoded value and the captured `expected` types are checked,
-//! and the rendered reference tokens round-trip through
+//! and each rendered bare or dotted reference token round-trips through
 //! `SourceReference::from_block`.
 //!
 //! Gated behind `nota-text` like the rest of signal-spirit's text surface.
@@ -43,8 +43,10 @@ fn enum_payload(schema: &InstanceSchema) -> &InstanceSchema {
     }
 }
 
-/// Every parenthesised reference token the renderer emits must parse back
-/// through schema-language's own reference reader.
+/// Every bare or dotted reference token the renderer emits must parse back
+/// through schema-language's own reference reader. Expanded instance-schema
+/// tuples such as `(Input DomainScopes)` are structural traces rather than a
+/// single syntax reference.
 fn round_trips_as_reference(text: &str) {
     let block = NotaSource::new(text)
         .parse_root()
@@ -74,7 +76,7 @@ fn certainty_newtype_preserves_wrapper_then_magnitude() {
         InstanceSchemaText::new(&schema).expanded(),
         "(Certainty Magnitude)"
     );
-    round_trips_as_reference("(Certainty Magnitude)");
+    round_trips_as_reference("Magnitude");
 }
 
 #[test]
@@ -100,9 +102,9 @@ fn empty_domains_still_names_its_element_type() {
     assert_eq!(InstanceSchemaText::new(&schema).aligned(), "Domains");
     assert_eq!(
         InstanceSchemaText::new(&schema).expanded(),
-        "(Domains (Vector Domain))"
+        "(Domains Vector.Domain)"
     );
-    round_trips_as_reference("(Vector Domain)");
+    round_trips_as_reference("Vector.Domain");
 }
 
 #[test]
@@ -111,12 +113,12 @@ fn domain_path_traces_expected_types_down_the_real_taxonomy() {
         schema_of::<Domain>("(Technology (Software (Programming CodeGeneration)))");
     assert!(matches!(value, Domain::Technology(_)));
 
-    // Expected-type trace: Domain -> Technology -> Software -> ProgrammingLeaf.
+    // Expected-type trace: Domain -> TechnologyDomain -> SoftwareDomain -> ProgrammingLeaf.
     assert_eq!(named(schema.expected()), "Domain");
     let technology = enum_payload(&schema);
-    assert_eq!(named(technology.expected()), "Technology");
+    assert_eq!(named(technology.expected()), "TechnologyDomain");
     let software = enum_payload(technology);
-    assert_eq!(named(software.expected()), "Software");
+    assert_eq!(named(software.expected()), "SoftwareDomain");
     // Software::Programming now carries a required ProgrammingLeaf; the payload
     // node is the leaf enum itself, with no intervening Optional.
     let programming = enum_payload(software);
@@ -143,7 +145,7 @@ fn bare_leaf_variant_without_payload_is_rejected_and_all_traces_the_leaf() {
     let (value, schema) = schema_of::<Domain>("(Technology (Software (Programming All)))");
     assert!(matches!(value, Domain::Technology(_)));
     let software = enum_payload(enum_payload(&schema));
-    assert_eq!(named(software.expected()), "Software");
+    assert_eq!(named(software.expected()), "SoftwareDomain");
     let programming = enum_payload(software);
     assert_eq!(named(programming.expected()), "ProgrammingLeaf");
     assert!(matches!(
@@ -164,7 +166,7 @@ fn domain_match_partial_renders_enum_name_with_payload_reference() {
         InstanceSchemaText::new(&schema).aligned(),
         "(DomainMatch DomainScopes)"
     );
-    round_trips_as_reference("(DomainMatch DomainScopes)");
+    round_trips_as_reference("DomainScopes");
 }
 
 #[test]
@@ -192,7 +194,7 @@ fn root_input_public_intent_renders_domain_scopes_payload() {
         InstanceSchemaText::new(&schema).aligned(),
         "(Input DomainScopes)"
     );
-    round_trips_as_reference("(Input DomainScopes)");
+    round_trips_as_reference("DomainScopes");
 }
 
 #[test]

@@ -484,19 +484,44 @@ checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
 [[package]]
 name = "schema-language"
 version = "0.2.0"
-source = "git+https://github.com/LiGoldragon/schema-language.git?rev=6aae825d668e3f607a2754afa6b7d94e9f246c41#6aae825d668e3f607a2754afa6b7d94e9f246c41"
+source = "git+https://github.com/LiGoldragon/schema-language.git?rev=0ee452a4#0ee452a42b0c41c00455411a55d45afecbef910a"
 dependencies = [
  "blake3",
  "nota",
  "rkyv",
- "schema-language-cc",
+ "schema-language-cc 0.1.0 (git+https://github.com/LiGoldragon/schema-language.git?rev=0ee452a4)",
+ "thiserror",
+]
+
+[[package]]
+name = "schema-language"
+version = "0.2.0"
+source = "git+https://github.com/LiGoldragon/schema-language.git?rev=0ee452a42b0c41c00455411a55d45afecbef910a#0ee452a42b0c41c00455411a55d45afecbef910a"
+dependencies = [
+ "blake3",
+ "nota",
+ "rkyv",
+ "schema-language-cc 0.1.0 (git+https://github.com/LiGoldragon/schema-language.git?rev=0ee452a42b0c41c00455411a55d45afecbef910a)",
  "thiserror",
 ]
 
 [[package]]
 name = "schema-language-cc"
 version = "0.1.0"
-source = "git+https://github.com/LiGoldragon/schema-language.git?rev=6aae825d668e3f607a2754afa6b7d94e9f246c41#6aae825d668e3f607a2754afa6b7d94e9f246c41"
+source = "git+https://github.com/LiGoldragon/schema-language.git?rev=0ee452a4#0ee452a42b0c41c00455411a55d45afecbef910a"
+dependencies = [
+ "nota",
+ "prettyplease",
+ "proc-macro2",
+ "quote",
+ "syn",
+ "thiserror",
+]
+
+[[package]]
+name = "schema-language-cc"
+version = "0.1.0"
+source = "git+https://github.com/LiGoldragon/schema-language.git?rev=0ee452a42b0c41c00455411a55d45afecbef910a#0ee452a42b0c41c00455411a55d45afecbef910a"
 dependencies = [
  "nota",
  "prettyplease",
@@ -508,14 +533,14 @@ dependencies = [
 
 [[package]]
 name = "schema-rust"
-version = "0.6.0"
-source = "git+https://github.com/LiGoldragon/schema-rust.git?rev=3278fbc6e6593c044437b3ee5ca1fe71cac344c1#3278fbc6e6593c044437b3ee5ca1fe71cac344c1"
+version = "0.7.0"
+source = "git+https://github.com/LiGoldragon/schema-rust.git?rev=6434c006672307565c991c7e476a6c75da59755f#6434c006672307565c991c7e476a6c75da59755f"
 dependencies = [
  "nota",
  "prettyplease",
  "proc-macro2",
  "quote",
- "schema-language",
+ "schema-language 0.2.0 (git+https://github.com/LiGoldragon/schema-language.git?rev=0ee452a42b0c41c00455411a55d45afecbef910a)",
  "syn",
  "thiserror",
  "triad-runtime",
@@ -560,11 +585,11 @@ checksum = "f8fadd59c855ef2080decdef8ff161eb6661b86933c9d82e5ba29dc602a55aba"
 [[package]]
 name = "signal-domain"
 version = "0.1.0"
-source = "git+https://github.com/LiGoldragon/signal-domain.git?rev=801e1c5bcc824c9760e246205826e3c8e962d005#801e1c5bcc824c9760e246205826e3c8e962d005"
+source = "git+https://github.com/LiGoldragon/signal-domain.git?rev=36ba3904eaeb71a3e274219c5f3916c3c8e716cc#36ba3904eaeb71a3e274219c5f3916c3c8e716cc"
 dependencies = [
  "nota",
  "rkyv",
- "schema-language",
+ "schema-language 0.2.0 (git+https://github.com/LiGoldragon/schema-language.git?rev=0ee452a4)",
  "schema-rust",
 ]
 
@@ -596,7 +621,7 @@ version = "0.13.0"
 dependencies = [
  "nota",
  "rkyv",
- "schema-language",
+ "schema-language 0.2.0 (git+https://github.com/LiGoldragon/schema-language.git?rev=0ee452a4)",
  "schema-rust",
  "signal-domain",
  "signal-frame",

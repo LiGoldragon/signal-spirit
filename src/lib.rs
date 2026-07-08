@@ -15,6 +15,63 @@ pub mod help;
 use std::collections::BTreeSet;
 
 pub use crate::schema::signal::*;
+
+pub type State = StateInput;
+pub type Record = RecordInput;
+pub type Propose = ProposeInput;
+pub type Clarify = ClarifyInput;
+pub type Supersede = SupersedeInput;
+pub type Retire = RetireInput;
+pub type ResolveClarification = ResolveClarificationInput;
+pub type Observe = ObserveInput;
+pub type PublicIntent = PublicIntentInput;
+pub type PublicTextSearch = PublicTextSearchInput;
+pub type PublicRecords = PublicRecordsInput;
+pub type PrivateRecords = PrivateRecordsInput;
+pub type Lookup = LookupInput;
+pub type Count = CountInput;
+pub type ChangeCertainty = ChangeCertaintyInput;
+pub type BumpImportance = BumpImportanceInput;
+pub type ChangeRecord = ChangeRecordInput;
+pub type RegisterReferent = RegisterReferentInput;
+pub type LookupStash = LookupStashInput;
+pub type Tap = TapInput;
+pub type Untap = UntapInput;
+pub type ApplyAuthorizedRecord = ApplyAuthorizedRecordInput;
+pub type SubscribeIntent = SubscribeIntentInput;
+
+pub type RecordAccepted = RecordAcceptedOutput;
+pub type Proposed = ProposedOutput;
+pub type Clarified = ClarifiedOutput;
+pub type Superseded = SupersededOutput;
+pub type Retired = RetiredOutput;
+pub type ClarificationResolved = ClarificationResolvedOutput;
+pub type GuardianRejected = GuardianRejectedOutput;
+pub type ReferentGuardianRejected = ReferentGuardianRejectedOutput;
+pub type RecordsObserved = RecordsObservedOutput;
+pub type RecordsStashed = RecordsStashedOutput;
+pub type RecordFound = RecordFoundOutput;
+pub type RecordsCounted = RecordsCountedOutput;
+pub type CertaintyChanged = CertaintyChangedOutput;
+pub type ImportanceBumped = ImportanceBumpedOutput;
+pub type RecordChanged = RecordChangedOutput;
+pub type ReferentRegistered = ReferentRegisteredOutput;
+pub type ObservationTapped = ObservationTappedOutput;
+pub type ObservationUntapped = ObservationUntappedOutput;
+pub type SubscriptionStarted = SubscriptionStartedOutput;
+pub type VersionReported = VersionReportedOutput;
+pub type MarkerReported = MarkerReportedOutput;
+pub type RecordApplied = RecordAppliedOutput;
+pub type ApplyRefused = ApplyRefusedOutput;
+pub type Error = ErrorOutput;
+pub type Rejected = RejectedOutput;
+pub type AdvanceRefused = AdvanceRefusedOutput;
+
+pub type IntentRecorded = IntentRecordedEvent;
+pub type IntentClarified = IntentClarifiedEvent;
+pub type IntentSuperseded = IntentSupersededEvent;
+pub type IntentRetired = IntentRetiredEvent;
+
 #[cfg(feature = "nota-text")]
 pub use help::{HelpBody, HelpError, HelpModel, HelpRequest, HelpResponse};
 

@@ -13,7 +13,7 @@ use std::collections::BTreeSet;
 use nota::{NotaEncode, NotaSource};
 
 #[cfg(feature = "nota-text")]
-const DOMAIN_HELP_ROW: &str = "[All (Health Health) (Food Food) (Home Home) (Finance Finance) (Work Work) (Craft Craft) (Knowledge Knowledge) (Education Education) (Language Language) (Art Art) (Kinship Kinship) (Selfhood Selfhood) (Spirituality Spirituality) (Governance Governance) (Law Law) (Community Community) (Nature Nature) (Travel Travel) (Commerce Commerce) (Leisure Leisure) (Appearance Appearance) (Safety Safety) (Information Information) (Technology Technology)]";
+const DOMAIN_HELP_ROW: &str = "[All (Health HealthDomain) (Food FoodDomain) (Home HomeDomain) (Finance FinanceDomain) (Work WorkDomain) (Craft CraftDomain) (Knowledge KnowledgeDomain) (Education EducationDomain) (Language LanguageDomain) (Art ArtDomain) (Kinship KinshipDomain) (Selfhood SelfhoodDomain) (Spirituality SpiritualityDomain) (Governance GovernanceDomain) (Law LawDomain) (Community CommunityDomain) (Nature NatureDomain) (Travel TravelDomain) (Commerce CommerceDomain) (Leisure LeisureDomain) (Appearance AppearanceDomain) (Safety SafetyDomain) (Information InformationDomain) (Technology TechnologyDomain)]";
 
 #[test]
 fn generated_input_frame_round_trips() {
@@ -322,14 +322,14 @@ fn generated_help_model_renders_spirit_one_level_shapes() {
             .render(&signal_spirit::HelpRequest::for_name("Entry"))
             .expect("render Entry help")
             .to_string(),
-        "{ Domains Kind Description Certainty Importance Privacy Referents }\n(Vector Domain)\n[Decision Principle Correction Clarification Constraint]\nString\nMagnitude\nMagnitude\nMagnitude\n(Vector Referent)"
+        "{ Domains Kind Description Certainty Importance Privacy Referents }\nVector.Domain\n[Decision Principle Correction Clarification Constraint]\nString\nMagnitude\nMagnitude\nMagnitude\nVector.Referent"
     );
     assert_eq!(
         model
             .render(&signal_spirit::HelpRequest::for_name("Domains"))
             .expect("render Domains help")
             .to_string(),
-        "(Vector Domain)"
+        "Vector.Domain"
     );
     assert_eq!(
         model
@@ -343,7 +343,7 @@ fn generated_help_model_renders_spirit_one_level_shapes() {
             .render(&signal_spirit::HelpRequest::for_name("VerbatimQuote"))
             .expect("render VerbatimQuote help")
             .to_string(),
-        "{ QuoteText OptionalAntecedent }\nString\n(Optional Antecedent)"
+        "{ QuoteText OptionalAntecedent }\nString\nOptional.Antecedent"
     );
 }
 
@@ -392,11 +392,11 @@ fn generated_help_model_renders_every_decoded_schema_target() {
     );
     assert_eq!(
         model
-            .render(&signal_spirit::HelpRequest::for_name("Technology"))
-            .expect("render Technology help")
+            .render(&signal_spirit::HelpRequest::for_name("TechnologyDomain"))
+            .expect("render TechnologyDomain help")
             .to_string(),
-        "[(Hardware HardwareLeaf) (Software Software)]",
-        "Technology Help should expose the same-named Software payload from TrueSchema"
+        "[(Hardware HardwareLeaf) (Software SoftwareDomain)]",
+        "TechnologyDomain Help should expose its SoftwareDomain payload from TrueSchema"
     );
     assert_eq!(
         model
@@ -438,7 +438,7 @@ fn generated_help_model_round_trips_through_rkyv() {
 /// same schema-language codec (`HelpResponse::to_schema_text` ->
 /// `HelpResponse::from_schema_text` -> `to_schema_text`). Covered shapes: a
 /// root payload struct (`Record`), a struct of newtype roles (`Entry`), a vector
-/// reference rendered through TrueSchema as the canonical `(Vector Domain)`
+/// reference rendered through TrueSchema as the canonical `Vector.Domain`
 /// (`Domains`), a newtype (`RecordAccepted`), an enum (`DomainMatch`), and a
 /// stream (`IntentEventStream`).
 #[cfg(feature = "nota-text")]
@@ -453,18 +453,21 @@ fn generated_help_round_trips_through_the_schema_codec() {
         ),
         (
             "Entry",
-            "{ Domains Kind Description Certainty Importance Privacy Referents }\n(Vector Domain)\n[Decision Principle Correction Clarification Constraint]\nString\nMagnitude\nMagnitude\nMagnitude\n(Vector Referent)",
+            "{ Domains Kind Description Certainty Importance Privacy Referents }\nVector.Domain\n[Decision Principle Correction Clarification Constraint]\nString\nMagnitude\nMagnitude\nMagnitude\nVector.Referent",
         ),
-        ("Domains", "(Vector Domain)"),
+        ("Domains", "Vector.Domain"),
         ("RecordAccepted", "RecordIdentifier"),
-        // Same-named payload variants stay explicit in Help so navigation does
-        // not hide payload declarations from the typed schema.
+        // Payload variants stay explicit in Help so navigation does not hide
+        // payload declarations from the typed schema.
         ("Domain", DOMAIN_HELP_ROW),
         (
-            "Technology",
-            "[(Hardware HardwareLeaf) (Software Software)]",
+            "TechnologyDomain",
+            "[(Hardware HardwareLeaf) (Software SoftwareDomain)]",
         ),
-        ("DomainMatch", "[Any (Partial Partial) (Full Full)]"),
+        (
+            "DomainMatch",
+            "[Any (Partial PartialMatch) (Full FullMatch)]",
+        ),
         (
             "IntentEventStream",
             "(Stream { token.SubscriptionToken opened.SubscriptionStarted event.IntentEvent close.SubscriptionToken })",
