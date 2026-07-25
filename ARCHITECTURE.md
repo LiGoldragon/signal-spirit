@@ -83,8 +83,9 @@ criome authorization request but proceeds without waiting for the verdict.
 
 **Text projection.** The default build is binary/rkyv-only and does not pull
 `nota`, `nota-codec`, or `signal-core`. The `nota-text` feature enables
-NOTA derives, manual NOTA codecs, and text round-trip tests for CLI/debug/audit
-edges. Daemon consumers use the default graph.
+generated Nota derives, the `schema-language` codec integration, and text
+round-trip tests for CLI/debug/audit edges. This crate owns no parallel text
+decoder. Daemon consumers use the default graph.
 
 References:
 - `primary/skills/contract-repo.md` §"Public contracts use contract-local operation verbs"
@@ -145,7 +146,7 @@ or dependencies of this crate.
 ## Code Map
 
 ```text
-src/lib.rs              — request/reply/event records, signal-domain re-exports, and explicit signal_channel! declaration
+src/lib.rs              — generated schema re-exports, compatibility aliases/helpers, and StreamingFrame aliases
 src/schema/domain.rs    — compatibility shim re-exporting signal-domain schema types
 schema/signal.schema    — Spirit wire schema importing signal-domain taxonomy types
 tests/generated_contract.rs — frame, Help, domain compatibility, and NOTA witnesses
