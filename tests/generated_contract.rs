@@ -13,7 +13,7 @@ use std::collections::BTreeSet;
 use nota::{NotaEncode, NotaSource};
 
 #[cfg(feature = "nota-text")]
-const DOMAIN_HELP_ROW: &str = "[All (Health Health) (Food Food) (Home Home) (Finance Finance) (Work Work) (Craft Craft) (Knowledge Knowledge) (Education Education) (Language Language) (Art Art) (Kinship Kinship) (Selfhood Selfhood) (Spirituality Spirituality) (Governance Governance) (Law Law) (Community Community) (Nature Nature) (Travel Travel) (Commerce Commerce) (Leisure Leisure) (Appearance Appearance) (Safety Safety) (Information Information) (Technology Technology)]";
+const DOMAIN_HELP_ROW: &str = "[All Health.HealthDomain Food.FoodDomain Home.HomeDomain Finance.FinanceDomain Work.WorkDomain Craft.CraftDomain Knowledge.KnowledgeDomain Education.EducationDomain Language.LanguageDomain Art.ArtDomain Kinship.KinshipDomain Selfhood.SelfhoodDomain Spirituality.SpiritualityDomain Governance.GovernanceDomain Law.LawDomain Community.CommunityDomain Nature.NatureDomain Travel.TravelDomain Commerce.CommerceDomain Leisure.LeisureDomain Appearance.AppearanceDomain Safety.SafetyDomain Information.InformationDomain Technology.TechnologyDomain]";
 
 #[test]
 fn generated_input_frame_round_trips() {
@@ -322,14 +322,14 @@ fn generated_help_model_renders_spirit_one_level_shapes() {
             .render(&signal_spirit::HelpRequest::for_name("Entry"))
             .expect("render Entry help")
             .to_string(),
-        "{ Domains Kind Description Certainty Importance Privacy Referents }\n(Vector Domain)\n[Decision Principle Correction Clarification Constraint]\nString\nMagnitude\nMagnitude\nMagnitude\n(Vector Referent)"
+        "{ Domains Kind Description Certainty Importance Privacy Referents }\nVector.Domain\n[Decision Principle Correction Clarification Constraint]\nString\nMagnitude\nMagnitude\nMagnitude\nVector.Referent"
     );
     assert_eq!(
         model
             .render(&signal_spirit::HelpRequest::for_name("Domains"))
             .expect("render Domains help")
             .to_string(),
-        "(Vector Domain)"
+        "Vector.Domain"
     );
     assert_eq!(
         model
@@ -343,7 +343,7 @@ fn generated_help_model_renders_spirit_one_level_shapes() {
             .render(&signal_spirit::HelpRequest::for_name("VerbatimQuote"))
             .expect("render VerbatimQuote help")
             .to_string(),
-        "{ QuoteText OptionalAntecedent }\nString\n(Optional Antecedent)"
+        "{ QuoteText OptionalAntecedent }\nString\nOptional.Antecedent"
     );
 }
 
@@ -392,31 +392,26 @@ fn generated_help_model_renders_every_decoded_schema_target() {
     );
     assert_eq!(
         model
-            .render(&signal_spirit::HelpRequest::for_name("Technology"))
-            .expect("render Technology help")
+            .render(&signal_spirit::HelpRequest::for_name("TechnologyDomain"))
+            .expect("render TechnologyDomain help")
             .to_string(),
-        "[(Hardware HardwareLeaf) (Software Software)]",
-        "Technology Help should expose the same-named Software payload from TrueSchema"
+        "[Hardware.HardwareLeaf Software.SoftwareDomain]",
+        "TechnologyDomain Help should expose the canonical SoftwareDomain payload"
     );
-    assert_eq!(
-        model
-            .render(&signal_spirit::HelpRequest::for_name("IntentEventStream"))
-            .expect("render stream help")
-            .to_string(),
-        "(Stream { token.SubscriptionToken opened.SubscriptionStarted event.IntentEvent close.SubscriptionToken })"
+    assert!(
+        matches!(
+            model.render(&signal_spirit::HelpRequest::for_name("IntentEventStream")),
+            Err(signal_spirit::HelpError::UnknownTarget(target))
+                if target == "IntentEventStream"
+        ),
+        "retired stream declarations must not survive as synthetic Help targets"
     );
 }
 
 #[cfg(feature = "nota-text")]
 #[test]
-fn generated_help_model_round_trips_through_rkyv() {
+fn generated_help_response_round_trips_through_rkyv() {
     let model = signal_spirit::HelpModel::from_signal_schema_source().expect("build help model");
-    let bytes = rkyv::to_bytes::<rkyv::rancor::Error>(&model).expect("archive help model");
-    let decoded = rkyv::from_bytes::<signal_spirit::HelpModel, rkyv::rancor::Error>(&bytes)
-        .expect("decode help model");
-
-    assert_eq!(decoded, model);
-
     let response = model
         .render(&signal_spirit::HelpRequest::for_name("Entry"))
         .expect("render typed help response");
@@ -438,9 +433,9 @@ fn generated_help_model_round_trips_through_rkyv() {
 /// same schema-language codec (`HelpResponse::to_schema_text` ->
 /// `HelpResponse::from_schema_text` -> `to_schema_text`). Covered shapes: a
 /// root payload struct (`Record`), a struct of newtype roles (`Entry`), a vector
-/// reference rendered through TrueSchema as the canonical `(Vector Domain)`
+/// reference rendered through TrueSchema as the canonical `Vector.Domain`
 /// (`Domains`), a newtype (`RecordAccepted`), an enum (`DomainMatch`), and a
-/// stream (`IntentEventStream`).
+/// nested enum (`Technology`).
 #[cfg(feature = "nota-text")]
 #[test]
 fn generated_help_round_trips_through_the_schema_codec() {
@@ -453,22 +448,18 @@ fn generated_help_round_trips_through_the_schema_codec() {
         ),
         (
             "Entry",
-            "{ Domains Kind Description Certainty Importance Privacy Referents }\n(Vector Domain)\n[Decision Principle Correction Clarification Constraint]\nString\nMagnitude\nMagnitude\nMagnitude\n(Vector Referent)",
+            "{ Domains Kind Description Certainty Importance Privacy Referents }\nVector.Domain\n[Decision Principle Correction Clarification Constraint]\nString\nMagnitude\nMagnitude\nMagnitude\nVector.Referent",
         ),
-        ("Domains", "(Vector Domain)"),
+        ("Domains", "Vector.Domain"),
         ("RecordAccepted", "RecordIdentifier"),
         // Same-named payload variants stay explicit in Help so navigation does
         // not hide payload declarations from the typed schema.
         ("Domain", DOMAIN_HELP_ROW),
         (
-            "Technology",
-            "[(Hardware HardwareLeaf) (Software Software)]",
+            "TechnologyDomain",
+            "[Hardware.HardwareLeaf Software.SoftwareDomain]",
         ),
-        ("DomainMatch", "[Any (Partial Partial) (Full Full)]"),
-        (
-            "IntentEventStream",
-            "(Stream { token.SubscriptionToken opened.SubscriptionStarted event.IntentEvent close.SubscriptionToken })",
-        ),
+        ("DomainMatch", "[Any Partial.PartialMatch Full.FullMatch]"),
     ] {
         let response = model
             .render(&signal_spirit::HelpRequest::for_name(target))
@@ -526,8 +517,8 @@ impl DecodedHelpTargets {
         };
         targets.insert_root_names(signal_source.input());
         targets.insert_root_names(signal_source.output());
-        targets.insert_namespace_names(signal_source.namespace());
-        targets.insert_namespace_names(domain_source.namespace());
+        targets.insert_type_names(signal_source.types());
+        targets.insert_type_names(domain_source.types());
         targets
     }
 
@@ -547,16 +538,11 @@ impl DecodedHelpTargets {
         }
     }
 
-    fn insert_namespace_names(&mut self, namespace: &schema_language::SourceNamespace) {
-        for entry in namespace.entries() {
-            if let Some(value) = entry.value() {
-                self.declaration_names
-                    .insert(entry.name().as_str().to_owned());
-                self.insert_inline_declaration_names(value);
-            }
-            if let Some(child_namespace) = entry.namespace() {
-                self.insert_namespace_names(child_namespace);
-            }
+    fn insert_type_names(&mut self, types: &schema_language::SourceTypes) {
+        for entry in types.entries() {
+            self.declaration_names
+                .insert(entry.name().as_str().to_owned());
+            self.insert_inline_declaration_names(entry.value());
         }
     }
 
@@ -579,9 +565,7 @@ impl DecodedHelpTargets {
                 }
             }
             schema_language::SourceDeclarationValue::Reference(_)
-            | schema_language::SourceDeclarationValue::Text(_)
-            | schema_language::SourceDeclarationValue::Stream(_)
-            | schema_language::SourceDeclarationValue::Family(_) => {}
+            | schema_language::SourceDeclarationValue::Text(_) => {}
         }
     }
 
@@ -616,14 +600,14 @@ fn top_level_all_domain_round_trips_through_nota() {
 #[cfg(feature = "nota-text")]
 #[test]
 fn terminal_value_domain_tags_round_trip_through_nota() {
-    // Strict positional NOTA: bare `Data` no longer decodes — a variant payload
+    // Strict dotted NOTA: bare `Data` no longer decodes — a variant payload
     // must always appear, and the whole-category value is the explicit `All`.
     assert!(
-        "(Technology (Software Data))".parse_domain().is_err(),
+        "Technology.Software.Data".parse_domain().is_err(),
         "bare Data must be rejected now that the payload is required"
     );
 
-    let domain = "(Technology (Software (Data All)))"
+    let domain = "Technology.Software.Data.All"
         .parse_domain()
         .expect("explicit all-data domain parses");
 
@@ -631,13 +615,13 @@ fn terminal_value_domain_tags_round_trip_through_nota() {
         domain,
         Domain::Technology(Technology::Software(Software::Data(DataLeaf::All)))
     );
-    assert_eq!(domain.to_nota(), "(Technology (Software (Data All)))");
+    assert_eq!(domain.to_nota(), "Technology.Software.Data.All");
 }
 
 #[cfg(feature = "nota-text")]
 #[test]
 fn curated_leaf_domain_tags_round_trip_through_nota() {
-    let domain = "(Technology (Software (Data SchemaEvolution)))"
+    let domain = "Technology.Software.Data.SchemaEvolution"
         .parse_domain()
         .expect("schema evolution domain parses");
 
@@ -647,16 +631,13 @@ fn curated_leaf_domain_tags_round_trip_through_nota() {
             DataLeaf::SchemaEvolution
         )))
     );
-    assert_eq!(
-        domain.to_nota(),
-        "(Technology (Software (Data SchemaEvolution)))"
-    );
+    assert_eq!(domain.to_nota(), "Technology.Software.Data.SchemaEvolution");
 }
 
 #[cfg(feature = "nota-text")]
 #[test]
 fn pure_terminal_theory_domain_round_trips_through_nota() {
-    let domain = "(Technology (Software Theory))"
+    let domain = "Technology.Software.Theory"
         .parse_domain()
         .expect("theory terminal domain parses");
 
@@ -664,16 +645,16 @@ fn pure_terminal_theory_domain_round_trips_through_nota() {
         domain,
         Domain::Technology(Technology::Software(Software::Theory))
     );
-    assert_eq!(domain.to_nota(), "(Technology (Software Theory))");
+    assert_eq!(domain.to_nota(), "Technology.Software.Theory");
 }
 
 #[cfg(feature = "nota-text")]
 #[test]
 fn deleted_software_leaves_do_not_parse() {
     for deleted in [
-        "(Technology (Software (Distributed ServiceMesh)))",
-        "(Technology (Software (Quality UnitTesting)))",
-        "(Technology (Software (Engineering SoftwareArchitecture)))",
+        "Technology.Software.Distributed.ServiceMesh",
+        "Technology.Software.Quality.UnitTesting",
+        "Technology.Software.Engineering.SoftwareArchitecture",
     ] {
         assert!(
             deleted.parse_domain().is_err(),

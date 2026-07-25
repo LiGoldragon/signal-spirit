@@ -25,27 +25,22 @@ nota-text = [
 ]
 
 [dependencies]
-signal-domain = { git = "https://github.com/LiGoldragon/signal-domain.git", rev = "801e1c5bcc824c9760e246205826e3c8e962d005", default-features = false }
-signal-frame = { git = "https://github.com/LiGoldragon/signal-frame.git", branch = "main", default-features = false }
-nota    = { package = "nota", git = "https://github.com/LiGoldragon/nota.git", branch = "main", optional = true }
-schema-language = { git = "https://github.com/LiGoldragon/schema-language.git", rev = "6aae825d668e3f607a2754afa6b7d94e9f246c41", optional = true }
+signal-domain = { git = "https://github.com/LiGoldragon/signal-domain.git", rev = "f5e79ffd1f6985cb12925ddd43addb66d6755b54", default-features = false }
+signal-frame = { git = "https://github.com/LiGoldragon/signal-frame.git", rev = "e27bbb5752f133589ba3200c3aace1b350c5123e", default-features = false }
+nota    = { package = "nota", git = "https://github.com/LiGoldragon/nota.git", rev = "89dc3c85a9ff96d4e4d53accfd867df672cae5a8", optional = true }
+schema-language = { git = "https://github.com/LiGoldragon/schema-language.git", rev = "9c217610c4b8d3bdaa9f95542e28c04424a593e3", optional = true }
 rkyv         = { version = "0.8", default-features = false, features = ["std", "bytecheck", "little_endian", "pointer_width_32", "unaligned"] }
 thiserror    = "2"
-version-projection = { git = "https://github.com/LiGoldragon/version-projection.git", branch = "main", default-features = false }
+version-projection = { git = "https://github.com/LiGoldragon/version-projection.git", rev = "485be1c609e5f2038fdf54ed0de04cd29d884b06", default-features = false }
 
 [build-dependencies]
-schema-rust = { package = "schema-rust", git = "https://github.com/LiGoldragon/schema-rust.git", rev = "3278fbc6e6593c044437b3ee5ca1fe71cac344c1" }
+schema-rust = { package = "schema-rust", git = "https://github.com/LiGoldragon/schema-rust.git", rev = "3721656b0a654d47d9abde31f14d89d01f9305cf", default-features = false }
 
 [dev-dependencies]
-nota = { package = "nota", git = "https://github.com/LiGoldragon/nota.git", branch = "main" }
-schema-language = { git = "https://github.com/LiGoldragon/schema-language.git", rev = "6aae825d668e3f607a2754afa6b7d94e9f246c41" }
+nota = { package = "nota", git = "https://github.com/LiGoldragon/nota.git", rev = "89dc3c85a9ff96d4e4d53accfd867df672cae5a8" }
+schema-language = { git = "https://github.com/LiGoldragon/schema-language.git", rev = "9c217610c4b8d3bdaa9f95542e28c04424a593e3" }
 
 [lints.rust]
 unsafe_code = "forbid"
 unused      = { level = "warn", priority = -1 }
 dead_code   = "warn"
-
-[patch."https://github.com/LiGoldragon/nota-next.git"]
-nota = { package = "nota", git = "https://github.com/LiGoldragon/nota.git", branch = "main" }
-nota-derive = { package = "nota-derive", git = "https://github.com/LiGoldragon/nota.git", branch = "main" }
-

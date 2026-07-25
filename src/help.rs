@@ -9,17 +9,17 @@
 //! The text codec is schema-language's body codec end to end: each [`HelpBody`]
 //! encodes via [`SourceDeclarationValue::to_schema_text`] and decodes via
 //! [`SourceDeclarationValue::from_block`]. No hand `format!` printer, no
-//! parallel decoder. The rkyv codec is the rkyv derive on the Help wrappers and
-//! on the stored [`TrueSchema`] values.
+//! parallel decoder. [`TrueSchema`] is schema-language's stringless semantic
+//! view and is deliberately reconstructed from the authored schema sources
+//! rather than archived as a second tree.
 
 use std::fmt;
 
 use ::schema_language::{
-    EnumDeclaration, EnumVariant, FamilyDeclaration, ImportResolver, Name, Root, SchemaEngine,
-    SchemaError, SchemaIdentity, SchemaSource, SourceDeclarationValue, SourceEnumBody,
-    SourceFamilyBody, SourceField, SourceReference, SourceStreamBody, SourceStructBody,
-    SourceVariantPayload, SourceVariantSignature, StreamDeclaration, TrueSchema, TypeDeclaration,
-    TypeReference,
+    EnumDeclaration, EnumVariant, ImportResolver, Name, Root, SchemaEngine, SchemaError,
+    SchemaIdentity, SchemaSource, SourceDeclarationValue, SourceEnumBody, SourceField,
+    SourceReference, SourceStructBody, SourceVariantPayload, SourceVariantSignature, TrueSchema,
+    TypeDeclaration, TypeReference,
 };
 use nota::{Block, Delimiter, Document};
 use thiserror::Error;
@@ -141,20 +141,8 @@ impl fmt::Display for HelpResponse {
     }
 }
 
-#[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, Eq, PartialEq)]
-#[rkyv(
-    bytecheck(bounds(
-        __C: rkyv::validation::ArchiveContext,
-        __C::Error: rkyv::rancor::Source
-    )),
-    serialize_bounds(
-        __S: rkyv::ser::Writer + rkyv::ser::Allocator,
-        __S::Error: rkyv::rancor::Source
-    ),
-    deserialize_bounds(__D::Error: rkyv::rancor::Source)
-)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct HelpModel {
-    #[rkyv(omit_bounds)]
     schemas: Vec<TrueSchema>,
 }
 
@@ -215,33 +203,32 @@ impl<'schema> HelpCatalog<'schema> {
     }
 
     fn root_entries(&self) -> Vec<HelpEntry> {
-        self.schemas
-            .iter()
-            .flat_map(TrueSchema::input_and_output)
-            .filter_map(Root::as_enum)
-            .flat_map(|root| root.variants.iter())
-            .map(|variant| self.entry_for_root_variant(variant))
-            .collect()
+        let mut entries = Vec::new();
+        for schema in self.schemas {
+            for root in schema.input_and_output() {
+                if let Root::Enum(root) = root {
+                    entries.extend(
+                        root.variants
+                            .iter()
+                            .map(|variant| self.entry_for_root_variant(variant)),
+                    );
+                }
+            }
+        }
+        entries
     }
 
     fn entry_named(&self, target: &Name) -> Option<HelpEntry> {
         self.root_variant_named(target)
-            .map(|variant| self.entry_for_root_variant(variant))
+            .map(|variant| self.entry_for_root_variant(&variant))
             .or_else(|| {
                 self.root_named(target)
-                    .map(|root| self.entry_for_root(root))
+                    .map(|root| self.entry_for_root(&root))
             })
             .or_else(|| {
-                self.type_declaration_named(target)
-                    .map(|declaration| self.entry_for_type_declaration(target.clone(), declaration))
-            })
-            .or_else(|| {
-                self.stream_named(target)
-                    .map(|stream| HelpEntry::one(target.clone(), HelpBody::from_stream(stream)))
-            })
-            .or_else(|| {
-                self.family_named(target)
-                    .map(|family| HelpEntry::one(target.clone(), HelpBody::from_family(family)))
+                self.type_declaration_named(target).map(|declaration| {
+                    self.entry_for_type_declaration(target.clone(), &declaration)
+                })
             })
     }
 
@@ -293,7 +280,7 @@ impl<'schema> HelpCatalog<'schema> {
             Some(TypeDeclaration::Newtype(declaration)) => {
                 self.rows_for_root_wrapper_reference(&declaration.reference)
             }
-            Some(declaration) => self.rows_for_type_declaration(declaration),
+            Some(declaration) => self.rows_for_type_declaration(&declaration),
             None => vec![HelpBody::from_type_reference(reference)],
         }
     }
@@ -304,7 +291,7 @@ impl<'schema> HelpCatalog<'schema> {
             .and_then(|name| self.type_declaration_named(name))
         {
             Some(TypeDeclaration::Struct(declaration)) => {
-                let mut rows = vec![HelpBody::from_struct(declaration)];
+                let mut rows = vec![HelpBody::from_struct(&declaration)];
                 rows.extend(
                     declaration
                         .fields
@@ -313,7 +300,7 @@ impl<'schema> HelpCatalog<'schema> {
                 );
                 rows
             }
-            Some(TypeDeclaration::Enum(declaration)) => vec![HelpBody::from_enum(declaration)],
+            Some(TypeDeclaration::Enum(declaration)) => vec![HelpBody::from_enum(&declaration)],
             Some(TypeDeclaration::Newtype(_)) | None => {
                 vec![HelpBody::from_type_reference(reference)]
             }
@@ -324,43 +311,36 @@ impl<'schema> HelpCatalog<'schema> {
         reference
             .plain_name()
             .and_then(|name| self.type_declaration_named(name))
-            .map(HelpBody::from_type_declaration)
+            .map(|declaration| HelpBody::from_type_declaration(&declaration))
             .unwrap_or_else(|| HelpBody::from_type_reference(reference))
     }
 
-    fn root_named(&self, target: &Name) -> Option<&'schema Root> {
+    fn root_named(&self, target: &Name) -> Option<Root> {
         self.schemas
             .iter()
             .find_map(|schema| schema.root_named(target.as_str()))
     }
 
-    fn root_variant_named(&self, target: &Name) -> Option<&'schema EnumVariant> {
-        self.schemas
-            .iter()
-            .flat_map(TrueSchema::input_and_output)
-            .filter_map(Root::as_enum)
-            .flat_map(|root| root.variants.iter())
-            .find(|variant| variant.name == *target)
+    fn root_variant_named(&self, target: &Name) -> Option<EnumVariant> {
+        for schema in self.schemas {
+            for root in schema.input_and_output() {
+                if let Root::Enum(root) = root
+                    && let Some(variant) = root
+                        .variants
+                        .into_iter()
+                        .find(|variant| variant.name == *target)
+                {
+                    return Some(variant);
+                }
+            }
+        }
+        None
     }
 
-    fn type_declaration_named(&self, target: &Name) -> Option<&'schema TypeDeclaration> {
+    fn type_declaration_named(&self, target: &Name) -> Option<TypeDeclaration> {
         self.schemas
             .iter()
             .find_map(|schema| schema.type_named(target.as_str()))
-    }
-
-    fn stream_named(&self, target: &Name) -> Option<&'schema StreamDeclaration> {
-        self.schemas
-            .iter()
-            .flat_map(TrueSchema::streams)
-            .find(|stream| stream.name == *target)
-    }
-
-    fn family_named(&self, target: &Name) -> Option<&'schema FamilyDeclaration> {
-        self.schemas
-            .iter()
-            .flat_map(TrueSchema::families)
-            .find(|family| family.name == *target)
     }
 }
 
@@ -483,23 +463,6 @@ impl HelpBody {
         )))
     }
 
-    fn from_stream(stream: &StreamDeclaration) -> Self {
-        Self::new(SourceDeclarationValue::Stream(SourceStreamBody::new(
-            SourceReference::from_type_reference(&stream.token),
-            SourceReference::from_type_reference(&stream.opened),
-            SourceReference::from_type_reference(&stream.event),
-            SourceReference::from_type_reference(&stream.close),
-        )))
-    }
-
-    fn from_family(family: &FamilyDeclaration) -> Self {
-        Self::new(SourceDeclarationValue::Family(SourceFamilyBody::new(
-            family.record.clone(),
-            family.table.clone(),
-            family.key,
-        )))
-    }
-
     fn from_type_reference(reference: &TypeReference) -> Self {
         Self::new(SourceDeclarationValue::Reference(
             SourceReference::from_type_reference(reference),
@@ -511,15 +474,9 @@ impl HelpBody {
             SourceVariantPayload::Reference(SourceReference::from_type_reference(payload))
         });
 
-        match (payload, variant.stream_relation.as_ref()) {
-            (Some(payload), None) => {
-                SourceVariantSignature::from_payload(variant.name.clone(), payload)
-            }
-            (payload, stream_relation) => SourceVariantSignature::from_projected(
-                variant.name.clone(),
-                payload,
-                stream_relation,
-            ),
+        match payload {
+            Some(payload) => SourceVariantSignature::from_payload(variant.name.clone(), payload),
+            None => SourceVariantSignature::from_name(variant.name.clone()),
         }
     }
 
