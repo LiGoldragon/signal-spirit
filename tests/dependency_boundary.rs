@@ -80,13 +80,13 @@ fn all_features_resolve_one_exact_schema_and_nota_world() {
     let lock = fs::read_to_string(root.join("Cargo.lock")).expect("read Cargo.lock");
 
     for exact_pin in [
-        "4ea4892d717247cce2d0c221b100314077f3fa3d",
+        "c24059de43614e6fb2128e47f959dc11748bd7e7",
         "0786fbe8caf27552afcdd5deb85bc82ec6088337",
         "485be1c609e5f2038fdf54ed0de04cd29d884b06",
         "89dc3c85a9ff96d4e4d53accfd867df672cae5a8",
         "9c217610c4b8d3bdaa9f95542e28c04424a593e3",
-        "4cb55c87174db23ba21237f5975bf97b4c0690b5",
-        "c322127d85f442eb7a0d3152d8bacea638d3f6ea",
+        "9bce5ed8efadeb157811b256aa69a1f88cd5314f",
+        "ee3897429e8e8836c3aee833ff11bc7a761b0d86",
     ] {
         assert!(
             manifest.contains(exact_pin),

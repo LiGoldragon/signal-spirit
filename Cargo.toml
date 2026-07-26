@@ -25,7 +25,7 @@ nota-text = [
 ]
 
 [dependencies]
-signal-domain = { git = "https://github.com/LiGoldragon/signal-domain.git", rev = "4ea4892d717247cce2d0c221b100314077f3fa3d", default-features = false }
+signal-domain = { git = "https://github.com/LiGoldragon/signal-domain.git", rev = "c24059de43614e6fb2128e47f959dc11748bd7e7", default-features = false }
 signal-frame = { git = "https://github.com/LiGoldragon/signal-frame.git", rev = "0786fbe8caf27552afcdd5deb85bc82ec6088337", default-features = false }
 nota    = { package = "nota", git = "https://github.com/LiGoldragon/nota.git", rev = "89dc3c85a9ff96d4e4d53accfd867df672cae5a8", optional = true }
 schema-language = { git = "https://github.com/LiGoldragon/schema-language.git", rev = "9c217610c4b8d3bdaa9f95542e28c04424a593e3", optional = true }
@@ -34,8 +34,8 @@ thiserror    = "2"
 version-projection = { git = "https://github.com/LiGoldragon/version-projection.git", rev = "485be1c609e5f2038fdf54ed0de04cd29d884b06", default-features = false }
 
 [build-dependencies]
-protos = { git = "https://github.com/LiGoldragon/protos.git", rev = "4cb55c87174db23ba21237f5975bf97b4c0690b5" }
-schema-rust = { package = "schema-rust", git = "https://github.com/LiGoldragon/schema-rust.git", rev = "c322127d85f442eb7a0d3152d8bacea638d3f6ea", default-features = false, features = ["cli"] }
+protos = { git = "https://github.com/LiGoldragon/protos.git", rev = "9bce5ed8efadeb157811b256aa69a1f88cd5314f" }
+schema-rust = { package = "schema-rust", git = "https://github.com/LiGoldragon/schema-rust.git", rev = "ee3897429e8e8836c3aee833ff11bc7a761b0d86", default-features = false, features = ["cli"] }
 
 [dev-dependencies]
 nota = { package = "nota", git = "https://github.com/LiGoldragon/nota.git", rev = "89dc3c85a9ff96d4e4d53accfd867df672cae5a8" }
