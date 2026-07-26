@@ -2,7 +2,10 @@ use std::marker::PhantomData;
 
 #[cfg(feature = "nota-text")]
 use signal_spirit::OperationKind;
-use signal_spirit::{Input, InputRoute, Output, OutputRoute};
+use signal_spirit::schema::signal::short_header;
+#[cfg(feature = "nota-text")]
+use signal_spirit::{Input, Output};
+use signal_spirit::{InputRoute, OutputRoute};
 
 const INPUT_ROUTES: [(&str, InputRoute); 25] = [
     ("State", InputRoute::State),
@@ -65,13 +68,71 @@ const OUTPUT_ROUTES: [(&str, OutputRoute); 27] = [
     ("AdvanceRefused", OutputRoute::AdvanceRefused),
 ];
 
+const INPUT_SHORT_HEADERS: [u64; 25] = [
+    short_header::INPUT_STATE,
+    short_header::INPUT_RECORD,
+    short_header::INPUT_PROPOSE,
+    short_header::INPUT_CLARIFY,
+    short_header::INPUT_SUPERSEDE,
+    short_header::INPUT_RETIRE,
+    short_header::INPUT_RESOLVE_CLARIFICATION,
+    short_header::INPUT_OBSERVE,
+    short_header::INPUT_PUBLIC_TEXT_SEARCH,
+    short_header::INPUT_PUBLIC_RECORDS,
+    short_header::INPUT_PRIVATE_RECORDS,
+    short_header::INPUT_LOOKUP,
+    short_header::INPUT_COUNT,
+    short_header::INPUT_CHANGE_CERTAINTY,
+    short_header::INPUT_BUMP_IMPORTANCE,
+    short_header::INPUT_CHANGE_RECORD,
+    short_header::INPUT_REGISTER_REFERENT,
+    short_header::INPUT_LOOKUP_STASH,
+    short_header::INPUT_TAP,
+    short_header::INPUT_UNTAP,
+    short_header::INPUT_APPLY_AUTHORIZED_RECORD,
+    short_header::INPUT_SUBSCRIBE_INTENT,
+    short_header::INPUT_VERSION,
+    short_header::INPUT_MARKER,
+    short_header::INPUT_PUBLIC_INTENT,
+];
+
+const OUTPUT_SHORT_HEADERS: [u64; 27] = [
+    short_header::OUTPUT_RECORD_ACCEPTED,
+    short_header::OUTPUT_PROPOSED,
+    short_header::OUTPUT_CLARIFIED,
+    short_header::OUTPUT_SUPERSEDED,
+    short_header::OUTPUT_RETIRED,
+    short_header::OUTPUT_CLARIFICATION_RESOLVED,
+    short_header::OUTPUT_GUARDIAN_REJECTED,
+    short_header::OUTPUT_REFERENT_GUARDIAN_REJECTED,
+    short_header::OUTPUT_RECORDS_OBSERVED,
+    short_header::OUTPUT_RECORDS_STASHED,
+    short_header::OUTPUT_RECORD_FOUND,
+    short_header::OUTPUT_RECORDS_COUNTED,
+    short_header::OUTPUT_CERTAINTY_CHANGED,
+    short_header::OUTPUT_IMPORTANCE_BUMPED,
+    short_header::OUTPUT_RECORD_CHANGED,
+    short_header::OUTPUT_REFERENT_REGISTERED,
+    short_header::OUTPUT_OBSERVATION_TAPPED,
+    short_header::OUTPUT_OBSERVATION_UNTAPPED,
+    short_header::OUTPUT_SUBSCRIPTION_STARTED,
+    short_header::OUTPUT_VERSION_REPORTED,
+    short_header::OUTPUT_MARKER_REPORTED,
+    short_header::OUTPUT_RECORD_APPLIED,
+    short_header::OUTPUT_APPLY_REFUSED,
+    short_header::OUTPUT_EVENT,
+    short_header::OUTPUT_ERROR,
+    short_header::OUTPUT_REJECTED,
+    short_header::OUTPUT_ADVANCE_REFUSED,
+];
+
 #[test]
 fn complete_route_header_and_tag_inventory_is_stable() {
-    for (index, (_, route)) in INPUT_ROUTES.iter().enumerate() {
-        let expected_header = (index as u64) << 48;
+    for (index, ((_, route), header)) in INPUT_ROUTES.iter().zip(INPUT_SHORT_HEADERS).enumerate() {
+        let expected_header = ((index as u64) << 48) | 0x0000_0001_0000_0001;
         assert_eq!(
-            Input::route_from_short_header(expected_header).expect("known Input header"),
-            *route
+            header, expected_header,
+            "Input route {route:?} moved or lost its SignalSpirit binding"
         );
         let archived =
             rkyv::to_bytes::<rkyv::rancor::Error>(route).expect("archive Input route tag");
@@ -82,11 +143,12 @@ fn complete_route_header_and_tag_inventory_is_stable() {
         );
     }
 
-    for (index, (_, route)) in OUTPUT_ROUTES.iter().enumerate() {
-        let expected_header = (0x0100_u64 + index as u64) << 48;
+    for (index, ((_, route), header)) in OUTPUT_ROUTES.iter().zip(OUTPUT_SHORT_HEADERS).enumerate()
+    {
+        let expected_header = ((0x0100_u64 + index as u64) << 48) | 0x0000_0001_0000_0001;
         assert_eq!(
-            Output::route_from_short_header(expected_header).expect("known Output header"),
-            *route
+            header, expected_header,
+            "Output route {route:?} moved or lost its SignalSpirit binding"
         );
         let archived =
             rkyv::to_bytes::<rkyv::rancor::Error>(route).expect("archive Output route tag");
@@ -108,6 +170,8 @@ macro_rules! assert_alias {
 
 #[test]
 fn established_public_payload_names_remain_exact_type_aliases() {
+    assert_alias!(signal_spirit::SpiritFrame, signal_spirit::Frame);
+    assert_alias!(signal_spirit::SpiritFrameBody, signal_spirit::FrameBody);
     assert_alias!(signal_spirit::State, signal_spirit::StateInput);
     assert_alias!(signal_spirit::Record, signal_spirit::RecordInput);
     assert_alias!(signal_spirit::Propose, signal_spirit::ProposeInput);
@@ -443,7 +507,7 @@ fn public_text_search_crosses_text_archive_and_process_frame_boundaries() {
         OperationKind::from_input(&input),
         OperationKind::PublicTextSearch
     );
-    assert_eq!(input.short_header(), 0x0008_0000_0000_0000);
+    assert_eq!(input.short_header(), 0x0008_0001_0000_0001);
 
     let text = input.to_nota();
     assert_eq!(text, "PublicTextSearch.(exact public text)");
@@ -454,27 +518,25 @@ fn public_text_search_crosses_text_archive_and_process_frame_boundaries() {
         input
     );
 
-    let direct_wire = input
-        .encode_signal_frame()
-        .expect("encode generated PublicTextSearch frame");
-    assert_eq!(
-        Input::decode_signal_frame(&direct_wire).expect("decode generated PublicTextSearch frame"),
-        (InputRoute::PublicTextSearch, input.clone())
-    );
-
-    let process_frame = input.clone().into_frame(ExchangeIdentifier::new(
+    let exchange = ExchangeIdentifier::new(
         SessionEpoch::new(7),
         ExchangeLane::Connector,
         LaneSequence::first(),
-    ));
-    assert_eq!(process_frame.short_header().value(), 0x0008_0000_0000_0000);
-    let process_wire = process_frame
-        .encode()
-        .expect("encode process-boundary PublicTextSearch frame");
+    );
+    let process_frame = input.clone().into_frame(exchange);
+    assert_eq!(process_frame.short_header().value(), 0x0008_0001_0000_0001);
+    let process_wire = input
+        .clone()
+        .encode_request_frame(exchange)
+        .expect("encode bound process-frame PublicTextSearch request");
+    let decoded_frame = signal_spirit::ContractMarker::decode_frame(&process_wire)
+        .expect("decode bound process-frame PublicTextSearch request");
+    assert_eq!(decoded_frame.short_header(), process_frame.short_header());
+    assert_eq!(decoded_frame.into_body(), process_frame.into_body());
     assert_eq!(
-        signal_spirit::Frame::decode(&process_wire)
-            .expect("decode process-boundary PublicTextSearch frame"),
-        process_frame
+        signal_spirit::ContractMarker::decode_single_request(&process_wire)
+            .expect("decode one bound PublicTextSearch request"),
+        (exchange, input)
     );
 
     assert!(signal_spirit::SIGNAL_SCHEMA_SOURCE.contains("PublicTextSearch.PublicTextSearchInput"));

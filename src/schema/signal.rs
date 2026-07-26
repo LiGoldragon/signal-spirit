@@ -5585,68 +5585,78 @@ impl std::fmt::Display for Output {
 
 #[rustfmt::skip]
 pub mod short_header {
-    pub const INPUT_STATE: u64 = 0x0000000000000000;
-    pub const INPUT_RECORD: u64 = 0x0001000000000000;
-    pub const INPUT_PROPOSE: u64 = 0x0002000000000000;
-    pub const INPUT_CLARIFY: u64 = 0x0003000000000000;
-    pub const INPUT_SUPERSEDE: u64 = 0x0004000000000000;
-    pub const INPUT_RETIRE: u64 = 0x0005000000000000;
-    pub const INPUT_RESOLVE_CLARIFICATION: u64 = 0x0006000000000000;
-    pub const INPUT_OBSERVE: u64 = 0x0007000000000000;
-    pub const INPUT_PUBLIC_TEXT_SEARCH: u64 = 0x0008000000000000;
-    pub const INPUT_PUBLIC_RECORDS: u64 = 0x0009000000000000;
-    pub const INPUT_PRIVATE_RECORDS: u64 = 0x000A000000000000;
-    pub const INPUT_LOOKUP: u64 = 0x000B000000000000;
-    pub const INPUT_COUNT: u64 = 0x000C000000000000;
-    pub const INPUT_CHANGE_CERTAINTY: u64 = 0x000D000000000000;
-    pub const INPUT_BUMP_IMPORTANCE: u64 = 0x000E000000000000;
-    pub const INPUT_CHANGE_RECORD: u64 = 0x000F000000000000;
-    pub const INPUT_REGISTER_REFERENT: u64 = 0x0010000000000000;
-    pub const INPUT_LOOKUP_STASH: u64 = 0x0011000000000000;
-    pub const INPUT_TAP: u64 = 0x0012000000000000;
-    pub const INPUT_UNTAP: u64 = 0x0013000000000000;
-    pub const INPUT_APPLY_AUTHORIZED_RECORD: u64 = 0x0014000000000000;
-    pub const INPUT_SUBSCRIBE_INTENT: u64 = 0x0015000000000000;
-    pub const INPUT_VERSION: u64 = 0x0016000000000000;
-    pub const INPUT_MARKER: u64 = 0x0017000000000000;
-    pub const INPUT_PUBLIC_INTENT: u64 = 0x0018000000000000;
-    pub const OUTPUT_RECORD_ACCEPTED: u64 = 0x0100000000000000;
-    pub const OUTPUT_PROPOSED: u64 = 0x0101000000000000;
-    pub const OUTPUT_CLARIFIED: u64 = 0x0102000000000000;
-    pub const OUTPUT_SUPERSEDED: u64 = 0x0103000000000000;
-    pub const OUTPUT_RETIRED: u64 = 0x0104000000000000;
-    pub const OUTPUT_CLARIFICATION_RESOLVED: u64 = 0x0105000000000000;
-    pub const OUTPUT_GUARDIAN_REJECTED: u64 = 0x0106000000000000;
-    pub const OUTPUT_REFERENT_GUARDIAN_REJECTED: u64 = 0x0107000000000000;
-    pub const OUTPUT_RECORDS_OBSERVED: u64 = 0x0108000000000000;
-    pub const OUTPUT_RECORDS_STASHED: u64 = 0x0109000000000000;
-    pub const OUTPUT_RECORD_FOUND: u64 = 0x010A000000000000;
-    pub const OUTPUT_RECORDS_COUNTED: u64 = 0x010B000000000000;
-    pub const OUTPUT_CERTAINTY_CHANGED: u64 = 0x010C000000000000;
-    pub const OUTPUT_IMPORTANCE_BUMPED: u64 = 0x010D000000000000;
-    pub const OUTPUT_RECORD_CHANGED: u64 = 0x010E000000000000;
-    pub const OUTPUT_REFERENT_REGISTERED: u64 = 0x010F000000000000;
-    pub const OUTPUT_OBSERVATION_TAPPED: u64 = 0x0110000000000000;
-    pub const OUTPUT_OBSERVATION_UNTAPPED: u64 = 0x0111000000000000;
-    pub const OUTPUT_SUBSCRIPTION_STARTED: u64 = 0x0112000000000000;
-    pub const OUTPUT_VERSION_REPORTED: u64 = 0x0113000000000000;
-    pub const OUTPUT_MARKER_REPORTED: u64 = 0x0114000000000000;
-    pub const OUTPUT_RECORD_APPLIED: u64 = 0x0115000000000000;
-    pub const OUTPUT_APPLY_REFUSED: u64 = 0x0116000000000000;
-    pub const OUTPUT_EVENT: u64 = 0x0117000000000000;
-    pub const OUTPUT_ERROR: u64 = 0x0118000000000000;
-    pub const OUTPUT_REJECTED: u64 = 0x0119000000000000;
-    pub const OUTPUT_ADVANCE_REFUSED: u64 = 0x011A000000000000;
+    pub const INPUT_STATE: u64 = 0x0000000100000001;
+    pub const INPUT_RECORD: u64 = 0x0001000100000001;
+    pub const INPUT_PROPOSE: u64 = 0x0002000100000001;
+    pub const INPUT_CLARIFY: u64 = 0x0003000100000001;
+    pub const INPUT_SUPERSEDE: u64 = 0x0004000100000001;
+    pub const INPUT_RETIRE: u64 = 0x0005000100000001;
+    pub const INPUT_RESOLVE_CLARIFICATION: u64 = 0x0006000100000001;
+    pub const INPUT_OBSERVE: u64 = 0x0007000100000001;
+    pub const INPUT_PUBLIC_TEXT_SEARCH: u64 = 0x0008000100000001;
+    pub const INPUT_PUBLIC_RECORDS: u64 = 0x0009000100000001;
+    pub const INPUT_PRIVATE_RECORDS: u64 = 0x000A000100000001;
+    pub const INPUT_LOOKUP: u64 = 0x000B000100000001;
+    pub const INPUT_COUNT: u64 = 0x000C000100000001;
+    pub const INPUT_CHANGE_CERTAINTY: u64 = 0x000D000100000001;
+    pub const INPUT_BUMP_IMPORTANCE: u64 = 0x000E000100000001;
+    pub const INPUT_CHANGE_RECORD: u64 = 0x000F000100000001;
+    pub const INPUT_REGISTER_REFERENT: u64 = 0x0010000100000001;
+    pub const INPUT_LOOKUP_STASH: u64 = 0x0011000100000001;
+    pub const INPUT_TAP: u64 = 0x0012000100000001;
+    pub const INPUT_UNTAP: u64 = 0x0013000100000001;
+    pub const INPUT_APPLY_AUTHORIZED_RECORD: u64 = 0x0014000100000001;
+    pub const INPUT_SUBSCRIBE_INTENT: u64 = 0x0015000100000001;
+    pub const INPUT_VERSION: u64 = 0x0016000100000001;
+    pub const INPUT_MARKER: u64 = 0x0017000100000001;
+    pub const INPUT_PUBLIC_INTENT: u64 = 0x0018000100000001;
+    pub const OUTPUT_RECORD_ACCEPTED: u64 = 0x0100000100000001;
+    pub const OUTPUT_PROPOSED: u64 = 0x0101000100000001;
+    pub const OUTPUT_CLARIFIED: u64 = 0x0102000100000001;
+    pub const OUTPUT_SUPERSEDED: u64 = 0x0103000100000001;
+    pub const OUTPUT_RETIRED: u64 = 0x0104000100000001;
+    pub const OUTPUT_CLARIFICATION_RESOLVED: u64 = 0x0105000100000001;
+    pub const OUTPUT_GUARDIAN_REJECTED: u64 = 0x0106000100000001;
+    pub const OUTPUT_REFERENT_GUARDIAN_REJECTED: u64 = 0x0107000100000001;
+    pub const OUTPUT_RECORDS_OBSERVED: u64 = 0x0108000100000001;
+    pub const OUTPUT_RECORDS_STASHED: u64 = 0x0109000100000001;
+    pub const OUTPUT_RECORD_FOUND: u64 = 0x010A000100000001;
+    pub const OUTPUT_RECORDS_COUNTED: u64 = 0x010B000100000001;
+    pub const OUTPUT_CERTAINTY_CHANGED: u64 = 0x010C000100000001;
+    pub const OUTPUT_IMPORTANCE_BUMPED: u64 = 0x010D000100000001;
+    pub const OUTPUT_RECORD_CHANGED: u64 = 0x010E000100000001;
+    pub const OUTPUT_REFERENT_REGISTERED: u64 = 0x010F000100000001;
+    pub const OUTPUT_OBSERVATION_TAPPED: u64 = 0x0110000100000001;
+    pub const OUTPUT_OBSERVATION_UNTAPPED: u64 = 0x0111000100000001;
+    pub const OUTPUT_SUBSCRIPTION_STARTED: u64 = 0x0112000100000001;
+    pub const OUTPUT_VERSION_REPORTED: u64 = 0x0113000100000001;
+    pub const OUTPUT_MARKER_REPORTED: u64 = 0x0114000100000001;
+    pub const OUTPUT_RECORD_APPLIED: u64 = 0x0115000100000001;
+    pub const OUTPUT_APPLY_REFUSED: u64 = 0x0116000100000001;
+    pub const OUTPUT_EVENT: u64 = 0x0117000100000001;
+    pub const OUTPUT_ERROR: u64 = 0x0118000100000001;
+    pub const OUTPUT_REJECTED: u64 = 0x0119000100000001;
+    pub const OUTPUT_ADVANCE_REFUSED: u64 = 0x011A000100000001;
+    pub const HANDSHAKE_REQUEST: u64 = 0xFF00000100000001;
+    pub const HANDSHAKE_REPLY: u64 = 0xFF01000100000001;
+    pub const ENGINE_REFUSAL: u64 = 0xFF02000100000001;
 }
 
 #[rustfmt::skip]
-const SIGNAL_SHORT_HEADER_BYTE_COUNT: usize = 8;
+pub enum ContractMarker {}
 #[rustfmt::skip]
-/// Reserved refusal header. Real variant headers pack root and
-/// variant indices into the top sixteen bits and leave the low
-/// forty-eight bits zero, so the all-ones value can never name a
-/// declared variant.
-const ENGINE_REFUSAL_SHORT_HEADER: u64 = u64::MAX;
+impl signal_frame::WireContract for ContractMarker {
+    const BINDING: signal_frame::ContractBinding = signal_frame::ContractBinding::new(
+        match signal_frame::ContractId::try_new(1u32) {
+            Ok(contract) => contract,
+            Err(_) => panic!("generated contract ID must be nonzero"),
+        },
+        match signal_frame::WireRevision::try_new(1u16) {
+            Ok(revision) => revision,
+            Err(_) => panic!("generated wire revision must be nonzero"),
+        },
+    );
+}
 #[rustfmt::skip]
 /// Why the daemon refused to produce an ordinary reply.
 #[derive(
@@ -5700,13 +5710,13 @@ impl EngineRefusal {
             detail,
         }
     }
-    pub fn encode_signal_frame(&self) -> Result<Vec<u8>, SignalFrameError> {
+    pub fn encode_bound_frame(&self) -> Result<Vec<u8>, SignalFrameError> {
         let archive = rkyv::to_bytes::<rkyv::rancor::Error>(self)
             .map_err(|_| SignalFrameError::ArchiveEncode)?;
         let mut frame = Vec::with_capacity(
-            SIGNAL_SHORT_HEADER_BYTE_COUNT + archive.len(),
+            signal_frame::SHORT_HEADER_BYTE_COUNT + archive.len(),
         );
-        frame.extend_from_slice(&ENGINE_REFUSAL_SHORT_HEADER.to_le_bytes());
+        frame.extend_from_slice(&short_header::ENGINE_REFUSAL.to_le_bytes());
         frame.extend_from_slice(&archive);
         Ok(frame)
     }
@@ -5714,30 +5724,63 @@ impl EngineRefusal {
 #[rustfmt::skip]
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum SignalFrameError {
+    FrameEncode,
     ArchiveEncode,
     ArchiveDecode,
     FrameTooShort { found: usize },
-    UnknownHeader { root_enum: &'static str, header: u64 },
-    HeaderMismatch { expected: u64, found: u64 },
+    LegacyHeader { contract_id: u32, wire_revision: u16 },
+    ContractMismatch { expected: u32, found: u32 },
+    UnsupportedWireRevision { contract_id: u32, expected: u16, found: u16 },
+    UnknownRoute { root: u8, variant: u8 },
+    RouteBodyMismatch { root: u8, variant: u8, body: &'static str },
+    UnexpectedFrameBody { found: &'static str },
+    OperationCount { found: usize },
     EngineRefused { refusal: EngineRefusal },
 }
 #[rustfmt::skip]
 impl std::fmt::Display for SignalFrameError {
     fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::FrameEncode => {
+                formatter.write_str("failed to encode bound signal frame")
+            }
             Self::ArchiveEncode => formatter.write_str("failed to encode rkyv archive"),
             Self::ArchiveDecode => formatter.write_str("failed to decode rkyv archive"),
             Self::FrameTooShort { found } => {
                 write!(formatter, "signal frame too short: {found} bytes")
             }
-            Self::UnknownHeader { root_enum, header } => {
-                write!(formatter, "unknown {root_enum} short header 0x{header:016X}")
-            }
-            Self::HeaderMismatch { expected, found } => {
+            Self::LegacyHeader { contract_id, wire_revision } => {
                 write!(
                     formatter,
-                    "decoded payload header mismatch: expected 0x{expected:016X}, found 0x{found:016X}"
+                    "legacy unbound signal frame ({contract_id}, {wire_revision})"
                 )
+            }
+            Self::ContractMismatch { expected, found } => {
+                write!(
+                    formatter,
+                    "signal contract mismatch: expected {expected}, found {found}"
+                )
+            }
+            Self::UnsupportedWireRevision { contract_id, expected, found } => {
+                write!(
+                    formatter,
+                    "unsupported wire revision for contract {contract_id}: expected {expected}, found {found}"
+                )
+            }
+            Self::UnknownRoute { root, variant } => {
+                write!(formatter, "unknown bound signal route ({root}, {variant})")
+            }
+            Self::RouteBodyMismatch { root, variant, body } => {
+                write!(
+                    formatter,
+                    "bound signal route ({root}, {variant}) does not carry {body}"
+                )
+            }
+            Self::UnexpectedFrameBody { found } => {
+                write!(formatter, "expected one request frame, found {found}")
+            }
+            Self::OperationCount { found } => {
+                write!(formatter, "expected one request operation, found {found}")
             }
             Self::EngineRefused { refusal } => {
                 write!(formatter, "{}: {}", refusal.reason, refusal.detail)
@@ -5747,6 +5790,209 @@ impl std::fmt::Display for SignalFrameError {
 }
 #[rustfmt::skip]
 impl std::error::Error for SignalFrameError {}
+#[rustfmt::skip]
+impl ContractMarker {
+    pub fn handshake_request_frame(request: signal_frame::HandshakeRequest) -> Frame {
+        Frame::new(
+            signal_frame::WireRoute::new(
+                signal_frame::RootCode::new(0xff),
+                signal_frame::VariantCode::new(0),
+            ),
+            FrameBody::HandshakeRequest(request),
+        )
+    }
+    pub fn handshake_reply_frame(reply: signal_frame::HandshakeReply) -> Frame {
+        Frame::new(
+            signal_frame::WireRoute::new(
+                signal_frame::RootCode::new(0xff),
+                signal_frame::VariantCode::new(1),
+            ),
+            FrameBody::HandshakeReply(reply),
+        )
+    }
+    pub fn decode_frame(bytes: &[u8]) -> Result<Frame, SignalFrameError> {
+        if bytes.len() < signal_frame::SHORT_HEADER_BYTE_COUNT {
+            return Err(SignalFrameError::FrameTooShort {
+                found: bytes.len(),
+            });
+        }
+        let mut header_bytes = [0_u8; signal_frame::SHORT_HEADER_BYTE_COUNT];
+        header_bytes.copy_from_slice(&bytes[..signal_frame::SHORT_HEADER_BYTE_COUNT]);
+        let header = u64::from_le_bytes(header_bytes);
+        let contract_id = header as u32;
+        let wire_revision = (header >> 32) as u16;
+        if contract_id == 0 || wire_revision == 0 {
+            return Err(SignalFrameError::LegacyHeader {
+                contract_id,
+                wire_revision,
+            });
+        }
+        if contract_id != 1u32 {
+            return Err(SignalFrameError::ContractMismatch {
+                expected: 1u32,
+                found: contract_id,
+            });
+        }
+        if wire_revision != 1u16 {
+            return Err(SignalFrameError::UnsupportedWireRevision {
+                contract_id,
+                expected: 1u16,
+                found: wire_revision,
+            });
+        }
+        let root = (header >> 56) as u8;
+        let variant = (header >> 48) as u8;
+        match (root, variant) {
+            (0, 0)
+            | (0, 1)
+            | (0, 2)
+            | (0, 3)
+            | (0, 4)
+            | (0, 5)
+            | (0, 6)
+            | (0, 7)
+            | (0, 8)
+            | (0, 9)
+            | (0, 10)
+            | (0, 11)
+            | (0, 12)
+            | (0, 13)
+            | (0, 14)
+            | (0, 15)
+            | (0, 16)
+            | (0, 17)
+            | (0, 18)
+            | (0, 19)
+            | (0, 20)
+            | (0, 21)
+            | (0, 22)
+            | (0, 23)
+            | (0, 24)
+            | (1, 0)
+            | (1, 1)
+            | (1, 2)
+            | (1, 3)
+            | (1, 4)
+            | (1, 5)
+            | (1, 6)
+            | (1, 7)
+            | (1, 8)
+            | (1, 9)
+            | (1, 10)
+            | (1, 11)
+            | (1, 12)
+            | (1, 13)
+            | (1, 14)
+            | (1, 15)
+            | (1, 16)
+            | (1, 17)
+            | (1, 18)
+            | (1, 19)
+            | (1, 20)
+            | (1, 21)
+            | (1, 22)
+            | (1, 23)
+            | (1, 24)
+            | (1, 25)
+            | (1, 26)
+            | (0xff, 0)
+            | (0xff, 1)
+            | (0xff, 2) => {}
+            _ => {
+                return Err(SignalFrameError::UnknownRoute {
+                    root,
+                    variant,
+                });
+            }
+        }
+        if (root, variant) == (0xff, 2) {
+            let refusal = rkyv::from_bytes::<
+                EngineRefusal,
+                rkyv::rancor::Error,
+            >(&bytes[signal_frame::SHORT_HEADER_BYTE_COUNT..])
+                .map_err(|_| SignalFrameError::ArchiveDecode)?;
+            return Err(SignalFrameError::EngineRefused {
+                refusal,
+            });
+        }
+        let frame = Frame::decode(bytes).map_err(|_| SignalFrameError::ArchiveDecode)?;
+        let header_route = signal_frame::WireRoute::new(
+            signal_frame::RootCode::new(root),
+            signal_frame::VariantCode::new(variant),
+        );
+        let body_matches = match frame.body() {
+            FrameBody::HandshakeRequest(_) => (root, variant) == (0xff, 0),
+            FrameBody::HandshakeReply(_) => (root, variant) == (0xff, 1),
+            FrameBody::Request { request, .. } => {
+                request.route().is_ok_and(|route| route == header_route)
+            }
+            FrameBody::Reply { reply, .. } => {
+                match reply {
+                    signal_frame::Reply::Accepted { per_operation, .. } => {
+                        match per_operation.head() {
+                            signal_frame::SubReply::Ok(output) => {
+                                output.wire_route() == header_route
+                            }
+                            signal_frame::SubReply::Failed {
+                                detail: Some(output),
+                                ..
+                            } => output.wire_route() == header_route,
+                            signal_frame::SubReply::Invalidated
+                            | signal_frame::SubReply::Failed { detail: None, .. }
+                            | signal_frame::SubReply::Skipped => root == 1,
+                        }
+                    }
+                    signal_frame::Reply::Rejected { .. } => root == 1,
+                }
+            }
+        };
+        if !body_matches {
+            let body = match frame.body() {
+                FrameBody::HandshakeRequest(_) => "handshake request",
+                FrameBody::HandshakeReply(_) => "handshake reply",
+                FrameBody::Request { .. } => "request",
+                FrameBody::Reply { .. } => "reply",
+            };
+            return Err(SignalFrameError::RouteBodyMismatch {
+                root,
+                variant,
+                body,
+            });
+        }
+        Ok(frame)
+    }
+    pub fn decode_single_request(
+        bytes: &[u8],
+    ) -> Result<(signal_frame::ExchangeIdentifier, Input), SignalFrameError> {
+        let frame = Self::decode_frame(bytes)?;
+        match frame.into_body() {
+            FrameBody::Request { exchange, request } => {
+                let found = request.payloads().len();
+                if found != 1 {
+                    return Err(SignalFrameError::OperationCount {
+                        found,
+                    });
+                }
+                Ok((exchange, request.payloads.into_head()))
+            }
+            FrameBody::HandshakeRequest(_) => {
+                Err(SignalFrameError::UnexpectedFrameBody {
+                    found: "handshake request",
+                })
+            }
+            FrameBody::HandshakeReply(_) => {
+                Err(SignalFrameError::UnexpectedFrameBody {
+                    found: "handshake reply",
+                })
+            }
+            FrameBody::Reply { .. } => {
+                Err(SignalFrameError::UnexpectedFrameBody {
+                    found: "reply",
+                })
+            }
+        }
+    }
+}
 
 #[rustfmt::skip]
 #[cfg_attr(
@@ -5867,6 +6113,160 @@ impl Input {
             Self::PublicIntent(_) => InputRoute::PublicIntent,
         }
     }
+    pub fn wire_route(&self) -> signal_frame::WireRoute {
+        match self {
+            Self::State(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(0),
+                    signal_frame::VariantCode::new(0),
+                )
+            }
+            Self::Record(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(0),
+                    signal_frame::VariantCode::new(1),
+                )
+            }
+            Self::Propose(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(0),
+                    signal_frame::VariantCode::new(2),
+                )
+            }
+            Self::Clarify(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(0),
+                    signal_frame::VariantCode::new(3),
+                )
+            }
+            Self::Supersede(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(0),
+                    signal_frame::VariantCode::new(4),
+                )
+            }
+            Self::Retire(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(0),
+                    signal_frame::VariantCode::new(5),
+                )
+            }
+            Self::ResolveClarification(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(0),
+                    signal_frame::VariantCode::new(6),
+                )
+            }
+            Self::Observe(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(0),
+                    signal_frame::VariantCode::new(7),
+                )
+            }
+            Self::PublicTextSearch(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(0),
+                    signal_frame::VariantCode::new(8),
+                )
+            }
+            Self::PublicRecords(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(0),
+                    signal_frame::VariantCode::new(9),
+                )
+            }
+            Self::PrivateRecords(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(0),
+                    signal_frame::VariantCode::new(10),
+                )
+            }
+            Self::Lookup(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(0),
+                    signal_frame::VariantCode::new(11),
+                )
+            }
+            Self::Count(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(0),
+                    signal_frame::VariantCode::new(12),
+                )
+            }
+            Self::ChangeCertainty(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(0),
+                    signal_frame::VariantCode::new(13),
+                )
+            }
+            Self::BumpImportance(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(0),
+                    signal_frame::VariantCode::new(14),
+                )
+            }
+            Self::ChangeRecord(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(0),
+                    signal_frame::VariantCode::new(15),
+                )
+            }
+            Self::RegisterReferent(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(0),
+                    signal_frame::VariantCode::new(16),
+                )
+            }
+            Self::LookupStash(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(0),
+                    signal_frame::VariantCode::new(17),
+                )
+            }
+            Self::Tap(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(0),
+                    signal_frame::VariantCode::new(18),
+                )
+            }
+            Self::Untap(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(0),
+                    signal_frame::VariantCode::new(19),
+                )
+            }
+            Self::ApplyAuthorizedRecord(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(0),
+                    signal_frame::VariantCode::new(20),
+                )
+            }
+            Self::SubscribeIntent(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(0),
+                    signal_frame::VariantCode::new(21),
+                )
+            }
+            Self::Version => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(0),
+                    signal_frame::VariantCode::new(22),
+                )
+            }
+            Self::Marker => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(0),
+                    signal_frame::VariantCode::new(23),
+                )
+            }
+            Self::PublicIntent(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(0),
+                    signal_frame::VariantCode::new(24),
+                )
+            }
+        }
+    }
     pub fn short_header(&self) -> u64 {
         match self {
             Self::State(_) => short_header::INPUT_STATE,
@@ -5895,91 +6295,6 @@ impl Input {
             Self::Marker => short_header::INPUT_MARKER,
             Self::PublicIntent(_) => short_header::INPUT_PUBLIC_INTENT,
         }
-    }
-    pub fn route_from_short_header(header: u64) -> Result<InputRoute, SignalFrameError> {
-        match header {
-            short_header::INPUT_STATE => Ok(InputRoute::State),
-            short_header::INPUT_RECORD => Ok(InputRoute::Record),
-            short_header::INPUT_PROPOSE => Ok(InputRoute::Propose),
-            short_header::INPUT_CLARIFY => Ok(InputRoute::Clarify),
-            short_header::INPUT_SUPERSEDE => Ok(InputRoute::Supersede),
-            short_header::INPUT_RETIRE => Ok(InputRoute::Retire),
-            short_header::INPUT_RESOLVE_CLARIFICATION => {
-                Ok(InputRoute::ResolveClarification)
-            }
-            short_header::INPUT_OBSERVE => Ok(InputRoute::Observe),
-            short_header::INPUT_PUBLIC_TEXT_SEARCH => Ok(InputRoute::PublicTextSearch),
-            short_header::INPUT_PUBLIC_RECORDS => Ok(InputRoute::PublicRecords),
-            short_header::INPUT_PRIVATE_RECORDS => Ok(InputRoute::PrivateRecords),
-            short_header::INPUT_LOOKUP => Ok(InputRoute::Lookup),
-            short_header::INPUT_COUNT => Ok(InputRoute::Count),
-            short_header::INPUT_CHANGE_CERTAINTY => Ok(InputRoute::ChangeCertainty),
-            short_header::INPUT_BUMP_IMPORTANCE => Ok(InputRoute::BumpImportance),
-            short_header::INPUT_CHANGE_RECORD => Ok(InputRoute::ChangeRecord),
-            short_header::INPUT_REGISTER_REFERENT => Ok(InputRoute::RegisterReferent),
-            short_header::INPUT_LOOKUP_STASH => Ok(InputRoute::LookupStash),
-            short_header::INPUT_TAP => Ok(InputRoute::Tap),
-            short_header::INPUT_UNTAP => Ok(InputRoute::Untap),
-            short_header::INPUT_APPLY_AUTHORIZED_RECORD => {
-                Ok(InputRoute::ApplyAuthorizedRecord)
-            }
-            short_header::INPUT_SUBSCRIBE_INTENT => Ok(InputRoute::SubscribeIntent),
-            short_header::INPUT_VERSION => Ok(InputRoute::Version),
-            short_header::INPUT_MARKER => Ok(InputRoute::Marker),
-            short_header::INPUT_PUBLIC_INTENT => Ok(InputRoute::PublicIntent),
-            _ => {
-                Err(SignalFrameError::UnknownHeader {
-                    root_enum: "Input",
-                    header,
-                })
-            }
-        }
-    }
-    pub fn encode_signal_frame(&self) -> Result<Vec<u8>, SignalFrameError> {
-        let archive = rkyv::to_bytes::<rkyv::rancor::Error>(self)
-            .map_err(|_| SignalFrameError::ArchiveEncode)?;
-        let mut frame = Vec::with_capacity(
-            SIGNAL_SHORT_HEADER_BYTE_COUNT + archive.len(),
-        );
-        frame.extend_from_slice(&self.short_header().to_le_bytes());
-        frame.extend_from_slice(&archive);
-        Ok(frame)
-    }
-    pub fn decode_signal_frame(
-        frame: &[u8],
-    ) -> Result<(InputRoute, Self), SignalFrameError> {
-        if frame.len() < SIGNAL_SHORT_HEADER_BYTE_COUNT {
-            return Err(SignalFrameError::FrameTooShort {
-                found: frame.len(),
-            });
-        }
-        let mut header_bytes = [0_u8; SIGNAL_SHORT_HEADER_BYTE_COUNT];
-        header_bytes.copy_from_slice(&frame[..SIGNAL_SHORT_HEADER_BYTE_COUNT]);
-        let header = u64::from_le_bytes(header_bytes);
-        if header == ENGINE_REFUSAL_SHORT_HEADER {
-            let refusal = rkyv::from_bytes::<
-                EngineRefusal,
-                rkyv::rancor::Error,
-            >(&frame[SIGNAL_SHORT_HEADER_BYTE_COUNT..])
-                .map_err(|_| SignalFrameError::ArchiveDecode)?;
-            return Err(SignalFrameError::EngineRefused {
-                refusal,
-            });
-        }
-        let route = Self::route_from_short_header(header)?;
-        let value = rkyv::from_bytes::<
-            Self,
-            rkyv::rancor::Error,
-        >(&frame[SIGNAL_SHORT_HEADER_BYTE_COUNT..])
-            .map_err(|_| SignalFrameError::ArchiveDecode)?;
-        let expected = value.short_header();
-        if expected != header {
-            return Err(SignalFrameError::HeaderMismatch {
-                expected,
-                found: header,
-            });
-        }
-        Ok((route, value))
     }
 }
 
@@ -6016,6 +6331,172 @@ impl Output {
             Self::AdvanceRefused(_) => OutputRoute::AdvanceRefused,
         }
     }
+    pub fn wire_route(&self) -> signal_frame::WireRoute {
+        match self {
+            Self::RecordAccepted(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(0),
+                )
+            }
+            Self::Proposed(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(1),
+                )
+            }
+            Self::Clarified(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(2),
+                )
+            }
+            Self::Superseded(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(3),
+                )
+            }
+            Self::Retired(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(4),
+                )
+            }
+            Self::ClarificationResolved(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(5),
+                )
+            }
+            Self::GuardianRejected(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(6),
+                )
+            }
+            Self::ReferentGuardianRejected(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(7),
+                )
+            }
+            Self::RecordsObserved(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(8),
+                )
+            }
+            Self::RecordsStashed(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(9),
+                )
+            }
+            Self::RecordFound(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(10),
+                )
+            }
+            Self::RecordsCounted(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(11),
+                )
+            }
+            Self::CertaintyChanged(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(12),
+                )
+            }
+            Self::ImportanceBumped(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(13),
+                )
+            }
+            Self::RecordChanged(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(14),
+                )
+            }
+            Self::ReferentRegistered(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(15),
+                )
+            }
+            Self::ObservationTapped(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(16),
+                )
+            }
+            Self::ObservationUntapped(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(17),
+                )
+            }
+            Self::SubscriptionStarted(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(18),
+                )
+            }
+            Self::VersionReported(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(19),
+                )
+            }
+            Self::MarkerReported(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(20),
+                )
+            }
+            Self::RecordApplied(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(21),
+                )
+            }
+            Self::ApplyRefused(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(22),
+                )
+            }
+            Self::Event(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(23),
+                )
+            }
+            Self::Error(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(24),
+                )
+            }
+            Self::Rejected(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(25),
+                )
+            }
+            Self::AdvanceRefused(_) => {
+                signal_frame::WireRoute::new(
+                    signal_frame::RootCode::new(1),
+                    signal_frame::VariantCode::new(26),
+                )
+            }
+        }
+    }
     pub fn short_header(&self) -> u64 {
         match self {
             Self::RecordAccepted(_) => short_header::OUTPUT_RECORD_ACCEPTED,
@@ -6048,101 +6529,6 @@ impl Output {
             Self::Rejected(_) => short_header::OUTPUT_REJECTED,
             Self::AdvanceRefused(_) => short_header::OUTPUT_ADVANCE_REFUSED,
         }
-    }
-    pub fn route_from_short_header(
-        header: u64,
-    ) -> Result<OutputRoute, SignalFrameError> {
-        match header {
-            short_header::OUTPUT_RECORD_ACCEPTED => Ok(OutputRoute::RecordAccepted),
-            short_header::OUTPUT_PROPOSED => Ok(OutputRoute::Proposed),
-            short_header::OUTPUT_CLARIFIED => Ok(OutputRoute::Clarified),
-            short_header::OUTPUT_SUPERSEDED => Ok(OutputRoute::Superseded),
-            short_header::OUTPUT_RETIRED => Ok(OutputRoute::Retired),
-            short_header::OUTPUT_CLARIFICATION_RESOLVED => {
-                Ok(OutputRoute::ClarificationResolved)
-            }
-            short_header::OUTPUT_GUARDIAN_REJECTED => Ok(OutputRoute::GuardianRejected),
-            short_header::OUTPUT_REFERENT_GUARDIAN_REJECTED => {
-                Ok(OutputRoute::ReferentGuardianRejected)
-            }
-            short_header::OUTPUT_RECORDS_OBSERVED => Ok(OutputRoute::RecordsObserved),
-            short_header::OUTPUT_RECORDS_STASHED => Ok(OutputRoute::RecordsStashed),
-            short_header::OUTPUT_RECORD_FOUND => Ok(OutputRoute::RecordFound),
-            short_header::OUTPUT_RECORDS_COUNTED => Ok(OutputRoute::RecordsCounted),
-            short_header::OUTPUT_CERTAINTY_CHANGED => Ok(OutputRoute::CertaintyChanged),
-            short_header::OUTPUT_IMPORTANCE_BUMPED => Ok(OutputRoute::ImportanceBumped),
-            short_header::OUTPUT_RECORD_CHANGED => Ok(OutputRoute::RecordChanged),
-            short_header::OUTPUT_REFERENT_REGISTERED => {
-                Ok(OutputRoute::ReferentRegistered)
-            }
-            short_header::OUTPUT_OBSERVATION_TAPPED => Ok(OutputRoute::ObservationTapped),
-            short_header::OUTPUT_OBSERVATION_UNTAPPED => {
-                Ok(OutputRoute::ObservationUntapped)
-            }
-            short_header::OUTPUT_SUBSCRIPTION_STARTED => {
-                Ok(OutputRoute::SubscriptionStarted)
-            }
-            short_header::OUTPUT_VERSION_REPORTED => Ok(OutputRoute::VersionReported),
-            short_header::OUTPUT_MARKER_REPORTED => Ok(OutputRoute::MarkerReported),
-            short_header::OUTPUT_RECORD_APPLIED => Ok(OutputRoute::RecordApplied),
-            short_header::OUTPUT_APPLY_REFUSED => Ok(OutputRoute::ApplyRefused),
-            short_header::OUTPUT_EVENT => Ok(OutputRoute::Event),
-            short_header::OUTPUT_ERROR => Ok(OutputRoute::Error),
-            short_header::OUTPUT_REJECTED => Ok(OutputRoute::Rejected),
-            short_header::OUTPUT_ADVANCE_REFUSED => Ok(OutputRoute::AdvanceRefused),
-            _ => {
-                Err(SignalFrameError::UnknownHeader {
-                    root_enum: "Output",
-                    header,
-                })
-            }
-        }
-    }
-    pub fn encode_signal_frame(&self) -> Result<Vec<u8>, SignalFrameError> {
-        let archive = rkyv::to_bytes::<rkyv::rancor::Error>(self)
-            .map_err(|_| SignalFrameError::ArchiveEncode)?;
-        let mut frame = Vec::with_capacity(
-            SIGNAL_SHORT_HEADER_BYTE_COUNT + archive.len(),
-        );
-        frame.extend_from_slice(&self.short_header().to_le_bytes());
-        frame.extend_from_slice(&archive);
-        Ok(frame)
-    }
-    pub fn decode_signal_frame(
-        frame: &[u8],
-    ) -> Result<(OutputRoute, Self), SignalFrameError> {
-        if frame.len() < SIGNAL_SHORT_HEADER_BYTE_COUNT {
-            return Err(SignalFrameError::FrameTooShort {
-                found: frame.len(),
-            });
-        }
-        let mut header_bytes = [0_u8; SIGNAL_SHORT_HEADER_BYTE_COUNT];
-        header_bytes.copy_from_slice(&frame[..SIGNAL_SHORT_HEADER_BYTE_COUNT]);
-        let header = u64::from_le_bytes(header_bytes);
-        if header == ENGINE_REFUSAL_SHORT_HEADER {
-            let refusal = rkyv::from_bytes::<
-                EngineRefusal,
-                rkyv::rancor::Error,
-            >(&frame[SIGNAL_SHORT_HEADER_BYTE_COUNT..])
-                .map_err(|_| SignalFrameError::ArchiveDecode)?;
-            return Err(SignalFrameError::EngineRefused {
-                refusal,
-            });
-        }
-        let route = Self::route_from_short_header(header)?;
-        let value = rkyv::from_bytes::<
-            Self,
-            rkyv::rancor::Error,
-        >(&frame[SIGNAL_SHORT_HEADER_BYTE_COUNT..])
-            .map_err(|_| SignalFrameError::ArchiveDecode)?;
-        let expected = value.short_header();
-        if expected != header {
-            return Err(SignalFrameError::HeaderMismatch {
-                expected,
-                found: header,
-            });
-        }
-        Ok((route, value))
     }
 }
 
@@ -6181,11 +6567,12 @@ impl signal_frame::SignalOperationHeads for Input {
 #[rustfmt::skip]
 impl signal_frame::LogVariant for Input {
     fn log_variant(&self) -> u64 {
-        self.short_header()
+        let route = self.wire_route();
+        u64::from(route.root().value()) | (u64::from(route.variant().value()) << 8)
     }
 }
 #[rustfmt::skip]
-pub type Frame = signal_frame::ExchangeFrame<Input, Output>;
+pub type Frame = signal_frame::BoundExchangeFrame<ContractMarker, Input, Output>;
 #[rustfmt::skip]
 pub type FrameBody = signal_frame::ExchangeFrameBody<Input, Output>;
 #[rustfmt::skip]
@@ -6197,30 +6584,44 @@ pub type RequestBuilder = signal_frame::RequestBuilder<Input>;
 #[rustfmt::skip]
 impl Input {
     pub fn into_frame(self, exchange: signal_frame::ExchangeIdentifier) -> Frame {
-        let short_header = signal_frame::ShortHeader::new(self.short_header());
+        let route = self.wire_route();
         let request = signal_frame::Request::from_payload(self);
-        Frame::with_short_header(
-            short_header,
+        Frame::new(
+            route,
             FrameBody::Request {
                 exchange,
                 request,
             },
         )
     }
+    pub fn encode_request_frame(
+        self,
+        exchange: signal_frame::ExchangeIdentifier,
+    ) -> Result<Vec<u8>, SignalFrameError> {
+        self.into_frame(exchange).encode().map_err(|_| SignalFrameError::FrameEncode)
+    }
 }
 #[rustfmt::skip]
 impl Output {
     pub fn into_reply_frame(self, exchange: signal_frame::ExchangeIdentifier) -> Frame {
-        let short_header = signal_frame::ShortHeader::new(self.short_header());
+        let route = self.wire_route();
         let reply = signal_frame::Reply::committed(
             signal_frame::NonEmpty::single(signal_frame::SubReply::Ok(self)),
         );
-        Frame::with_short_header(
-            short_header,
+        Frame::new(
+            route,
             FrameBody::Reply {
                 exchange,
                 reply,
             },
         )
+    }
+    pub fn encode_reply_frame(
+        self,
+        exchange: signal_frame::ExchangeIdentifier,
+    ) -> Result<Vec<u8>, SignalFrameError> {
+        self.into_reply_frame(exchange)
+            .encode()
+            .map_err(|_| SignalFrameError::FrameEncode)
     }
 }

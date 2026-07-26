@@ -1,10 +1,10 @@
 use signal_spirit::{
     AdvanceRefusal, AdvanceRefusalReason, ClarificationRecordIdentifier, ClarificationResolution,
-    ClarificationResolutionReceipt, DataLeaf, Description, Domain, DomainMatch, DomainScope,
-    DomainScopes, Domains, Input, InputRoute, Justification, OperationKind, Output, OutputRoute,
-    QuoteText, Reasoning, RecordIdentifier, RecordIdentifiers, ScopeSet, Software,
-    TargetClarification, TargetClarifications, Technology, Testimony, VerbatimQuote, VersionReport,
-    VersionText,
+    ClarificationResolutionReceipt, ContractMarker, DataLeaf, Description, Domain, DomainMatch,
+    DomainScope, DomainScopes, Domains, Input, InputRoute, Justification, OperationKind, Output,
+    OutputRoute, QuoteText, Reasoning, RecordIdentifier, RecordIdentifiers, ScopeSet,
+    SignalFrameError, Software, TargetClarification, TargetClarifications, Technology, Testimony,
+    VerbatimQuote, VersionReport, VersionText,
 };
 #[cfg(feature = "nota-text")]
 use std::collections::BTreeSet;
@@ -15,21 +15,94 @@ use nota::{NotaEncode, NotaSource};
 #[cfg(feature = "nota-text")]
 const DOMAIN_HELP_ROW: &str = "[All Health.HealthDomain Food.FoodDomain Home.HomeDomain Finance.FinanceDomain Work.WorkDomain Craft.CraftDomain Knowledge.KnowledgeDomain Education.EducationDomain Language.LanguageDomain Art.ArtDomain Kinship.KinshipDomain Selfhood.SelfhoodDomain Spirituality.SpiritualityDomain Governance.GovernanceDomain Law.LawDomain Community.CommunityDomain Nature.NatureDomain Travel.TravelDomain Commerce.CommerceDomain Leisure.LeisureDomain Appearance.AppearanceDomain Safety.SafetyDomain Information.InformationDomain Technology.TechnologyDomain]";
 
+fn exchange() -> signal_frame::ExchangeIdentifier {
+    signal_frame::ExchangeIdentifier::new(
+        signal_frame::SessionEpoch::new(7),
+        signal_frame::ExchangeLane::Connector,
+        signal_frame::LaneSequence::first(),
+    )
+}
+
+fn round_trip_input(input: Input) -> (InputRoute, Input) {
+    let bytes = input
+        .clone()
+        .encode_request_frame(exchange())
+        .expect("encode bound request frame");
+    let (decoded_exchange, decoded) =
+        ContractMarker::decode_single_request(&bytes).expect("decode bound request frame");
+
+    assert_eq!(decoded_exchange, exchange());
+    assert_eq!(
+        u64::from_le_bytes(bytes[..8].try_into().expect("short header")),
+        input.short_header()
+    );
+    (decoded.route(), decoded)
+}
+
+fn round_trip_output(output: Output) -> OutputRoute {
+    let expected = output.clone().into_reply_frame(exchange());
+    let bytes = output
+        .clone()
+        .encode_reply_frame(exchange())
+        .expect("encode bound reply frame");
+    let decoded = ContractMarker::decode_frame(&bytes).expect("decode bound reply frame");
+
+    assert_eq!(
+        u64::from_le_bytes(bytes[..8].try_into().expect("short header")),
+        output.short_header()
+    );
+    assert_eq!(decoded.short_header(), expected.short_header());
+    assert_eq!(decoded.into_body(), expected.into_body());
+    output.route()
+}
+
 #[test]
 fn generated_input_frame_round_trips() {
     let input = Input::Version;
-    let bytes = input.encode_signal_frame().expect("encode input frame");
-    let (route, decoded) = Input::decode_signal_frame(&bytes).expect("decode input frame");
+    let (route, decoded) = round_trip_input(input.clone());
 
     assert_eq!(route, InputRoute::Version);
     assert_eq!(decoded, input);
 }
 
 #[test]
+fn generated_frames_enforce_the_signal_spirit_contract_binding() {
+    let bytes = Input::Version
+        .encode_request_frame(exchange())
+        .expect("encode bound request frame");
+    let header = u64::from_le_bytes(bytes[..8].try_into().expect("short header"));
+
+    assert_eq!(header as u32, 1);
+    assert_eq!((header >> 32) as u16, 1);
+
+    let mut wrong_contract = bytes.clone();
+    wrong_contract[..4].copy_from_slice(&2_u32.to_le_bytes());
+    wrong_contract.truncate(8);
+    assert!(matches!(
+        ContractMarker::decode_frame(&wrong_contract),
+        Err(SignalFrameError::ContractMismatch {
+            expected: 1,
+            found: 2,
+        })
+    ));
+
+    let mut wrong_revision = bytes;
+    wrong_revision[4..6].copy_from_slice(&2_u16.to_le_bytes());
+    wrong_revision.truncate(8);
+    assert!(matches!(
+        ContractMarker::decode_frame(&wrong_revision),
+        Err(SignalFrameError::UnsupportedWireRevision {
+            contract_id: 1,
+            expected: 1,
+            found: 2,
+        })
+    ));
+}
+
+#[test]
 fn generated_public_intent_frame_round_trips_without_moving_existing_routes() {
     let input = Input::public_intent(DomainScopes::new(vec![DomainScope::All]));
-    let bytes = input.encode_signal_frame().expect("encode input frame");
-    let (route, decoded) = Input::decode_signal_frame(&bytes).expect("decode input frame");
+    let (route, decoded) = round_trip_input(input.clone());
 
     assert_eq!(route, InputRoute::PublicIntent);
     assert_eq!(decoded, input);
@@ -39,17 +112,17 @@ fn generated_public_intent_frame_round_trips_without_moving_existing_routes() {
     );
     assert_eq!(
         input.short_header(),
-        0x0018_0000_0000_0000,
+        0x0018_0001_0000_0001,
         "new PublicIntent route is appended after the existing route range"
     );
     assert_eq!(
         signal_spirit::schema::signal::short_header::INPUT_PUBLIC_TEXT_SEARCH,
-        0x0008_0000_0000_0000,
+        0x0008_0001_0000_0001,
         "existing PublicTextSearch route must keep its short header"
     );
     assert_eq!(
         signal_spirit::schema::signal::short_header::INPUT_MARKER,
-        0x0017_0000_0000_0000,
+        0x0017_0001_0000_0001,
         "existing Marker route must keep its short header when PublicIntent is added"
     );
 }
@@ -57,11 +130,9 @@ fn generated_public_intent_frame_round_trips_without_moving_existing_routes() {
 #[test]
 fn generated_output_frame_round_trips() {
     let output = Output::version_reported(VersionReport::new(VersionText::new("0.12.1")));
-    let bytes = output.encode_signal_frame().expect("encode output frame");
-    let (route, decoded) = Output::decode_signal_frame(&bytes).expect("decode output frame");
+    let route = round_trip_output(output);
 
     assert_eq!(route, OutputRoute::VersionReported);
-    assert_eq!(decoded, output);
 }
 
 #[test]
@@ -82,8 +153,7 @@ fn generated_resolve_clarification_frame_round_trips() {
             reasoning: Reasoning::new("fold standalone clarification into target"),
         },
     });
-    let bytes = input.encode_signal_frame().expect("encode input frame");
-    let (route, decoded) = Input::decode_signal_frame(&bytes).expect("decode input frame");
+    let (route, decoded) = round_trip_input(input.clone());
 
     assert_eq!(route, InputRoute::ResolveClarification);
     assert_eq!(decoded, input);
@@ -97,11 +167,9 @@ fn generated_clarification_resolved_frame_round_trips() {
         )),
         record_identifiers: RecordIdentifiers::new(vec![RecordIdentifier::new("targ1")]),
     });
-    let bytes = output.encode_signal_frame().expect("encode output frame");
-    let (route, decoded) = Output::decode_signal_frame(&bytes).expect("decode output frame");
+    let route = round_trip_output(output);
 
     assert_eq!(route, OutputRoute::ClarificationResolved);
-    assert_eq!(decoded, output);
 }
 
 #[test]
@@ -113,25 +181,23 @@ fn generated_advance_refused_frame_round_trips_without_moving_existing_routes() 
         AdvanceRefusalReason::Unreachable,
     ] {
         let output = Output::advance_refused(AdvanceRefusal::new(reason));
-        let bytes = output.encode_signal_frame().expect("encode output frame");
-        let (route, decoded) = Output::decode_signal_frame(&bytes).expect("decode output frame");
+        let route = round_trip_output(output.clone());
 
         assert_eq!(route, OutputRoute::AdvanceRefused);
-        assert_eq!(decoded, output);
         assert_eq!(
             output.short_header(),
-            0x011A_0000_0000_0000,
+            0x011A_0001_0000_0001,
             "new AdvanceRefused route is appended after the existing route range"
         );
     }
     assert_eq!(
         signal_spirit::schema::signal::short_header::OUTPUT_APPLY_REFUSED,
-        0x0116_0000_0000_0000,
+        0x0116_0001_0000_0001,
         "existing ApplyRefused route must keep its short header"
     );
     assert_eq!(
         signal_spirit::schema::signal::short_header::OUTPUT_REJECTED,
-        0x0119_0000_0000_0000,
+        0x0119_0001_0000_0001,
         "existing Rejected route must keep its short header when AdvanceRefused is added"
     );
 }

@@ -101,8 +101,8 @@ pub use help::{HelpBody, HelpError, HelpModel, HelpRequest, HelpResponse};
 
 pub type SpiritRequest = Input;
 pub type SpiritReply = Output;
-pub type SpiritFrame = signal_frame::StreamingFrame<Input, Output, IntentEvent>;
-pub type SpiritFrameBody = signal_frame::StreamingFrameBody<Input, Output, IntentEvent>;
+pub type SpiritFrame = Frame;
+pub type SpiritFrameBody = FrameBody;
 
 pub const DOMAIN_SCHEMA_SOURCE: &str = signal_domain::DOMAIN_SCHEMA_SOURCE;
 pub const SIGNAL_SCHEMA_SOURCE: &str = include_str!("../schema/signal.schema");

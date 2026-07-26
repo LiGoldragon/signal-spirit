@@ -73,7 +73,12 @@ the spirit tables. Executable payloads do not live in this contract.
 The public intent event stays contract-owned as `IntentEvent`. It does not
 carry `SemaObservation` or depend on `signal-sema`.
 
-**Frame layer.** Frame mechanics come from `signal-frame`.
+**Frame layer.** Frame mechanics come from `signal-frame`. `build.rs` selects
+the `SignalSpirit` family through the build-only `protos` contract, and
+`schema-rust` emits the corresponding `ContractMarker` plus bound request and
+reply frames. Generated and runtime code do not depend on `protos`. Intent
+events remain the `Output::Event` variant; this contract declares no parallel
+stream descriptor or unbound streaming frame.
 
 **Daemon startup configuration.** The binary
 `SpiritDaemonConfiguration` also carries daemon startup policy that must be set
@@ -135,8 +140,8 @@ or dependencies of this crate.
 | Retired schema Stream and Family constructs do not return through Help. | `generated_help_model_renders_every_decoded_schema_target` proves every current decoded target renders, while `IntentEventStream` is an explicit unknown target and `TrueSchema` contains no retired stream relation. |
 | Intent entries can be nominated for removal without deletion. | `ChangeCertainty(CertaintyChange)` round-trips through RKYV and NOTA and returns `CertaintyChanged`; setting certainty to `Zero` makes the record visible to removal-candidate review. |
 | Intent entries can be corrected in place without remove-and-recreate. | `ChangeRecord(RecordChange)` returns `RecordChanged(RecordChangeReceipt)` while keeping removal off the ordinary surface. |
-| Default consumers stay binary-only. | `default_dependency_tree_does_not_pull_text_or_legacy_signal_crates` proves the default normal dependency graph has no `nota`, `nota-codec`, or `signal-core`; `nota_text_feature_is_the_only_text_projection_opt_in` proves `nota` appears only when requested. |
-| All-feature consumers resolve one immutable schema world. | `all_features_resolve_one_exact_schema_and_nota_world` checks every producer pin, the absence of alternate Nota URLs, patches, branch/path sources, and an empty duplicate tree. |
+| Default consumers stay binary-only. | `default_dependency_tree_does_not_pull_text_or_legacy_signal_crates` proves the default normal dependency graph has no `nota`, `nota-codec`, `protos`, or `signal-core`; `nota_text_feature_is_the_only_text_projection_opt_in` proves `nota` appears only when requested. |
+| All-feature consumers resolve one immutable schema world. | `all_features_resolve_one_exact_schema_and_nota_world` checks every producer pin and rejects alternate Nota URLs, patches, branch/path sources, and duplicate producer worlds. The same exact `signal-frame` source may be built once for the build-only Protos host graph and once for the runtime target graph. |
 | Checked-in examples describe the active typed contract. | `wire_inventory::canonical_examples_are_generated_from_current_typed_wire_values` generates every example from real `Input`/`Output` values and decodes each line back through Nota. |
 | Domain taxonomy is shared, not duplicated. | `public_domain_paths_are_signal_domain_types` proves the public `signal-spirit` domain paths are the `signal-domain` types, and `public_domain_path_round_trips_through_rkyv` / `public_domain_path_round_trips_through_nota` keep representative codec compatibility covered. |
 | A refused head advance surfaces a typed reason and new routes never move existing ones. | `generated_advance_refused_frame_round_trips_without_moving_existing_routes` round-trips every `AdvanceRefusalReason` variant through the signal frame and pins the appended `OUTPUT_ADVANCE_REFUSED` short header beside the unchanged `ApplyRefused`/`Rejected` headers. |
@@ -146,7 +151,7 @@ or dependencies of this crate.
 ## Code Map
 
 ```text
-src/lib.rs              — generated schema re-exports, compatibility aliases/helpers, and StreamingFrame aliases
+src/lib.rs              — generated schema re-exports, compatibility aliases/helpers, and bound frame aliases
 src/schema/domain.rs    — compatibility shim re-exporting signal-domain schema types
 schema/signal.schema    — Spirit wire schema importing signal-domain taxonomy types
 tests/generated_contract.rs — frame, Help, domain compatibility, and NOTA witnesses
