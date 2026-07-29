@@ -28,7 +28,7 @@ Privacy is a second directional `Magnitude` axis, not a named tier enum: `Zero` 
 
 Daemon startup carries `AuthorizationMode`: `Gating` keeps criome verdicts fail-closed for fan-out; `Observing` emits criome authorization requests and lets the local head proceed for monitoring.
 
-Under cluster authorization, a head-advancing operation the cluster does not grant is refused to the caller as `AdvanceRefused(AdvanceRefusal)` with a closed `AdvanceRefusalReason`: `Denied` — criome reached a terminal deny; `Expired` — the authorization window closed before the quorum completed; `Unavailable` — no operational quorum contract exists (the unfounded-criome loud refusal); `Unreachable` — the local criome could not be reached or its session went dead. The schema language carries no comment syntax, so these reason meanings live here. `AdvanceRefusal` is the intake-gate vocabulary and is distinct from the peer-apply ingress `ApplyRefusal`; the two contact points keep their own closed types.
+Under cluster authorization, a head-advancing operation the cluster does not grant is refused to the caller as `AdvanceRefused(AdvanceRefusal)` with a closed `AdvanceRefusalReason`: `Denied` — criome reached a terminal deny; `Expired` — the authorization window closed before the quorum completed; `Unavailable` — no operational quorum contract exists (the unfounded-criome loud refusal); `Unreachable` — the local criome could not be reached or its session went dead. The Ethos language carries no comment syntax, so these reason meanings live here. `AdvanceRefusal` is the intake-gate vocabulary and is distinct from the peer-apply ingress `ApplyRefusal`; the two contact points keep their own closed types.
 
 ## Contract/Daemon Boundary
 
@@ -48,7 +48,7 @@ The ordinary contract uses contract-local verbs:
   payload `Entry`),
 - `Observe` (the read side — payload is a closed `Observation` enum
   naming `State`, `Records`, `Topics`, `QuestionsPending`, etc.),
-- `PublicIntent` (agent-facing public intent lookup by schema-backed
+- `PublicIntent` (agent-facing public intent lookup by ethos-backed
   `DomainScope` selections),
 - `Watch` / `Unwatch` (domain-specific subscriptions — payload names
   which stream class to open).
@@ -133,7 +133,7 @@ or dependencies of this crate.
 | Retract-shaped close variants have typed close acknowledgements. | `SubscriptionRetracted` carries the typed `SubscriptionToken` sum and round-trips through RKYV and NOTA. |
 | Intent queries return compact summaries unless provenance is requested. | `ObservationMode::SummaryOnly` is the explicit query mode used in canonical examples. |
 | Intent record queries support the agent-useful filters needed for intent work. | `PublicRecordQuery` carries `TopicSelection` (`Any`, `Partial`, `Full`), optional `kind`, `CertaintySelection` (`Any`, `Exact`, `AtMost`, `AtLeast`), `RecordedTimeSelection` (`Any`, `Between`, `Since`, `Until`, `Recent`, `Shallow`, `Deep`, `VeryDeep`), and description/provenance mode; it has no privacy field and means exact-`Zero` privacy. `RecordIdentifierQuery` selects one opaque identifier exactly; identifier ranges are intentionally absent because random identifiers do not carry recency or ordinal meaning. `PrivacyScopedRecordQuery` and `PrivacyScopedRecordIdentifierQuery` are explicit elevated read shapes carrying `PrivacySelection` (`Any`, `Exact`, `AtMost`, `AtLeast`). `RecordQuery` remains the full maintenance/internal query shape for candidate collection and daemon projection. |
-| Agent-facing public intent lookup hides low-level query plumbing. | `PublicIntent(DomainScopes)` carries schema-backed domain selections and validates them with the same non-empty `DomainScopes` rule used by domain matches. |
+| Agent-facing public intent lookup hides low-level query plumbing. | `PublicIntent(DomainScopes)` carries ethos-backed domain selections and validates them with the same non-empty `DomainScopes` rule used by domain matches. |
 | Intent entries can be removed explicitly by identifier. | `Remove(RecordIdentifier)` round-trips through RKYV and NOTA and returns `RecordRemoved`; production identifiers are opaque lowercase base36 codes minted by `spirit`, normally rendered at the shortest collision-free four-to-seven-character length while the wire type remains wide enough to decode older long codes. |
 | Intent entries can be nominated for removal without deletion. | `ChangeCertainty(CertaintyChange)` round-trips through RKYV and NOTA and returns `CertaintyChanged`; setting certainty to `Zero` makes the record visible to removal-candidate review. |
 | Intent entries can be corrected in place without remove-and-recreate. | `ChangeRecord(RecordChange)` round-trips through RKYV and NOTA and returns `RecordMutationApplied`; the daemon replaces the user-authored `Entry` fields under the same `RecordIdentifier` while preserving daemon-owned provenance. |
