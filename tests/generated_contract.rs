@@ -26,37 +26,100 @@ fn generated_input_frame_round_trips() {
 }
 
 #[test]
-fn generated_public_intent_frame_round_trips_without_moving_existing_routes() {
-    let input = Input::public_intent(DomainScopes::new(vec![DomainScope::All]));
+fn generated_intent_frame_round_trips_on_the_revision_2_route() {
+    let input = Input::intent(DomainScopes::new(vec![DomainScope::All]));
     let bytes = input.encode_signal_frame().expect("encode input frame");
     let (route, decoded) = Input::decode_signal_frame(&bytes).expect("decode input frame");
 
-    assert_eq!(route, InputRoute::PublicIntent);
+    assert_eq!(route, InputRoute::Intent);
     assert_eq!(decoded, input);
-    assert_eq!(
-        OperationKind::from_input(&input),
-        OperationKind::PublicIntent
-    );
+    assert_eq!(OperationKind::from_input(&input), OperationKind::Intent);
     assert_eq!(
         input.short_header(),
-        0x0018_0000_0000_0000,
-        "new PublicIntent route is appended after the existing route range"
+        0x0014_0000_0000_0000,
+        "Intent uses the dense revision-2 route"
     );
     assert_eq!(
-        signal_spirit::schema::signal::short_header::INPUT_PUBLIC_TEXT_SEARCH,
+        signal_spirit::schema::signal::short_header::INPUT_TEXT_SEARCH,
         0x0008_0000_0000_0000,
-        "existing PublicTextSearch route must keep its short header"
+        "TextSearch uses the dense revision-2 route"
     );
     assert_eq!(
         signal_spirit::schema::signal::short_header::INPUT_MARKER,
-        0x0017_0000_0000_0000,
-        "existing Marker route must keep its short header when PublicIntent is added"
+        0x0013_0000_0000_0000,
+        "Marker uses the dense revision-2 route"
     );
 }
 
 #[test]
+fn generated_text_search_frame_round_trips_on_the_revision_2_route() {
+    let input = Input::text_search(signal_spirit::SearchText::new("architecture"));
+    let bytes = input.encode_signal_frame().expect("encode input frame");
+    let (route, decoded) = Input::decode_signal_frame(&bytes).expect("decode input frame");
+
+    assert_eq!(route, InputRoute::TextSearch);
+    assert_eq!(decoded, input);
+    assert_eq!(OperationKind::from_input(&input), OperationKind::TextSearch);
+}
+
+#[test]
+fn active_schema_and_generated_contract_exclude_removed_v1_vocabulary() {
+    for removed in [
+        "Certainty",
+        "Privacy",
+        "Referent",
+        "Aliases",
+        "PublicIntent",
+        "PublicTextSearch",
+        "PublicRecords",
+        "PrivateRecords",
+        "ChangeCertainty",
+        "RegisterReferent",
+        "RemovalCandidate",
+    ] {
+        assert!(
+            !signal_spirit::SIGNAL_SCHEMA_SOURCE.contains(removed),
+            "active schema unexpectedly contains removed v1 vocabulary: {removed}"
+        );
+        assert!(
+            !signal_spirit::SIGNAL_RUST_SOURCE.contains(removed),
+            "generated contract unexpectedly contains removed v1 vocabulary: {removed}"
+        );
+    }
+}
+
+#[cfg(feature = "nota-text")]
+#[test]
+fn revision_1_operations_and_seven_field_entries_fail_to_decode() {
+    for source in [
+        "(PublicIntent [All])",
+        "(PublicTextSearch [architecture])",
+        "(PublicRecords (Any None))",
+        "(PrivateRecords (Any None))",
+        "(ChangeCertainty ([0001] Zero))",
+        "(RegisterReferent ([spirit] [] ([] [reason])))",
+        "(Record (([All] Decision [description] High Medium Zero [spirit]) ([] [reason])))",
+    ] {
+        assert!(
+            NotaSource::new(source).parse::<Input>().is_err(),
+            "revision-1 syntax must fail: {source}"
+        );
+    }
+}
+
+#[cfg(feature = "nota-text")]
+#[test]
+fn canonical_revision_2_inputs_decode() {
+    for source in include_str!("../examples/canonical.nota").lines() {
+        NotaSource::new(source)
+            .parse::<Input>()
+            .unwrap_or_else(|error| panic!("canonical input failed to decode: {source}: {error}"));
+    }
+}
+
+#[test]
 fn generated_output_frame_round_trips() {
-    let output = Output::version_reported(VersionReport::new(VersionText::new("0.12.1")));
+    let output = Output::version_reported(VersionReport::new(VersionText::new("0.14.0")));
     let bytes = output.encode_signal_frame().expect("encode output frame");
     let (route, decoded) = Output::decode_signal_frame(&bytes).expect("decode output frame");
 
@@ -120,19 +183,19 @@ fn generated_advance_refused_frame_round_trips_without_moving_existing_routes() 
         assert_eq!(decoded, output);
         assert_eq!(
             output.short_header(),
-            0x011A_0000_0000_0000,
-            "new AdvanceRefused route is appended after the existing route range"
+            0x0117_0000_0000_0000,
+            "AdvanceRefused uses the dense revision-2 route"
         );
     }
     assert_eq!(
         signal_spirit::schema::signal::short_header::OUTPUT_APPLY_REFUSED,
-        0x0116_0000_0000_0000,
-        "existing ApplyRefused route must keep its short header"
+        0x0113_0000_0000_0000,
+        "ApplyRefused uses the dense revision-2 route"
     );
     assert_eq!(
         signal_spirit::schema::signal::short_header::OUTPUT_REJECTED,
-        0x0119_0000_0000_0000,
-        "existing Rejected route must keep its short header when AdvanceRefused is added"
+        0x0116_0000_0000_0000,
+        "Rejected uses the dense revision-2 route"
     );
 }
 
@@ -306,7 +369,7 @@ fn generated_help_model_renders_spirit_one_level_shapes() {
             .any(|entry| {
                 entry.name().as_str() == "Record"
                     && entry.to_string()
-                        == "{ Entry Justification }\n{ Domains Kind Description Certainty Importance Privacy Referents }\n{ Testimony Reasoning }"
+                        == "{ Entry Justification }\n{ Domains Kind Description Importance }\n{ Testimony Reasoning }"
             }),
         "top-level help should include Record's positional payload rows"
     );
@@ -315,14 +378,14 @@ fn generated_help_model_renders_spirit_one_level_shapes() {
             .render(&signal_spirit::HelpRequest::for_name("Record"))
             .expect("render Record help")
             .to_string(),
-        "{ Entry Justification }\n{ Domains Kind Description Certainty Importance Privacy Referents }\n{ Testimony Reasoning }"
+        "{ Entry Justification }\n{ Domains Kind Description Importance }\n{ Testimony Reasoning }"
     );
     assert_eq!(
         model
             .render(&signal_spirit::HelpRequest::for_name("Entry"))
             .expect("render Entry help")
             .to_string(),
-        "{ Domains Kind Description Certainty Importance Privacy Referents }\n(Vector Domain)\n[Decision Principle Correction Clarification Constraint]\nString\nMagnitude\nMagnitude\nMagnitude\n(Vector Referent)"
+        "{ Domains Kind Description Importance }\n(Vector Domain)\n[Decision Principle Correction Clarification Constraint]\nString\nMagnitude"
     );
     assert_eq!(
         model
@@ -449,11 +512,11 @@ fn generated_help_round_trips_through_the_schema_codec() {
     for (target, expected) in [
         (
             "Record",
-            "{ Entry Justification }\n{ Domains Kind Description Certainty Importance Privacy Referents }\n{ Testimony Reasoning }",
+            "{ Entry Justification }\n{ Domains Kind Description Importance }\n{ Testimony Reasoning }",
         ),
         (
             "Entry",
-            "{ Domains Kind Description Certainty Importance Privacy Referents }\n(Vector Domain)\n[Decision Principle Correction Clarification Constraint]\nString\nMagnitude\nMagnitude\nMagnitude\n(Vector Referent)",
+            "{ Domains Kind Description Importance }\n(Vector Domain)\n[Decision Principle Correction Clarification Constraint]\nString\nMagnitude",
         ),
         ("Domains", "(Vector Domain)"),
         ("RecordAccepted", "RecordIdentifier"),

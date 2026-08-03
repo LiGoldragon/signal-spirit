@@ -1,161 +1,63 @@
-# signal-spirit — architecture
+# signal-spirit architecture
 
-*Ordinary Signal contract for the psyche-facing Spirit surface.*
+`signal-spirit` is the ordinary peer-callable contract for `spirit`. Version
+0.14.0 defines wire revision 2. Revision 1 frames and payload shapes are not
+accepted or upgraded online.
 
-## Role
+The crate owns vocabulary only. Runtime actors, sockets, persistence,
+classification, authorization, query execution, and migration live in
+`spirit`. Meta-policy orders live in `meta-signal-spirit`; admission verdicts
+live in `signal-spirit-judge`.
 
-`signal-spirit` is the peer-callable contract for
-`spirit`. It carries the vocabulary for submitting psyche statements,
-observing psyche state, observing intent records, and subscribing to those
-streams.
+## Record shape
 
-This repo carries the active ordinary Spirit contract. The
-`signal-persona-spirit` name is retired for this surface.
-
-Meta-policy lifecycle/configuration orders live in the sibling meta
-contract. Runtime actors, sockets, storage, classifier logic, and mind
-forwarding live in `spirit`.
-
-## Direction
-
-`signal-spirit` is the **ordinary peer-callable wire contract** for `spirit`. Its explicit goals: carry the ordinary contract for psyche-state observation, intent-record submission/observation, and subscription lifecycle; honour the single-channel-per-crate boundary; keep the wire surface on the current `signal-frame` stack; and stay binary-first with NOTA projection behind an explicit `nota-text` feature.
-
-The record shape enforces **description-only discipline**: one agent-clarified `Description`, a `Kind`, required certainty, daemon-stamped time, and user-creatable topic strings. Daemon-stamped timestamps only — clients never supply capture time. Wire replies are terse; no verbatim echo of submitted content.
-
-Domain taxonomy types are consumed from the shared `signal-domain` contract and re-exported through `signal_spirit::Domain`, `signal_spirit::schema::domain::*`, and `signal_spirit::schema::signal::*` compatibility paths. `signal-spirit` does not own or regenerate the taxonomy.
-
-Privacy is a second directional `Magnitude` axis, not a named tier enum: `Zero` means open/public, higher magnitudes narrow the audience. The mandatory `Tap`/`Untap` observable surface is injected by `signal_channel!`; the domain-specific `Watch`/`Unwatch` pairs for psyche-state and intent-record streams coexist without collision.
-
-Daemon startup carries `AuthorizationMode`: `Gating` keeps criome verdicts fail-closed for fan-out; `Observing` emits criome authorization requests and lets the local head proceed for monitoring.
-
-Under cluster authorization, a head-advancing operation the cluster does not grant is refused to the caller as `AdvanceRefused(AdvanceRefusal)` with a closed `AdvanceRefusalReason`: `Denied` — criome reached a terminal deny; `Expired` — the authorization window closed before the quorum completed; `Unavailable` — no operational quorum contract exists (the unfounded-criome loud refusal); `Unreachable` — the local criome could not be reached or its session went dead. The Ethos language carries no comment syntax, so these reason meanings live here. `AdvanceRefusal` is the intake-gate vocabulary and is distinct from the peer-apply ingress `ApplyRefusal`; the two contact points keep their own closed types.
-
-## Contract/Daemon Boundary
-
-This contract owns only the ordinary public wire vocabulary. The
-`spirit` daemon lowers those operations into its own Nexus commands,
-SEMA reads or writes, effects, rejections, replies, and observer events.
+`Entry` has exactly four fields, in order:
 
 ```text
-contract Operation  ->  daemon Nexus/SEMA/effect work
-wire vocabulary         daemon executable boundary
+Entry { Domains Kind Description Importance }
 ```
 
-**Contract operations on the wire (this crate).**
-The ordinary contract uses contract-local verbs:
-- `State` (the psyche stating intent, payload `Statement`),
-- `Record` (an agent submitting a typed intent entry without capture time,
-  payload `Entry`),
-- `Observe` (the read side — payload is a closed `Observation` enum
-  naming `State`, `Records`, `Topics`, `QuestionsPending`, etc.),
-- `PublicIntent` (agent-facing public intent lookup by ethos-backed
-  `DomainScope` selections),
-- `Watch` / `Unwatch` (domain-specific subscriptions — payload names
-  which stream class to open).
-- `Remove` (intent-store maintenance — payload is the `RecordIdentifier`
-  to delete from the daemon-owned store).
-- `ChangeCertainty` (intent-store maintenance — payload is a
-  `CertaintyChange` naming the record and replacement certainty).
-- `ChangeRecord` (intent-store maintenance — payload is a
-  `RecordChange` naming the record and replacement entry).
-- `CollectRemovalCandidates` (intent-store maintenance — payload is a
-  `RemovalCandidateCollection` that selects exact-`Zero` candidates and
-  names an output target before daemon-side retraction).
+It is one top-level statement. Clients do not supply capture time or record
+identifiers. `spirit` mints identifiers and owns provenance.
 
-Apply the verb-form rule per `intent/naming.nota` 19:45Z:
-`State` not `Statement`, `Record` not `Entry`-as-a-verb, `Observe` not
-`Observation`.
+## Ordinary surface
 
-**Mandatory `Tap`/`Untap` observability.** Spirit's observable surface is
-standardized.
-The macro-injected `Tap(ObserverFilter)` /
-`Untap(ObserverSubscriptionToken)` verbs are mandatory on the
-ordinary socket. The domain-specific `Watch`/`Unwatch` for psyche-
-state and intent-record streams is a separate surface and coexists
-without collision (spirit's domain doesn't use `Tap` as a verb).
-
-**Component commands (spirit daemon).** The spirit
-daemon owns its typed Command enum plus a `CommandExecutor` that knows
-the spirit tables. Executable payloads do not live in this contract.
-
-The public observer event stays contract-owned:
-`EffectEmitted { operation, outcome }`. It does not carry
-`SemaObservation` or depend on `signal-sema`.
-
-**Frame layer.** Frame mechanics come from `signal-frame`.
-
-**Daemon startup configuration.** The binary
-`SpiritDaemonConfiguration` also carries daemon startup policy that must be set
-before process launch. `AuthorizationMode` is explicit: `Gating` means criome
-verdicts release or hold fan-out, while `Observing` means spirit emits the
-criome authorization request but proceeds without waiting for the verdict.
-
-**Text projection.** The default build is binary/rkyv-only and does not pull
-`nota`, `nota-codec`, or `signal-core`. The `nota-text` feature enables
-NOTA derives, manual NOTA codecs, and text round-trip tests for CLI/debug/audit
-edges. Daemon consumers use the default graph.
-
-References:
-- `primary/skills/contract-repo.md` §"Public contracts use contract-local operation verbs"
-
-The generic observable event record is `EffectEmitted`, matching the
-current architecture where generic observers see the effect publication
-moment through the contract-owned operation/outcome pair rather than
-an executable daemon effect record or database-classification payload.
-
-## Contract Surface
+The revision-2 read roots are uniform over all live records:
 
 | Operation | Payload |
 |---|---|
-| `State` | `Statement` |
-| `Record` | `Entry` without date/time |
-| `Observe` | closed `Observation` enum |
-| `PublicIntent` | `DomainScopes` |
-| `Watch` | `Subscription` stream selector |
-| `Unwatch` | `SubscriptionToken` |
-| `Remove` | `RecordIdentifier` |
-| `ChangeCertainty` | `CertaintyChange` |
-| `ChangeRecord` | `RecordChange` |
-| `CollectRemovalCandidates` | `RemovalCandidateCollection` |
-| `Tap` | `ObserverFilter` |
-| `Untap` | `ObserverSubscriptionToken` |
+| `Observe` | `Query` |
+| `Intent` | `DomainScopes` |
+| `TextSearch` | `SearchText` |
+| `Lookup` | `RecordIdentifier` |
+| `Count` | `Query` |
 
-The wire form carries the contract-local verb only. Database classes and store
-effects are daemon-owned lowering, not public operation roots, event payloads,
-or dependencies of this crate.
+`Query` selects domains, description keywords or text, kind, and importance.
+`TextSearch` searches descriptions. `Intent` retains the domain-scope
+shorthand. Any ordering policy is daemon-owned.
 
-## Constraints
+Write and lifecycle roots are `State`, `Record`, `Propose`, `Clarify`,
+`ResolveClarification`, `Supersede`, `Retire`, `BumpImportance`, and
+`ChangeRecord`. `ApplyAuthorizedRecord` accepts only revision-2 v14 record
+bodies. `SubscribeIntent`, `Tap`, and `Untap` carry the stream and observation
+lifecycle. `Version`, `Marker`, and `LookupStash` retain their existing roles.
 
-| Constraint | Witness |
-|---|---|
-| Every request variant is a contract-local verb in verb form. | `round_trip.rs` asserts each variant's NOTA head. |
-| Subscribe-shaped variants declare stream relations. | `signal_channel!` stream blocks bind subscribe/open/event/close. |
-| Retract-shaped close variants have typed close acknowledgements. | `SubscriptionRetracted` carries the typed `SubscriptionToken` sum and round-trips through RKYV and NOTA. |
-| Intent queries return compact summaries unless provenance is requested. | `ObservationMode::SummaryOnly` is the explicit query mode used in canonical examples. |
-| Intent record queries support the agent-useful filters needed for intent work. | `PublicRecordQuery` carries `TopicSelection` (`Any`, `Partial`, `Full`), optional `kind`, `CertaintySelection` (`Any`, `Exact`, `AtMost`, `AtLeast`), `RecordedTimeSelection` (`Any`, `Between`, `Since`, `Until`, `Recent`, `Shallow`, `Deep`, `VeryDeep`), and description/provenance mode; it has no privacy field and means exact-`Zero` privacy. `RecordIdentifierQuery` selects one opaque identifier exactly; identifier ranges are intentionally absent because random identifiers do not carry recency or ordinal meaning. `PrivacyScopedRecordQuery` and `PrivacyScopedRecordIdentifierQuery` are explicit elevated read shapes carrying `PrivacySelection` (`Any`, `Exact`, `AtMost`, `AtLeast`). `RecordQuery` remains the full maintenance/internal query shape for candidate collection and daemon projection. |
-| Agent-facing public intent lookup hides low-level query plumbing. | `PublicIntent(DomainScopes)` carries ethos-backed domain selections and validates them with the same non-empty `DomainScopes` rule used by domain matches. |
-| Intent entries can be removed explicitly by identifier. | `Remove(RecordIdentifier)` round-trips through RKYV and NOTA and returns `RecordRemoved`; production identifiers are opaque lowercase base36 codes minted by `spirit`, normally rendered at the shortest collision-free four-to-seven-character length while the wire type remains wide enough to decode older long codes. |
-| Intent entries can be nominated for removal without deletion. | `ChangeCertainty(CertaintyChange)` round-trips through RKYV and NOTA and returns `CertaintyChanged`; setting certainty to `Zero` makes the record visible to removal-candidate review. |
-| Intent entries can be corrected in place without remove-and-recreate. | `ChangeRecord(RecordChange)` round-trips through RKYV and NOTA and returns `RecordMutationApplied`; the daemon replaces the user-authored `Entry` fields under the same `RecordIdentifier` while preserving daemon-owned provenance. |
-| Removal-candidate collection is explicit capture-before-retract maintenance. | `CollectRemovalCandidates(RemovalCandidateCollection)` round-trips through RKYV and NOTA, requires exact-`Zero` certainty and exact-`Zero` privacy by contract method, carries `OutputTarget::ArchiveDatabase(Default)` for the daemon-derived archive database, `OutputTarget::ArchiveDatabase(Path(ArchivePath))` for an explicit archive database path, or `OutputTarget::Print(OutputStream)` for client-rendered compact material, and returns `RemovalCandidatesCollected` with compact `RecordSummary` archive material plus removed identifiers and skipped candidates. |
-| Historical storage migration shapes stay contract-owned and explicit. | `tests/migration.rs` projects a v0.3.0 `migration::v030::Entry` and `migration::v030::Operation::Record` into the current privacy-aware shape with `privacy = Zero`, proving the daemon can read the prior production row shape without guessing at bytes. |
-| Agents can inspect the intent-topic catalog without reading every entry. | `Observation::Topics` returns `TopicsObserved` with one `TopicCount` per topic membership. |
-| Every submitted entry is one top-level psyche statement without client-provided capture time. | `Entry` carries one or more topics, kind, description, required `Magnitude` certainty, and required `Magnitude` privacy; repeated entries are the restatement signal. |
-| Spirit never accepts client-provided timestamps on `Record` requests. | `record_request_with_client_timestamp_shape_is_rejected` and `record_request_with_parenthesized_client_date_time_shape_is_rejected` fail old timestamp-bearing input shapes. |
-| Capture time appears only in daemon-produced provenance. | `RecordProvenance` carries one bare `YYYY-MM-DD` date field and one bare `HH:MM:SS` time field. |
-| Record identifiers are output-only. | `RecordIdentifier` appears in descriptions/provenance replies, not in `Entry`; `spirit` mints it from randomness, not from row position. |
-| Database classification is daemon-side only; no Sema payloads appear on the wire. | `EffectEmitted` carries contract-owned `operation` and `outcome` fields, and `spirit_contract_has_no_sema_classification_dependency_or_roots` guards the dependency and head set. |
-| Default consumers stay binary-only. | `default_dependency_tree_does_not_pull_text_or_legacy_signal_crates` proves the default normal dependency graph has no `nota`, `nota-codec`, or `signal-core`; `nota_text_feature_is_the_only_text_projection_opt_in` proves `nota` appears only when requested. |
-| Domain taxonomy is shared, not duplicated. | `public_domain_paths_are_signal_domain_types` proves the public `signal-spirit` domain paths are the `signal-domain` types, and `public_domain_path_round_trips_through_rkyv` / `public_domain_path_round_trips_through_nota` keep representative codec compatibility covered. |
-| A refused head advance surfaces a typed reason and new routes never move existing ones. | `generated_advance_refused_frame_round_trips_without_moving_existing_routes` round-trips every `AdvanceRefusalReason` variant through the signal frame and pins the appended `OUTPUT_ADVANCE_REFUSED` short header beside the unchanged `ApplyRefused`/`Rejected` headers. |
-| This crate contains no runtime. | Source has no Kameo, Tokio, sockets, database engine, or sema-engine code. |
+## Boundaries
 
-## Code Map
+- `schema/signal.schema` is authoritative; `src/schema/signal.rs` is generated.
+- Shared domains are imported from `signal-domain` and re-exported.
+- Default builds are binary/rkyv-only. `nota-text` is an explicit CLI,
+  diagnostic, and audit projection.
+- `SpiritDaemonConfiguration` is a separate stable archive and is not coupled
+  to the breaking ordinary wire revision.
+- Dense route discriminants are permitted in revision 2. No compatibility
+  variants, alternate arities, or invented defaults are exposed.
 
-```text
-src/lib.rs              — request/reply/event records, signal-domain re-exports, and explicit signal_channel! declaration
-src/schema/domain.rs    — compatibility shim re-exporting signal-domain schema types
-schema/signal.schema    — Spirit wire schema importing signal-domain taxonomy types
-tests/generated_contract.rs — rkyv frame, domain compatibility, and NOTA witnesses
-tests/validation.rs     — contract validation witnesses
-```
+## Proof obligations
+
+- generated artifacts equal the authoritative schema;
+- four-field entries and revision-2 operations round-trip through rkyv and the
+  optional text projection;
+- revision-1 operations and seven-field entries fail to decode;
+- the active schema and generated contract reject removed vocabulary;
+- the default dependency graph contains no text codec or runtime component.

@@ -81,7 +81,7 @@ fn decoded_spirit_signal_true_schema_projects_to_structured_nota() {
     );
     assert!(
         rendered.contains(
-            "(Public Entry [] (Struct (Entry {domains (Plain Domains) kind (Plain Kind) description (Plain Description) certainty (Plain Certainty) importance (Plain Importance) privacy (Plain Privacy) referents (Plain Referents)})) ([]))"
+            "(Public Entry [] (Struct (Entry {domains (Plain Domains) kind (Plain Kind) description (Plain Description) importance (Plain Importance)})) ([]))"
         ),
         "structured TrueSchema NOTA should include the semantic Entry declaration"
     );
@@ -104,8 +104,8 @@ fn decoded_spirit_signal_true_schema_projects_to_structured_nota() {
         "structured signal TrueSchema NOTA should not include a contract-local domain taxonomy"
     );
     assert!(
-        rendered.contains("(PublicIntent (Some (Plain PublicIntent)) None)"),
-        "structured signal TrueSchema NOTA should keep PublicIntent while resolving its payload through the shared domain import"
+        rendered.contains("(Intent (Some (Plain Intent)) None)"),
+        "structured signal TrueSchema NOTA should keep Intent while resolving its payload through the shared domain import"
     );
 
     let rendered_domain = schemas.domain.to_nota();
@@ -134,7 +134,7 @@ fn decoded_true_schema_feeds_label_free_help_rows() {
             .render(&HelpRequest::for_name("Record"))
             .expect("render Record help")
             .to_string(),
-        "{ Entry Justification }\n{ Domains Kind Description Certainty Importance Privacy Referents }\n{ Testimony Reasoning }",
+        "{ Entry Justification }\n{ Domains Kind Description Importance }\n{ Testimony Reasoning }",
         "Record Help should be projected from decoded TrueSchema rows"
     );
     assert_eq!(
@@ -142,7 +142,7 @@ fn decoded_true_schema_feeds_label_free_help_rows() {
             .render(&HelpRequest::for_name("Entry"))
             .expect("render Entry help")
             .to_string(),
-        "{ Domains Kind Description Certainty Importance Privacy Referents }\n(Vector Domain)\n[Decision Principle Correction Clarification Constraint]\nString\nMagnitude\nMagnitude\nMagnitude\n(Vector Referent)",
+        "{ Domains Kind Description Importance }\n(Vector Domain)\n[Decision Principle Correction Clarification Constraint]\nString\nMagnitude",
         "Entry Help should be projected from decoded TrueSchema rows"
     );
     assert_eq!(

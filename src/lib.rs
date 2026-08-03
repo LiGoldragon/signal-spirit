@@ -213,12 +213,9 @@ impl Input {
             Self::Supersede(supersede) => supersede.payload().validate(),
             Self::ResolveClarification(resolution) => resolution.payload().validate(),
             Self::Observe(observe) => observe.payload().validate(),
-            Self::PublicIntent(public_intent) => public_intent.payload().validate(),
-            Self::PublicTextSearch(search) => search.payload().validate(),
-            Self::PublicRecords(selection) => selection.payload().validate(),
-            Self::PrivateRecords(selection) => selection.payload().validate(),
+            Self::Intent(intent) => intent.payload().validate(),
+            Self::TextSearch(search) => search.payload().validate(),
             Self::Lookup(_)
-            | Self::ChangeCertainty(_)
             | Self::BumpImportance(_)
             | Self::LookupStash(_)
             | Self::Tap(_)
@@ -227,7 +224,6 @@ impl Input {
             | Self::Version
             | Self::Marker => Ok(()),
             Self::ChangeRecord(change) => change.payload().validate(),
-            Self::RegisterReferent(register) => register.payload().validate(),
             Self::Retire(retire) => retire.payload().validate(),
             Self::SubscribeIntent(query) => query.payload().validate(),
             Self::Count(count) => count.payload().validate(),
@@ -252,18 +248,11 @@ impl Entry {
         if self.description.trim().is_empty() {
             return Err(ValidationError::EmptyDescription);
         }
-        if self.certainty.payload() != &Magnitude::Zero && self.referents.payload().is_empty() {
-            return Err(ValidationError::EmptyReferents);
-        }
         Ok(())
     }
 
     pub fn matches(&self, query: &Query) -> bool {
         query.matches(self)
-    }
-
-    pub fn certainty_rank(&self) -> u64 {
-        self.certainty.payload().rank()
     }
 
     pub fn importance_rank(&self) -> u64 {
@@ -303,42 +292,6 @@ impl RecordRequest {
 impl Proposal {
     pub fn validate(&self) -> Result<(), ValidationError> {
         self.entry.validate()?;
-        self.justification.validate()
-    }
-}
-
-impl Referent {
-    pub fn validate(&self) -> Result<(), ValidationError> {
-        if self.payload().trim().is_empty() {
-            return Err(ValidationError::EmptyQueryReferent);
-        }
-        Ok(())
-    }
-}
-
-impl Referents {
-    pub fn validate(&self) -> Result<(), ValidationError> {
-        if self
-            .payload()
-            .iter()
-            .any(|referent| referent.payload().trim().is_empty())
-        {
-            return Err(ValidationError::EmptyQueryReferent);
-        }
-        Ok(())
-    }
-}
-
-impl Aliases {
-    pub fn validate(&self) -> Result<(), ValidationError> {
-        self.payload().validate()
-    }
-}
-
-impl ReferentRegistration {
-    pub fn validate(&self) -> Result<(), ValidationError> {
-        self.referent.validate()?;
-        self.aliases.validate()?;
         self.justification.validate()
     }
 }
@@ -408,73 +361,22 @@ impl Retirement {
     }
 }
 
-impl RemovalCandidateCollection {
-    pub fn validate(&self) -> Result<(), ValidationError> {
-        self.record_query.validate()?;
-        self.justification.validate()
-    }
-}
-
-impl RecordQuery {
-    pub fn validate(&self) -> Result<(), ValidationError> {
-        self.payload().validate()
-    }
-}
-
-impl RecordSelection {
-    pub fn validate(&self) -> Result<(), ValidationError> {
-        self.domain_match.validate()
-    }
-
-    pub fn into_public_query(self) -> Query {
-        Query {
-            domain_match: self.domain_match,
-            keyword_match: KeywordMatch::Any,
-            text_match: TextMatch::Any,
-            referent_selection: ReferentSelection::Any,
-            selected_kind: self.selected_kind,
-            privacy_selection: PrivacySelection::default_observation_privacy(),
-            certainty_selection: CertaintySelection::default_observation_certainty(),
-            importance_selection: ImportanceSelection::default_observation_importance(),
-        }
-    }
-
-    pub fn into_private_query(self) -> Query {
-        Query {
-            domain_match: self.domain_match,
-            keyword_match: KeywordMatch::Any,
-            text_match: TextMatch::Any,
-            referent_selection: ReferentSelection::Any,
-            selected_kind: self.selected_kind,
-            privacy_selection: PrivacySelection::at_least(Privacy::new(
-                PrivacySelection::private_floor(),
-            )),
-            certainty_selection: CertaintySelection::default_observation_certainty(),
-            importance_selection: ImportanceSelection::default_observation_importance(),
-        }
-    }
-}
-
 impl Query {
     pub fn validate(&self) -> Result<(), ValidationError> {
         self.domain_match.validate()?;
         self.keyword_match.validate()?;
-        self.text_match.validate()?;
-        self.referent_selection.validate()
+        self.text_match.validate()
     }
 
     pub fn matches(&self, entry: &Entry) -> bool {
         self.domain_match.matches(&entry.domains)
             && self.keyword_match.matches(&entry.description)
             && self.text_match.matches(&entry.description)
-            && self.referent_selection.matches(&entry.referents)
             && self
                 .selected_kind
                 .payload()
                 .as_ref()
                 .is_none_or(|kind| &entry.kind == kind)
-            && self.privacy_selection.matches(&entry.privacy)
-            && self.certainty_selection.matches(&entry.certainty)
             && self.importance_selection.matches(&entry.importance)
     }
 
@@ -512,16 +414,12 @@ impl OperationKind {
             Input::Retire(_) => Self::Retire,
             Input::ResolveClarification(_) => Self::ResolveClarification,
             Input::Observe(_) => Self::Observe,
-            Input::PublicIntent(_) => Self::PublicIntent,
-            Input::PublicTextSearch(_) => Self::PublicTextSearch,
-            Input::PublicRecords(_) => Self::PublicRecords,
-            Input::PrivateRecords(_) => Self::PrivateRecords,
+            Input::Intent(_) => Self::Intent,
+            Input::TextSearch(_) => Self::TextSearch,
             Input::Lookup(_) => Self::Lookup,
             Input::Count(_) => Self::Count,
-            Input::ChangeCertainty(_) => Self::ChangeCertainty,
             Input::BumpImportance(_) => Self::BumpImportance,
             Input::ChangeRecord(_) => Self::ChangeRecord,
-            Input::RegisterReferent(_) => Self::RegisterReferent,
             Input::LookupStash(_) => Self::LookupStash,
             Input::Tap(_) => Self::Tap,
             Input::Untap(_) => Self::Untap,
@@ -597,42 +495,6 @@ impl SearchText {
             return Err(ValidationError::EmptySearchText);
         }
         Ok(())
-    }
-}
-
-impl ReferentSelection {
-    pub fn validate(&self) -> Result<(), ValidationError> {
-        match self {
-            Self::Any => Ok(()),
-            Self::AnyReferent(referents) => {
-                if referents.payload().payload().is_empty() {
-                    return Err(ValidationError::EmptyQueryReferent);
-                }
-                Ok(())
-            }
-            Self::AllReferents(referents) => {
-                if referents.payload().payload().is_empty() {
-                    return Err(ValidationError::EmptyQueryReferent);
-                }
-                Ok(())
-            }
-        }
-    }
-
-    pub fn matches(&self, entry_referents: &Referents) -> bool {
-        match self {
-            Self::Any => true,
-            Self::AnyReferent(expected) => expected
-                .payload()
-                .payload()
-                .iter()
-                .any(|referent| entry_referents.payload().contains(referent)),
-            Self::AllReferents(expected) => expected
-                .payload()
-                .payload()
-                .iter()
-                .all(|referent| entry_referents.payload().contains(referent)),
-        }
     }
 }
 
@@ -725,51 +587,6 @@ impl StatementText {
     }
 }
 
-impl PrivacySelection {
-    pub fn private_floor() -> Magnitude {
-        Magnitude::Minimum
-    }
-
-    pub fn default_observation_privacy() -> Self {
-        Self::exact(Privacy::new(Magnitude::Zero))
-    }
-
-    pub fn matches(&self, privacy: &Privacy) -> bool {
-        match self {
-            Self::Any => true,
-            Self::Exact(expected) => privacy == expected.payload(),
-            Self::AtMost(maximum) => privacy.payload().rank() <= maximum.payload().payload().rank(),
-            Self::AtLeast(minimum) => {
-                privacy.payload().rank() >= minimum.payload().payload().rank()
-            }
-        }
-    }
-}
-
-impl CertaintySelection {
-    pub fn default_observation_certainty() -> Self {
-        Self::at_least_certainty(Certainty::new(Magnitude::Minimum))
-    }
-
-    pub fn removal_candidate_certainty() -> Self {
-        Self::exact_certainty(Certainty::new(Magnitude::Zero))
-    }
-
-    pub fn matches(&self, certainty: &Certainty) -> bool {
-        let certainty = certainty.payload();
-        match self {
-            Self::Any => true,
-            Self::ExactCertainty(expected) => certainty == expected.payload().payload(),
-            Self::AtMostCertainty(maximum) => {
-                certainty.rank() <= maximum.payload().payload().rank()
-            }
-            Self::AtLeastCertainty(minimum) => {
-                certainty.rank() >= minimum.payload().payload().rank()
-            }
-        }
-    }
-}
-
 impl ImportanceSelection {
     pub fn default_observation_importance() -> Self {
         Self::Any
@@ -787,12 +604,6 @@ impl ImportanceSelection {
                 importance.rank() >= minimum.payload().payload().rank()
             }
         }
-    }
-}
-
-impl Privacy {
-    pub fn rank(&self) -> u64 {
-        self.payload().rank()
     }
 }
 
@@ -1063,18 +874,6 @@ impl PartialEq<&str> for Statement {
     }
 }
 
-impl PartialEq<Magnitude> for Privacy {
-    fn eq(&self, other: &Magnitude) -> bool {
-        self.payload() == other
-    }
-}
-
-impl PartialEq<Magnitude> for Certainty {
-    fn eq(&self, other: &Magnitude) -> bool {
-        self.payload() == other
-    }
-}
-
 impl PartialOrd for CommitSequence {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         self.payload().partial_cmp(other.payload())
@@ -1151,14 +950,6 @@ impl std::ops::Deref for ObservationUntapped {
 
 impl std::ops::Deref for ObservedOperations {
     type Target = Vec<ObservedOperation>;
-
-    fn deref(&self) -> &Self::Target {
-        self.payload()
-    }
-}
-
-impl std::ops::Deref for CertaintyChanged {
-    type Target = CertaintyChangeReceipt;
 
     fn deref(&self) -> &Self::Target {
         self.payload()
