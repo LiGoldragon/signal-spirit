@@ -10,3 +10,8 @@ in `spirit`.
 
 Default builds expose the binary rkyv frame surface only. Enable
 `nota-text` for CLI/debug/audit NOTA projection.
+
+`examples/canonical.nota` contains objects, not a shell-option grammar. The
+public `spirit` CLI accepts exactly one ordinary object (a bare `Version` or
+`Marker` is an object); paths and Unix flags are not contract inputs. The
+authoritative root list is the schema, not a generated help command.

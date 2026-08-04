@@ -32,7 +32,9 @@ The revision-2 read roots are uniform over all live records:
 | `Lookup` | `RecordIdentifier` |
 | `Count` | `Query` |
 
-`Query` selects domains, description keywords or text, kind, and importance.
+`Query` has exactly five predicates in order: `DomainMatch`, `KeywordMatch`,
+`TextMatch`, `SelectedKind`, and `ImportanceSelection`. It selects domains,
+description keywords or text, kind, and importance.
 `TextSearch` searches descriptions. `Intent` retains the domain-scope
 shorthand. Any ordering policy is daemon-owned.
 
@@ -48,6 +50,8 @@ lifecycle. `Version`, `Marker`, and `LookupStash` retain their existing roles.
 - Shared domains are imported from `signal-domain` and re-exported.
 - Default builds are binary/rkyv-only. `nota-text` is an explicit CLI,
   diagnostic, and audit projection.
+- The public `spirit` executable accepts one inline ordinary object. Bare
+  selectors are objects; flags and file paths are not alternate grammar.
 - `SpiritDaemonConfiguration` is a separate stable archive and is not coupled
   to the breaking ordinary wire revision.
 - Dense route discriminants are permitted in revision 2. No compatibility
