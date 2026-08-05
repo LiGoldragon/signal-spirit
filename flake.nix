@@ -16,35 +16,25 @@
         pkgs = import nixpkgs { inherit system; };
         rust = rust-build.lib.${system}.fromPkgs pkgs;
         inherit (rust) craneLib toolchain;
-        examplesFilter = path: _type: builtins.match ".*/examples(/.*)?$" path != null;
-        schemaFilter = path: type:
-          type == "regular" &&
-          (pkgs.lib.hasSuffix ".nota" path || pkgs.lib.hasSuffix ".schema" path);
-        src = rust.cleanSource {
-          root = ./.;
-          extraFilters = [
-            examplesFilter
-            schemaFilter
-          ];
-        };
+        src = rust.cleanSource { root = ./.; };
         cargoVendorDirectory = craneLib.vendorCargoDeps { inherit src; };
         commonArguments = {
           inherit src cargoVendorDirectory;
           strictDeps = true;
         };
-        notaTextArguments = commonArguments // {
-          cargoExtraArgs = "--features nota-text";
+        binaryOnlyArguments = commonArguments // {
+          cargoExtraArgs = "--no-default-features";
         };
         cargoArtifacts = craneLib.buildDepsOnly commonArguments;
-        notaTextCargoArtifacts = craneLib.buildDepsOnly notaTextArguments;
+        binaryOnlyCargoArtifacts = craneLib.buildDepsOnly binaryOnlyArguments;
       in
       {
         packages.default = craneLib.buildPackage (commonArguments // { inherit cargoArtifacts; });
         checks = {
           build = craneLib.cargoBuild (commonArguments // { inherit cargoArtifacts; });
           test = craneLib.cargoTest (commonArguments // { inherit cargoArtifacts; });
-          test-nota-text = craneLib.cargoTest (notaTextArguments // {
-            cargoArtifacts = notaTextCargoArtifacts;
+          test-binary-only = craneLib.cargoTest (binaryOnlyArguments // {
+            cargoArtifacts = binaryOnlyCargoArtifacts;
           });
           doc = craneLib.cargoDoc (commonArguments // {
             inherit cargoArtifacts;

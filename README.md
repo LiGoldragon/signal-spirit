@@ -1,17 +1,16 @@
 # signal-spirit
 
-Signal contract for the ordinary `spirit` surface. Version 0.14.0 defines wire
-revision 2.
+The ordinary Signal contract for `spirit`, generated during the build from the
+sealed `spirit-ethos` `Interface` root. Runtime behavior, storage, admission,
+and migration remain in `spirit`; this crate exposes only the generated wire
+artifact.
 
-This crate owns the typed vocabulary for psyche statements, psyche-state
-queries, uniform intent-record queries, and spirit subscriptions. Its record
-payload is `Entry { Domains Kind Description Importance }`. Runtime logic lives
-in `spirit`.
+The default `dotos-text` feature supplies the Dotos text codec alongside the
+rkyv archive contract. `--no-default-features` is the binary-only consumer
+surface. Both use the same generated types and the fixed rkyv 0.8.17 archive
+ABI.
 
-Default builds expose the binary rkyv frame surface only. Enable
-`nota-text` for CLI/debug/audit NOTA projection.
-
-`examples/canonical.nota` contains objects, not a shell-option grammar. The
-public `spirit` CLI accepts exactly one ordinary object (a bare `Version` or
-`Marker` is an object); paths and Unix flags are not contract inputs. The
-authoritative root list is the schema, not a generated help command.
+`spirit-ethos` is the sole authored contract source. Its allocation-backed
+universal identities become the public canonical encoded Rust identifiers; this
+crate deliberately provides no legacy schema projection or compatibility
+aliases.

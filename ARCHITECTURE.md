@@ -1,67 +1,40 @@
 # signal-spirit architecture
 
-`signal-spirit` is the ordinary peer-callable contract for `spirit`. Version
-0.14.0 defines wire revision 2. Revision 1 frames and payload shapes are not
-accepted or upgraded online.
+`signal-spirit` is the ordinary peer-callable contract for `spirit`. It owns
+no runtime policy, actor, socket, persistence, or migration behavior. Those
+remain in `spirit`; meta orders remain in `meta-signal-spirit`; admission
+verdicts remain in `signal-spirit-judge`.
 
-The crate owns vocabulary only. Runtime actors, sockets, persistence,
-classification, authorization, query execution, and migration live in
-`spirit`. Meta-policy orders live in `meta-signal-spirit`; admission verdicts
-live in `signal-spirit-judge`.
+## Source-to-artifact pipeline
 
-## Record shape
+`spirit-ethos::INTERFACE` is the only authored ordinary contract input.
+`build.rs` validates its sealed batch configuration through `nomos-engine` and
+emits one Interface Rust artifact into `OUT_DIR`. `src/lib.rs` exposes that
+artifact directly. Universal identities are rendered as the canonical encoded
+Rust identifiers prescribed by production Rust Logos; readable compatibility
+aliases are not introduced.
 
-`Entry` has exactly four fields, in order:
-
-```text
-Entry { Domains Kind Description Importance }
-```
-
-It is one top-level statement. Clients do not supply capture time or record
-identifiers. `spirit` mints identifiers and owns provenance.
-
-## Ordinary surface
-
-The revision-2 read roots are uniform over all live records:
-
-| Operation | Payload |
-|---|---|
-| `Observe` | `Query` |
-| `Intent` | `DomainScopes` |
-| `TextSearch` | `SearchText` |
-| `Lookup` | `RecordIdentifier` |
-| `Count` | `Query` |
-
-`Query` has exactly five predicates in order: `DomainMatch`, `KeywordMatch`,
-`TextMatch`, `SelectedKind`, and `ImportanceSelection`. It selects domains,
-description keywords or text, kind, and importance.
-`TextSearch` searches descriptions. `Intent` retains the domain-scope
-shorthand. Any ordering policy is daemon-owned.
-
-Write and lifecycle roots are `State`, `Record`, `Propose`, `Clarify`,
-`ResolveClarification`, `Supersede`, `Retire`, `BumpImportance`, and
-`ChangeRecord`. `ApplyAuthorizedRecord` accepts only revision-2 v14 record
-bodies. `SubscribeIntent`, `Tap`, and `Untap` carry the stream and observation
-lifecycle. `Version`, `Marker`, and `LookupStash` retain their existing roles.
+The Ethos Interface declares the ordinary inputs, outputs, refusals, values,
+and observer stream. `Entry` remains the four-field value
+`{ Domains Kind Description Importance }`; `signal-domain` supplies its
+shared `Domain` and `DomainScopes` types. The source package, not this crate,
+is authoritative for the complete closed operation inventory and ordering.
 
 ## Boundaries
 
-- `schema/signal.schema` is authoritative; `src/schema/signal.rs` is generated.
-- Shared domains are imported from `signal-domain` and re-exported.
-- Default builds are binary/rkyv-only. `nota-text` is an explicit CLI,
-  diagnostic, and audit projection.
-- The public `spirit` executable accepts one inline ordinary object. Bare
-  selectors are objects; flags and file paths are not alternate grammar.
-- `SpiritDaemonConfiguration` is a separate stable archive and is not coupled
-  to the breaking ordinary wire revision.
-- Dense route discriminants are permitted in revision 2. No compatibility
-  variants, alternate arities, or invented defaults are exposed.
+- There is no local `.schema` input or generated `src/schema` projection.
+- `dotos-text` is the optional Dotos projection; binary-only users select
+  `--no-default-features`.
+- Dotos resolves from one full immutable source revision and rkyv resolves
+  exactly to 0.8.17, so the archive ABI has one package world.
+- The contract does not provide legacy operation decoders, alternate arities,
+  defaults, or name aliases.
 
 ## Proof obligations
 
-- generated artifacts equal the authoritative schema;
-- four-field entries and revision-2 operations round-trip through rkyv and the
-  optional text projection;
-- revision-1 operations and seven-field entries fail to decode;
-- the active schema and generated contract reject removed vocabulary;
-- the default dependency graph contains no text codec or runtime component.
+- building the crate regenerates the ordinary artifact from sealed Ethos;
+- source-boundary tests reject restoration of the local schema projection;
+- the locked dependency test rejects a short Dotos source identity and asserts
+  one current Dotos and rkyv package identity;
+- both all-feature and binary-only Nix checks compile the same generated
+  artifact.

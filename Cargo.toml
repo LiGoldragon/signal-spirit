@@ -1,50 +1,35 @@
 [package]
 name         = "signal-spirit"
-version      = "0.14.0"
+version      = "0.15.0"
 edition      = "2024"
 rust-version = "1.89"
 license      = "MIT OR Apache-2.0"
 repository   = "https://github.com/LiGoldragon/signal-spirit"
 description  = "Signal contract for the ordinary spirit surface."
 publish      = false
-links        = "signal-spirit"
-build        = "build.rs"
 
 [lib]
 name = "signal_spirit"
 path = "src/lib.rs"
 
 [features]
-default = []
-nota-text = [
-    "dep:nota",
-    "dep:schema-language",
-    "signal-domain/nota-text",
-    "signal-frame/nota-text",
-    "version-projection/nota-text",
-]
+default = ["dotos-text"]
+dotos-text = ["dep:dotos", "signal-domain/dotos-text", "signal-frame/dotos-text"]
 
 [dependencies]
-signal-domain = { git = "https://github.com/LiGoldragon/signal-domain.git", rev = "801e1c5bcc824c9760e246205826e3c8e962d005", default-features = false }
-signal-frame = { git = "https://github.com/LiGoldragon/signal-frame.git", branch = "main", default-features = false }
-nota    = { package = "nota", git = "https://github.com/LiGoldragon/nota.git", branch = "main", optional = true }
-schema-language = { git = "https://github.com/LiGoldragon/schema-language.git", rev = "6aae825d668e3f607a2754afa6b7d94e9f246c41", optional = true }
-rkyv         = { version = "0.8", default-features = false, features = ["std", "bytecheck", "little_endian", "pointer_width_32", "unaligned"] }
-thiserror    = "2"
-version-projection = { git = "https://github.com/LiGoldragon/version-projection.git", branch = "main", default-features = false }
+signal-domain = { git = "https://github.com/LiGoldragon/signal-domain.git", rev = "4cb9cb704965489ea6c25f148bcd8c723c9a84c6", default-features = false }
+signal-frame = { git = "https://github.com/LiGoldragon/signal-frame.git", rev = "01676293a623d97b65e320d4138c4b480c6d5dad", default-features = false }
+dotos = { git = "https://github.com/LiGoldragon/dotos.git", rev = "80c7b17f7ad3cf547d2624c6a243e5de5f85c9f3", optional = true }
+protos = { git = "https://github.com/LiGoldragon/protos.git", rev = "95aeb1470c549a404518faf1ab0280a36583a2b3" }
+rkyv = { version = "=0.8.17", default-features = false, features = ["std", "bytecheck", "little_endian", "pointer_width_32", "unaligned"] }
 
 [build-dependencies]
-schema-rust = { package = "schema-rust", git = "https://github.com/LiGoldragon/schema-rust.git", rev = "3278fbc6e6593c044437b3ee5ca1fe71cac344c1" }
+nomos-engine = { git = "https://github.com/LiGoldragon/nomos-engine.git", rev = "64a67c5b2465560e1b6db214d0c66d2258116856" }
+spirit-ethos = { git = "https://github.com/LiGoldragon/spirit-ethos.git", rev = "cb7cdd6a8fedc2628c93e5f91259f74d3240da74" }
 
 [dev-dependencies]
-nota = { package = "nota", git = "https://github.com/LiGoldragon/nota.git", branch = "main" }
-schema-language = { git = "https://github.com/LiGoldragon/schema-language.git", rev = "6aae825d668e3f607a2754afa6b7d94e9f246c41" }
 
 [lints.rust]
 unsafe_code = "forbid"
 unused      = { level = "warn", priority = -1 }
 dead_code   = "warn"
-
-[patch."https://github.com/LiGoldragon/nota-next.git"]
-nota = { package = "nota", git = "https://github.com/LiGoldragon/nota.git", branch = "main" }
-nota-derive = { package = "nota-derive", git = "https://github.com/LiGoldragon/nota.git", branch = "main" }
