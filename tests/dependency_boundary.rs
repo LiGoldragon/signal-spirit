@@ -1,39 +1,74 @@
 use std::{path::Path, process::Command};
 
 #[test]
-fn ordinary_contract_is_generated_from_the_sealed_ethos_root() {
+fn authority_sealed_generation_through_bootstrap_pipeline() {
     let build = include_str!("../build.rs");
     let library = include_str!("../src/lib.rs");
 
     for required in [
-        "spirit_ethos::INTERFACE",
-        "BatchConfiguration::from_json",
-        "generate_bundle",
-        "signal-spirit.rs",
+        "SemaBootstrapAuthority",
+        "BootstrapGeneration",
+        "CommitBootstrap",
+        "with_role_traits",
+        "spirit.schema",
     ] {
         assert!(
             build.contains(required),
-            "the ordinary build must retain its sealed Ethos generator step {required:?}"
+            "the authority build must contain {required:?}"
         );
     }
-    for forbidden in ["schema_rust::", "schema::", "Nota"] {
+    for retired in [
+        "spirit_ethos",
+        "nomos_engine",
+        "BatchConfiguration",
+        "generate_bundle",
+        "OUT_DIR",
+    ] {
         assert!(
-            !build.contains(forbidden) && !library.contains(forbidden),
-            "the ordinary public contract must not restore the retired schema projection {forbidden:?}"
+            !build.contains(retired),
+            "the authority build must not reference retired pipeline element {retired:?}"
         );
     }
-    assert!(library.contains("include!(concat!(env!(\"OUT_DIR\"), \"/signal-spirit.rs\"))"));
+    assert!(
+        !library.contains("include!(concat!(env!(\"OUT_DIR\")"),
+        "the generated projection must use a checked-in include, not OUT_DIR"
+    );
 
     let root = Path::new(env!("CARGO_MANIFEST_DIR"));
+    assert!(
+        root.join("schema/spirit.schema").exists(),
+        "the canonical Interface source must exist at schema/spirit.schema"
+    );
+    assert!(
+        root.join("src/schema/spirit/generated.rs").exists(),
+        "the checked-in Rust projection must exist at src/schema/spirit/generated.rs"
+    );
     for retired_artifact in [
         "schema/signal.schema",
-        "src/schema/mod.rs",
         "src/schema/domain.rs",
         "src/schema/signal.rs",
     ] {
         assert!(
             !root.join(retired_artifact).exists(),
             "the generated ordinary surface must not retain {retired_artifact}"
+        );
+    }
+}
+
+#[test]
+fn nomos_engine_and_spirit_ethos_dependencies_removed() {
+    let manifest = include_str!("../Cargo.toml");
+
+    for retired in ["nomos-engine", "spirit-ethos"] {
+        assert!(
+            !manifest.contains(retired),
+            "manifest must not depend on retired package {retired:?}"
+        );
+    }
+    for required in ["sema-translator", "schema-rust", "core-nomos", "name-table", "rust-logos"] {
+        assert!(
+            manifest.contains(required),
+            "manifest must contain authority pipeline dependency {required:?}"
         );
     }
 }
@@ -46,7 +81,6 @@ fn dotos_and_archive_sources_are_exact_and_single_world() {
 
     for exact_pin in [
         dotos_revision,
-        "4cb9cb704965489ea6c25f148bcd8c723c9a84c6",
         "version = \"=0.8.17\"",
     ] {
         assert!(

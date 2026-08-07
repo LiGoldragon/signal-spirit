@@ -1,12 +1,19 @@
-//! Generated ordinary Spirit wire contract.
+//! Signal contract for the ordinary spirit surface.
 //!
-//! The sealed `spirit-ethos` package is the only source. `build.rs` lowers its
-//! Interface root through the current Core/Nomos/Rust Logos chain and this
-//! crate exposes that artifact without a legacy schema-rust projection.
+//! `schema/spirit.schema` is the authored Interface source, rescued from the
+//! condemned `spirit-ethos` repository and re-spelled to the blessed 5-section
+//! form. `build.rs` authorizes it through `SemaBootstrapAuthority` and
+//! generates the Rust projection through `CommitBootstrap`.
+//!
+//! The Observer stream's initiation/termination mapping is held for the
+//! psyche — specifically whether `Observe.Query` double-duties as stream
+//! initiation and that a termination entry does not yet exist.
+//!
+// psyche-grasp: unseen
 
-#[allow(dead_code, non_camel_case_types)]
-pub mod generated {
-    include!(concat!(env!("OUT_DIR"), "/signal-spirit.rs"));
-}
+pub mod schema;
 
-pub use generated::*;
+pub use crate::schema::spirit::*;
+
+/// Canonical textual projection of the spirit Interface.
+pub const SPIRIT_INTERFACE_SOURCE: &str = include_str!("../schema/spirit.schema");
