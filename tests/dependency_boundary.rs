@@ -81,7 +81,7 @@ fn dotos_and_archive_sources_are_exact_and_single_world() {
 
     for exact_pin in [
         dotos_revision,
-        "version = \"=0.8.17\"",
+        "version = \"=0.8.18\"",
     ] {
         assert!(
             manifest.contains(exact_pin),
@@ -97,10 +97,10 @@ fn dotos_and_archive_sources_are_exact_and_single_world() {
     );
     assert_eq!(
         lockfile
-            .matches("name = \"rkyv\"\nversion = \"0.8.17\"")
+            .matches("name = \"rkyv\"\nversion = \"0.8.18\"")
             .count(),
         1,
-        "the lockfile must contain one rkyv 0.8.17 package identity"
+        "the lockfile must contain one rkyv 0.8.18 package identity"
     );
     assert!(
         !lockfile.contains("?rev=80c7b17f7ad3#"),

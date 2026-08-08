@@ -19,18 +19,18 @@ default = ["dotos-text"]
 dotos-text = ["dep:dotos", "signal-frame/dotos-text"]
 
 [dependencies]
-signal-domain = { git = "https://github.com/LiGoldragon/signal-domain.git", rev = "cc97101ebaff3173b55dd014bf1dda511534e011", default-features = false }
+signal-domain = { git = "https://github.com/LiGoldragon/signal-domain.git", rev = "90c6758", default-features = false }
 signal-frame = { git = "https://github.com/LiGoldragon/signal-frame.git", rev = "01676293a623d97b65e320d4138c4b480c6d5dad", default-features = false }
 dotos = { git = "https://github.com/LiGoldragon/dotos.git", rev = "80c7b17f7ad3cf547d2624c6a243e5de5f85c9f3", optional = true }
 protos = { git = "https://github.com/LiGoldragon/protos.git", rev = "d06c4a9" }
-rkyv = { version = "=0.8.17", default-features = false, features = ["std", "bytecheck", "little_endian", "pointer_width_32", "unaligned"] }
+rkyv = { version = "=0.8.18", default-features = false, features = ["std", "bytecheck", "little_endian", "pointer_width_32", "unaligned"] }
 
 [build-dependencies]
 name-table = { git = "https://github.com/LiGoldragon/name-table.git", rev = "7dd5db15c16b4246c83d049c759415d3252a7d43" }
-rust-logos = { git = "https://github.com/LiGoldragon/rust-logos.git", rev = "728647e" }
-schema-rust = { git = "https://github.com/LiGoldragon/schema-rust.git", rev = "d28ead7" }
+rust-logos = { git = "https://github.com/LiGoldragon/rust-logos.git", rev = "0687449" }
+schema-rust = { git = "https://github.com/LiGoldragon/schema-rust.git", rev = "37b7d10" }
 sema-translator = { git = "https://github.com/LiGoldragon/sema-translator.git", rev = "118d7a3", default-features = false, features = ["bootstrap"] }
-core-nomos = { git = "https://github.com/LiGoldragon/core-nomos.git", rev = "419dcba" }
+core-nomos = { git = "https://github.com/LiGoldragon/core-nomos.git", rev = "e57728e" }
 
 [dev-dependencies]
 
